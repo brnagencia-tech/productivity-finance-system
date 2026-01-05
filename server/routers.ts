@@ -1,28 +1,428 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { z } from "zod";
+import * as db from "./db";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
+  
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  users: router({
+    list: protectedProcedure.query(async () => {
+      return db.getAllUsers();
+    }),
+    getById: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ input }) => {
+      return db.getUserById(input.id);
+    }),
+  }),
+
+  categories: router({
+    list: protectedProcedure.input(z.object({ type: z.enum(["expense", "task", "habit"]).optional() }).optional()).query(async ({ ctx, input }) => {
+      return db.getCategoriesByUser(ctx.user.id, input?.type);
+    }),
+    create: protectedProcedure.input(z.object({
+      name: z.string().min(1),
+      icon: z.string().min(1),
+      color: z.string().min(1),
+      type: z.enum(["expense", "task", "habit"]),
+      scope: z.enum(["personal", "professional", "both"]).default("personal")
+    })).mutation(async ({ ctx, input }) => {
+      return db.createCategory({ ...input, userId: ctx.user.id });
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      name: z.string().min(1).optional(),
+      icon: z.string().min(1).optional(),
+      color: z.string().min(1).optional(),
+      scope: z.enum(["personal", "professional", "both"]).optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.updateCategory(id, ctx.user.id, data);
+      return { success: true };
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteCategory(input.id, ctx.user.id);
+      return { success: true };
+    }),
+  }),
+
+  tasks: router({
+    list: protectedProcedure.input(z.object({ scope: z.enum(["personal", "professional"]).optional() }).optional()).query(async ({ ctx, input }) => {
+      return db.getTasksByUser(ctx.user.id, input?.scope);
+    }),
+    create: protectedProcedure.input(z.object({
+      title: z.string().min(1),
+      description: z.string().optional(),
+      categoryId: z.number().optional(),
+      frequency: z.enum(["daily", "weekly", "monthly", "as_needed"]).default("daily"),
+      scope: z.enum(["personal", "professional"]).default("personal"),
+      assignedTo: z.number().optional(),
+      targetCompletionRate: z.number().min(0).max(100).default(100)
+    })).mutation(async ({ ctx, input }) => {
+      return db.createTask({ ...input, userId: ctx.user.id });
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      title: z.string().min(1).optional(),
+      description: z.string().optional(),
+      categoryId: z.number().optional(),
+      frequency: z.enum(["daily", "weekly", "monthly", "as_needed"]).optional(),
+      scope: z.enum(["personal", "professional"]).optional(),
+      assignedTo: z.number().optional(),
+      targetCompletionRate: z.number().min(0).max(100).optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.updateTask(id, ctx.user.id, data);
+      return { success: true };
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteTask(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    getCompletions: protectedProcedure.input(z.object({
+      startDate: z.string(),
+      endDate: z.string()
+    })).query(async ({ ctx, input }) => {
+      return db.getTaskCompletionsByUser(ctx.user.id, new Date(input.startDate), new Date(input.endDate));
+    }),
+    setCompletion: protectedProcedure.input(z.object({
+      taskId: z.number(),
+      date: z.string(),
+      status: z.enum(["done", "not_done", "in_progress"]),
+      notes: z.string().optional()
+    })).mutation(async ({ ctx, input }) => {
+      return db.upsertTaskCompletion({
+        taskId: input.taskId,
+        userId: ctx.user.id,
+        date: new Date(input.date),
+        status: input.status,
+        notes: input.notes
+      });
+    }),
+  }),
+
+  kanban: router({
+    listBoards: protectedProcedure.query(async ({ ctx }) => {
+      return db.getKanbanBoardsByUser(ctx.user.id);
+    }),
+    getBoard: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
+      return db.getKanbanBoardWithDetails(input.id, ctx.user.id);
+    }),
+    createBoard: protectedProcedure.input(z.object({
+      title: z.string().min(1),
+      description: z.string().optional(),
+      visibility: z.enum(["private", "shared", "public"]).default("private"),
+      scope: z.enum(["personal", "professional"]).default("personal")
+    })).mutation(async ({ ctx, input }) => {
+      return db.createKanbanBoard({ ...input, userId: ctx.user.id });
+    }),
+    updateBoard: protectedProcedure.input(z.object({
+      id: z.number(),
+      title: z.string().min(1).optional(),
+      description: z.string().optional(),
+      visibility: z.enum(["private", "shared", "public"]).optional(),
+      scope: z.enum(["personal", "professional"]).optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.updateKanbanBoard(id, ctx.user.id, data);
+      return { success: true };
+    }),
+    deleteBoard: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteKanbanBoard(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    addMember: protectedProcedure.input(z.object({
+      boardId: z.number(),
+      userId: z.number(),
+      role: z.enum(["owner", "editor", "viewer"]).default("viewer")
+    })).mutation(async ({ input }) => {
+      await db.addKanbanBoardMember(input.boardId, input.userId, input.role);
+      return { success: true };
+    }),
+    createColumn: protectedProcedure.input(z.object({
+      boardId: z.number(),
+      title: z.string().min(1),
+      position: z.number(),
+      color: z.string().optional()
+    })).mutation(async ({ input }) => {
+      return db.createKanbanColumn(input);
+    }),
+    updateColumn: protectedProcedure.input(z.object({
+      id: z.number(),
+      title: z.string().min(1).optional(),
+      position: z.number().optional(),
+      color: z.string().optional()
+    })).mutation(async ({ input }) => {
+      const { id, ...data } = input;
+      await db.updateKanbanColumn(id, data);
+      return { success: true };
+    }),
+    deleteColumn: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      await db.deleteKanbanColumn(input.id);
+      return { success: true };
+    }),
+    createCard: protectedProcedure.input(z.object({
+      columnId: z.number(),
+      boardId: z.number(),
+      title: z.string().min(1),
+      description: z.string().optional(),
+      assignedTo: z.number().optional(),
+      dueDate: z.string().optional(),
+      priority: z.enum(["low", "medium", "high"]).default("medium"),
+      position: z.number(),
+      labels: z.array(z.string()).optional()
+    })).mutation(async ({ input }) => {
+      return db.createKanbanCard({
+        ...input,
+        dueDate: input.dueDate ? new Date(input.dueDate) : undefined
+      });
+    }),
+    updateCard: protectedProcedure.input(z.object({
+      id: z.number(),
+      columnId: z.number().optional(),
+      title: z.string().min(1).optional(),
+      description: z.string().optional(),
+      assignedTo: z.number().optional(),
+      dueDate: z.string().optional(),
+      priority: z.enum(["low", "medium", "high"]).optional(),
+      position: z.number().optional(),
+      labels: z.array(z.string()).optional()
+    })).mutation(async ({ input }) => {
+      const { id, dueDate, ...data } = input;
+      await db.updateKanbanCard(id, {
+        ...data,
+        dueDate: dueDate ? new Date(dueDate) : undefined
+      });
+      return { success: true };
+    }),
+    deleteCard: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      await db.deleteKanbanCard(input.id);
+      return { success: true };
+    }),
+    getCardComments: protectedProcedure.input(z.object({ cardId: z.number() })).query(async ({ input }) => {
+      return db.getKanbanCardComments(input.cardId);
+    }),
+    addCardComment: protectedProcedure.input(z.object({
+      cardId: z.number(),
+      content: z.string().min(1)
+    })).mutation(async ({ ctx, input }) => {
+      return db.createKanbanCardComment({ ...input, userId: ctx.user.id });
+    }),
+  }),
+
+  expenses: router({
+    listVariable: protectedProcedure.input(z.object({
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      scope: z.enum(["personal", "professional"]).optional()
+    }).optional()).query(async ({ ctx, input }) => {
+      return db.getVariableExpensesByUser(
+        ctx.user.id,
+        input?.startDate ? new Date(input.startDate) : undefined,
+        input?.endDate ? new Date(input.endDate) : undefined,
+        input?.scope
+      );
+    }),
+    createVariable: protectedProcedure.input(z.object({
+      date: z.string(),
+      categoryId: z.number().optional(),
+      company: z.string().optional(),
+      description: z.string().optional(),
+      amount: z.string(),
+      receiptUrl: z.string().optional(),
+      notes: z.string().optional(),
+      scope: z.enum(["personal", "professional"]).default("personal")
+    })).mutation(async ({ ctx, input }) => {
+      return db.createVariableExpense({
+        ...input,
+        date: new Date(input.date),
+        userId: ctx.user.id
+      });
+    }),
+    updateVariable: protectedProcedure.input(z.object({
+      id: z.number(),
+      date: z.string().optional(),
+      categoryId: z.number().optional(),
+      company: z.string().optional(),
+      description: z.string().optional(),
+      amount: z.string().optional(),
+      receiptUrl: z.string().optional(),
+      notes: z.string().optional(),
+      scope: z.enum(["personal", "professional"]).optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, date, ...data } = input;
+      await db.updateVariableExpense(id, ctx.user.id, {
+        ...data,
+        date: date ? new Date(date) : undefined
+      });
+      return { success: true };
+    }),
+    deleteVariable: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteVariableExpense(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    listFixed: protectedProcedure.input(z.object({
+      scope: z.enum(["personal", "professional"]).optional()
+    }).optional()).query(async ({ ctx, input }) => {
+      return db.getFixedExpensesByUser(ctx.user.id, input?.scope);
+    }),
+    createFixed: protectedProcedure.input(z.object({
+      description: z.string().min(1),
+      categoryId: z.number().optional(),
+      amount: z.string(),
+      dueDay: z.number().min(1).max(31),
+      scope: z.enum(["personal", "professional"]).default("personal")
+    })).mutation(async ({ ctx, input }) => {
+      return db.createFixedExpense({ ...input, userId: ctx.user.id });
+    }),
+    updateFixed: protectedProcedure.input(z.object({
+      id: z.number(),
+      description: z.string().min(1).optional(),
+      categoryId: z.number().optional(),
+      amount: z.string().optional(),
+      dueDay: z.number().min(1).max(31).optional(),
+      scope: z.enum(["personal", "professional"]).optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.updateFixedExpense(id, ctx.user.id, data);
+      return { success: true };
+    }),
+    deleteFixed: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteFixedExpense(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    getFixedPayments: protectedProcedure.input(z.object({
+      month: z.number().min(1).max(12),
+      year: z.number()
+    })).query(async ({ ctx, input }) => {
+      return db.getFixedExpensePayments(ctx.user.id, input.month, input.year);
+    }),
+    setFixedPayment: protectedProcedure.input(z.object({
+      fixedExpenseId: z.number(),
+      month: z.number().min(1).max(12),
+      year: z.number(),
+      isPaid: z.boolean(),
+      paidAmount: z.string().optional(),
+      receiptUrl: z.string().optional()
+    })).mutation(async ({ ctx, input }) => {
+      return db.upsertFixedExpensePayment({
+        ...input,
+        userId: ctx.user.id,
+        paidAt: input.isPaid ? new Date() : undefined
+      });
+    }),
+    getByCategory: protectedProcedure.input(z.object({
+      month: z.number().min(1).max(12),
+      year: z.number()
+    })).query(async ({ ctx, input }) => {
+      return db.getExpensesByCategory(ctx.user.id, input.month, input.year);
+    }),
+    getMonthlyTrend: protectedProcedure.input(z.object({
+      year: z.number()
+    })).query(async ({ ctx, input }) => {
+      return db.getMonthlyExpenseTrend(ctx.user.id, input.year);
+    }),
+  }),
+
+  budgets: router({
+    list: protectedProcedure.input(z.object({ year: z.number() })).query(async ({ ctx, input }) => {
+      return db.getBudgetsByUser(ctx.user.id, input.year);
+    }),
+    create: protectedProcedure.input(z.object({
+      categoryId: z.number().optional(),
+      month: z.number().min(1).max(12),
+      year: z.number(),
+      amount: z.string(),
+      scope: z.enum(["personal", "professional", "both"]).default("both")
+    })).mutation(async ({ ctx, input }) => {
+      return db.createBudget({ ...input, userId: ctx.user.id });
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      amount: z.string().optional(),
+      scope: z.enum(["personal", "professional", "both"]).optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.updateBudget(id, ctx.user.id, data);
+      return { success: true };
+    }),
+  }),
+
+  habits: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return db.getHabitsByUser(ctx.user.id);
+    }),
+    create: protectedProcedure.input(z.object({
+      name: z.string().min(1),
+      categoryId: z.number().optional(),
+      icon: z.string().optional(),
+      color: z.string().optional(),
+      targetValue: z.string().optional(),
+      unit: z.string().optional(),
+      frequency: z.enum(["daily", "weekly"]).default("daily")
+    })).mutation(async ({ ctx, input }) => {
+      return db.createHabit({ ...input, userId: ctx.user.id });
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      name: z.string().min(1).optional(),
+      categoryId: z.number().optional(),
+      icon: z.string().optional(),
+      color: z.string().optional(),
+      targetValue: z.string().optional(),
+      unit: z.string().optional(),
+      frequency: z.enum(["daily", "weekly"]).optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.updateHabit(id, ctx.user.id, data);
+      return { success: true };
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteHabit(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    getLogs: protectedProcedure.input(z.object({
+      startDate: z.string(),
+      endDate: z.string()
+    })).query(async ({ ctx, input }) => {
+      return db.getHabitLogsByUser(ctx.user.id, new Date(input.startDate), new Date(input.endDate));
+    }),
+    setLog: protectedProcedure.input(z.object({
+      habitId: z.number(),
+      date: z.string(),
+      value: z.string().optional(),
+      completed: z.boolean(),
+      notes: z.string().optional()
+    })).mutation(async ({ ctx, input }) => {
+      return db.upsertHabitLog({
+        habitId: input.habitId,
+        userId: ctx.user.id,
+        date: new Date(input.date),
+        value: input.value,
+        completed: input.completed,
+        notes: input.notes
+      });
+    }),
+  }),
+
+  dashboard: router({
+    getStats: protectedProcedure.input(z.object({
+      month: z.number().min(1).max(12),
+      year: z.number()
+    })).query(async ({ ctx, input }) => {
+      return db.getDashboardStats(ctx.user.id, input.month, input.year);
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

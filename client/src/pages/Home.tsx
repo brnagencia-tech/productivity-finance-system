@@ -1,31 +1,354 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { getLoginUrl } from "@/const";
-import { Streamdown } from 'streamdown';
+import DashboardLayout from "@/components/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { trpc } from "@/lib/trpc";
+import { 
+  CheckCircle2, 
+  Wallet, 
+  Target, 
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Droplets,
+  Dumbbell,
+  Utensils,
+  Footprints
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  PieChart, 
+  Pie, 
+  Cell,
+  CartesianGrid,
+  Legend
+} from "recharts";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
+const COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#8b5cf6", "#ef4444", "#06b6d4", "#ec4899"];
+
+const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const now = new Date();
+  const [currentMonth] = useState(now.getMonth() + 1);
+  const [currentYear] = useState(now.getFullYear());
 
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+  const { data: stats, isLoading: statsLoading } = trpc.dashboard.getStats.useQuery({
+    month: currentMonth,
+    year: currentYear
+  });
+
+  const { data: expensesByCategory } = trpc.expenses.getByCategory.useQuery({
+    month: currentMonth,
+    year: currentYear
+  });
+
+  const { data: monthlyTrend } = trpc.expenses.getMonthlyTrend.useQuery({
+    year: currentYear
+  });
+
+  const { data: habits } = trpc.habits.list.useQuery();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+  const { data: habitLogs } = trpc.habits.getLogs.useQuery({
+    startDate: startOfWeek.toISOString(),
+    endDate: endOfWeek.toISOString()
+  });
+
+  const pieData = useMemo(() => {
+    if (!expensesByCategory) return [];
+    return expensesByCategory.map(item => ({
+      name: item.categoryName || "Sem categoria",
+      value: parseFloat(item.total || "0"),
+      color: item.categoryColor || "#6b7280"
+    }));
+  }, [expensesByCategory]);
+
+  const barData = useMemo(() => {
+    if (!monthlyTrend) return [];
+    return monthlyTrend.map(item => ({
+      name: monthNames[item.month - 1],
+      total: item.total
+    }));
+  }, [monthlyTrend]);
+
+  const habitStats = useMemo(() => {
+    if (!habits || !habitLogs) return [];
+    return habits.slice(0, 4).map(habit => {
+      const logs = habitLogs.filter(log => log.habitId === habit.id);
+      const completed = logs.filter(log => log.completed).length;
+      const total = habit.frequency === "daily" ? 7 : 1;
+      return {
+        id: habit.id,
+        name: habit.name,
+        icon: habit.icon,
+        color: habit.color,
+        completed,
+        total,
+        percentage: Math.round((completed / total) * 100)
+      };
+    });
+  }, [habits, habitLogs]);
+
+  const getHabitIcon = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes("água") || lower.includes("water")) return Droplets;
+    if (lower.includes("academia") || lower.includes("gym") || lower.includes("exerc")) return Dumbbell;
+    if (lower.includes("aliment") || lower.includes("comida") || lower.includes("dieta")) return Utensils;
+    if (lower.includes("caminh") || lower.includes("walk") || lower.includes("passo")) return Footprints;
+    return Target;
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    }).format(value);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
-    </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Visão geral das suas tarefas, finanças e hábitos
+          </p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Tarefas Hoje</CardTitle>
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {statsLoading ? "..." : `${stats?.tasksToday?.completed || 0}/${stats?.tasksToday?.total || 0}`}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {stats?.tasksToday?.total ? Math.round((stats.tasksToday.completed / stats.tasksToday.total) * 100) : 0}% concluídas
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Gastos do Mês</CardTitle>
+              <Wallet className="h-4 w-4 text-chart-2" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {statsLoading ? "..." : formatCurrency(stats?.monthlyExpenses || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {monthNames[currentMonth - 1]} {currentYear}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Hábitos Hoje</CardTitle>
+              <Target className="h-4 w-4 text-chart-3" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {statsLoading ? "..." : `${stats?.habitsToday?.completed || 0}/${stats?.habitsToday?.total || 0}`}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {stats?.habitsToday?.total ? Math.round((stats.habitsToday.completed / stats.habitsToday.total) * 100) : 0}% completados
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Tendência</CardTitle>
+              {(barData[currentMonth - 1]?.total || 0) > (barData[currentMonth - 2]?.total || 0) ? (
+                <TrendingUp className="h-4 w-4 text-destructive" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-primary" />
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-foreground">
+                {barData.length > 1 ? (
+                  ((barData[currentMonth - 1]?.total || 0) > (barData[currentMonth - 2]?.total || 0) ? "+" : "") +
+                  Math.round(((barData[currentMonth - 1]?.total || 0) - (barData[currentMonth - 2]?.total || 0)) / (barData[currentMonth - 2]?.total || 1) * 100) + "%"
+                ) : "0%"}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                vs. mês anterior
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Monthly Expenses Chart */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">Gastos Mensais</CardTitle>
+              <CardDescription>Evolução dos gastos em {currentYear}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={12}
+                      tickFormatter={(value) => `R$${value}`}
+                    />
+                    <Tooltip 
+                      formatter={(value: number) => formatCurrency(value)}
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--card))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                        color: "hsl(var(--foreground))"
+                      }}
+                    />
+                    <Bar 
+                      dataKey="total" 
+                      fill="hsl(var(--primary))" 
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Expenses by Category */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">Gastos por Categoria</CardTitle>
+              <CardDescription>Distribuição em {monthNames[currentMonth - 1]}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                {pieData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color || COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value: number) => formatCurrency(value)}
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "8px",
+                          color: "hsl(var(--foreground))"
+                        }}
+                      />
+                      <Legend 
+                        verticalAlign="bottom" 
+                        height={36}
+                        formatter={(value) => <span className="text-foreground text-sm">{value}</span>}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-muted-foreground">
+                    Nenhum gasto registrado este mês
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Habits Progress */}
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="text-foreground">Progresso dos Hábitos</CardTitle>
+            <CardDescription>Acompanhamento semanal</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {habitStats.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {habitStats.map(habit => {
+                  const IconComponent = getHabitIcon(habit.name);
+                  return (
+                    <div 
+                      key={habit.id} 
+                      className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50"
+                    >
+                      <div 
+                        className="h-12 w-12 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: `${habit.color || "#10b981"}20` }}
+                      >
+                        <IconComponent 
+                          className="h-6 w-6" 
+                          style={{ color: habit.color || "#10b981" }}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{habit.name}</p>
+                        <p className="text-xs text-muted-foreground">{habit.completed}/{habit.total} dias</p>
+                        <div className="mt-2 h-2 bg-secondary rounded-full overflow-hidden">
+                          <div 
+                            className="h-full rounded-full transition-all"
+                            style={{ 
+                              width: `${habit.percentage}%`,
+                              backgroundColor: habit.color || "#10b981"
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <span 
+                        className="text-lg font-bold"
+                        style={{ color: habit.color || "#10b981" }}
+                      >
+                        {habit.percentage}%
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Nenhum hábito cadastrado</p>
+                <p className="text-sm mt-1">Crie hábitos para acompanhar seu progresso</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }
