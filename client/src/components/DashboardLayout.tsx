@@ -33,7 +33,8 @@ import {
   Heart,
   Tags,
   TrendingUp,
-  Users
+  Users,
+  Brain
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -50,6 +51,7 @@ const menuItems = [
   { icon: Heart, label: "Hábitos", path: "/habits" },
   { icon: Tags, label: "Categorias", path: "/categories" },
   { icon: Users, label: "Contatos", path: "/contacts" },
+  { icon: Brain, label: "Insights IA", path: "/insights" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";

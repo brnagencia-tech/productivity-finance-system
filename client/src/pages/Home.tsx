@@ -186,10 +186,15 @@ export default function Home() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-foreground">
-                {barData.length > 1 ? (
-                  ((barData[currentMonth - 1]?.total || 0) > (barData[currentMonth - 2]?.total || 0) ? "+" : "") +
-                  Math.round(((barData[currentMonth - 1]?.total || 0) - (barData[currentMonth - 2]?.total || 0)) / (barData[currentMonth - 2]?.total || 1) * 100) + "%"
-                ) : "0%"}
+                {(() => {
+                  const currentTotal = barData[currentMonth - 1]?.total || 0;
+                  const previousTotal = barData[currentMonth - 2]?.total || 0;
+                  if (previousTotal === 0 && currentTotal === 0) return "0%";
+                  if (previousTotal === 0) return "+100%";
+                  const change = Math.round(((currentTotal - previousTotal) / previousTotal) * 100);
+                  const clampedChange = Math.max(-100, Math.min(change, 999));
+                  return (clampedChange > 0 ? "+" : "") + clampedChange + "%";
+                })()}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 vs. mês anterior

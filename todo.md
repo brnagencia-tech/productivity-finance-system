@@ -39,7 +39,7 @@
 - [ ] Alertas de orçamento - Pendente
 
 ## Fase 7: Funcionalidades Extras
-- [ ] Integração com GPT para análises semanais
+- [x] Integração com GPT para análises semanais
 - [ ] OCR automático de comprovantes
 - [ ] Exportação de dados em CSV
 - [ ] Lembretes de vencimento de despesas fixas
@@ -58,3 +58,14 @@
 - [x] Integrar gastos direto na planilha ao adicionar
 - [x] Implementar tema claro (substituir tema escuro)
 - [x] Remover necessidade de convite por e-mail (usar cadastro existente)
+
+## Integração GPT - Análises Semanais
+- [x] Criar funções de coleta de dados para análise (gastos, tarefas, hábitos)
+- [x] Implementar integração com LLM para gerar análises
+- [x] Criar endpoint tRPC para análise de gastos
+- [x] Criar endpoint tRPC para análise de produtividade
+- [x] Criar endpoint tRPC para recomendações personalizadas (insights semanais)
+- [x] Desenvolver página de Insights no dashboard
+- [x] Adicionar cards de resumo com insights principais
+- [ ] Implementar histórico de análises - Pendente
+- [x] Testes unitários das funcionalidades de análise (43 testes passando)

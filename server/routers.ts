@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
+import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyInsights } from "./analysis";
 
 export const appRouter = router({
   system: systemRouter,
@@ -488,6 +489,19 @@ export const appRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
       await db.deleteContact(input.id, ctx.user.id);
       return { success: true };
+    }),
+  }),
+
+  // ==================== INSIGHTS (Análises GPT) ====================
+  insights: router({
+    getExpenseAnalysis: protectedProcedure.query(async ({ ctx }) => {
+      return generateExpenseAnalysis(ctx.user.id);
+    }),
+    getProductivityAnalysis: protectedProcedure.query(async ({ ctx }) => {
+      return generateProductivityAnalysis(ctx.user.id);
+    }),
+    getWeeklyInsights: protectedProcedure.query(async ({ ctx }) => {
+      return generateWeeklyInsights(ctx.user.id);
     }),
   }),
 });

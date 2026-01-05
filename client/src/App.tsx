@@ -13,6 +13,7 @@ import AnnualExpenses from "./pages/AnnualExpenses";
 import Habits from "./pages/Habits";
 import Categories from "./pages/Categories";
 import Contacts from "./pages/Contacts";
+import Insights from "./pages/Insights";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path={"/habits"} component={Habits} />
       <Route path={"/categories"} component={Categories} />
       <Route path={"/contacts"} component={Contacts} />
+      <Route path={"/insights"} component={Insights} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
