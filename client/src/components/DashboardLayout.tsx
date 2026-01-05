@@ -32,7 +32,8 @@ import {
   CalendarDays,
   Heart,
   Tags,
-  TrendingUp
+  TrendingUp,
+  Users
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -48,6 +49,7 @@ const menuItems = [
   { icon: CalendarDays, label: "Planilha Anual", path: "/expenses/annual" },
   { icon: Heart, label: "Hábitos", path: "/habits" },
   { icon: Tags, label: "Categorias", path: "/categories" },
+  { icon: Users, label: "Contatos", path: "/contacts" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";

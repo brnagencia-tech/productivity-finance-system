@@ -47,3 +47,14 @@
 
 ## Testes
 - [x] Testes unitários das funcionalidades principais (29 testes passando)
+
+## Melhorias Solicitadas (Nova Iteração)
+- [x] Cadastro de pessoas com nome, telefone e e-mail
+- [x] Seleção automática de pessoas cadastradas ao compartilhar
+- [x] Modal de detalhes do card Kanban com comentários
+- [x] Checklist dentro dos cards do Kanban
+- [x] Drag and drop nos cards do Kanban entre colunas
+- [x] Corrigir cálculo de tarefas no dashboard
+- [x] Integrar gastos direto na planilha ao adicionar
+- [x] Implementar tema claro (substituir tema escuro)
+- [x] Remover necessidade de convite por e-mail (usar cadastro existente)

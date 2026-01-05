@@ -216,7 +216,45 @@ export const appRouter = router({
       cardId: z.number(),
       content: z.string().min(1)
     })).mutation(async ({ ctx, input }) => {
-      return db.createKanbanCardComment({ ...input, userId: ctx.user.id });
+      return db.createKanbanComment({ ...input, userId: ctx.user.id });
+    }),
+    deleteCardComment: protectedProcedure.input(z.object({
+      id: z.number()
+    })).mutation(async ({ ctx, input }) => {
+      await db.deleteKanbanComment(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    getCardChecklists: protectedProcedure.input(z.object({ cardId: z.number() })).query(async ({ input }) => {
+      return db.getKanbanChecklists(input.cardId);
+    }),
+    createChecklist: protectedProcedure.input(z.object({
+      cardId: z.number(),
+      title: z.string().min(1),
+      position: z.number()
+    })).mutation(async ({ input }) => {
+      return db.createKanbanChecklist(input);
+    }),
+    updateChecklist: protectedProcedure.input(z.object({
+      id: z.number(),
+      title: z.string().optional(),
+      isCompleted: z.boolean().optional(),
+      position: z.number().optional()
+    })).mutation(async ({ input }) => {
+      const { id, ...data } = input;
+      await db.updateKanbanChecklist(id, data);
+      return { success: true };
+    }),
+    deleteChecklist: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+      await db.deleteKanbanChecklist(input.id);
+      return { success: true };
+    }),
+    moveCard: protectedProcedure.input(z.object({
+      cardId: z.number(),
+      newColumnId: z.number(),
+      newPosition: z.number()
+    })).mutation(async ({ input }) => {
+      await db.moveKanbanCard(input.cardId, input.newColumnId, input.newPosition);
+      return { success: true };
     }),
   }),
 
@@ -421,6 +459,35 @@ export const appRouter = router({
       year: z.number()
     })).query(async ({ ctx, input }) => {
       return db.getDashboardStats(ctx.user.id, input.month, input.year);
+    }),
+  }),
+
+  contacts: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return db.getContactsByUser(ctx.user.id);
+    }),
+    create: protectedProcedure.input(z.object({
+      name: z.string().min(1),
+      email: z.string().email().optional(),
+      phone: z.string().optional(),
+      linkedUserId: z.number().optional()
+    })).mutation(async ({ ctx, input }) => {
+      return db.createContact({ ...input, userId: ctx.user.id });
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      name: z.string().min(1).optional(),
+      email: z.string().email().optional(),
+      phone: z.string().optional(),
+      linkedUserId: z.number().optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, ...data } = input;
+      await db.updateContact(id, ctx.user.id, data);
+      return { success: true };
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteContact(input.id, ctx.user.id);
+      return { success: true };
     }),
   }),
 });

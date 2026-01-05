@@ -1,0 +1,15 @@
+{
+  "query": "SELECT \n  (SELECT COUNT(*) FROM tasks WHERE userId = 1 AND isActive = 1 AND frequency = 'daily') as daily_tasks,\n  (SELECT COUNT(*) FROM tasks WHERE userId = 1 AND isActive = 1) as all_tasks,\n  (SELECT COUNT(*) FROM task_completions WHERE userId = 1) as total_completions",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT \n  (SELECT COUNT(*) FROM tasks WHERE userId = 1 AND isActive = 1 AND frequency = 'daily') as daily_tasks,\n  (SELECT COUNT(*) FROM tasks WHERE userId = 1 AND isActive = 1) as all_tasks,\n  (SELECT COUNT(*) FROM task_completions WHERE userId = 1) as total_completions",
+  "rows": [
+    {
+      "daily_tasks": "1",
+      "all_tasks": "1",
+      "total_completions": "13"
+    }
+  ],
+  "messages": [],
+  "stdout": "daily_tasks\tall_tasks\ttotal_completions\n1\t1\t13\n",
+  "stderr": "",
+  "execution_time_ms": 125
+}

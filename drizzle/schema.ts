@@ -236,3 +236,31 @@ export const habitLogs = mysqlTable("habit_logs", {
 
 export type HabitLog = typeof habitLogs.$inferSelect;
 export type InsertHabitLog = typeof habitLogs.$inferInsert;
+
+// ==================== CONTACTS (Cadastro de Pessoas) ====================
+export const contacts = mysqlTable("contacts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  phone: varchar("phone", { length: 50 }),
+  linkedUserId: int("linkedUserId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Contact = typeof contacts.$inferSelect;
+export type InsertContact = typeof contacts.$inferInsert;
+
+// ==================== KANBAN CARD CHECKLISTS ====================
+export const kanbanCardChecklists = mysqlTable("kanban_card_checklists", {
+  id: int("id").autoincrement().primaryKey(),
+  cardId: int("cardId").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  isCompleted: boolean("isCompleted").default(false).notNull(),
+  position: int("position").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type KanbanCardChecklist = typeof kanbanCardChecklists.$inferSelect;
+export type InsertKanbanCardChecklist = typeof kanbanCardChecklists.$inferInsert;

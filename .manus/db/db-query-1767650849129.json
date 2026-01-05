@@ -1,0 +1,9 @@
+{
+  "query": "DELETE t1 FROM task_completions t1\nINNER JOIN task_completions t2 \nWHERE t1.id < t2.id \n  AND t1.taskId = t2.taskId \n  AND t1.userId = t2.userId \n  AND DATE(t1.date) = DATE(t2.date)",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute DELETE t1 FROM task_completions t1\nINNER JOIN task_completions t2 \nWHERE t1.id < t2.id \n  AND t1.taskId = t2.taskId \n  AND t1.userId = t2.userId \n  AND DATE(t1.date) = DATE(t2.date)",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 58
+}

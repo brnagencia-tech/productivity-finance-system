@@ -512,14 +512,18 @@ export async function getDashboardStats(userId: number, month: number, year: num
     .from(variableExpenses)
     .where(and(eq(variableExpenses.userId, userId), gte(variableExpenses.date, startOfMonth), lte(variableExpenses.date, endOfMonth)));
 
-  // Get today's tasks
+  // Get today's tasks (only daily tasks count for today)
+  const dailyTasks = await db.select().from(tasks)
+    .where(and(eq(tasks.userId, userId), eq(tasks.isActive, true), eq(tasks.frequency, "daily")));
+  
+  const dailyTaskIds = dailyTasks.map(t => t.id);
+  
+  // Count only completions for daily tasks
   const todayCompletions = await db.select().from(taskCompletions)
     .where(and(eq(taskCompletions.userId, userId), gte(taskCompletions.date, today), lte(taskCompletions.date, tomorrow)));
 
-  const totalTasks = await db.select({ count: sql<number>`COUNT(*)` })
-    .from(tasks).where(and(eq(tasks.userId, userId), eq(tasks.isActive, true)));
-
-  const completedToday = todayCompletions.filter(t => t.status === "done").length;
+  const completedToday = todayCompletions.filter(t => t.status === "done" && dailyTaskIds.includes(t.taskId)).length;
+  const totalDailyTasks = dailyTasks.length;
 
   // Get habits completion
   const habitsList = await getHabitsByUser(userId);
@@ -530,7 +534,7 @@ export async function getDashboardStats(userId: number, month: number, year: num
 
   return {
     monthlyExpenses: parseFloat(monthExpenses[0]?.total || "0"),
-    tasksToday: { completed: completedToday, total: totalTasks[0]?.count || 0 },
+    tasksToday: { completed: completedToday, total: totalDailyTasks },
     habitsToday: { completed: habitsCompleted, total: habitsList.length }
   };
 }
@@ -592,4 +596,104 @@ export async function getMonthlyExpenseTrend(userId: number, year: number) {
     });
   }
   return results;
+}
+
+
+// ==================== CONTACT QUERIES ====================
+import { contacts, InsertContact, kanbanCardChecklists, InsertKanbanCardChecklist } from "../drizzle/schema";
+
+export async function createContact(data: InsertContact) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(contacts).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function getContactsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(contacts).where(eq(contacts.userId, userId)).orderBy(asc(contacts.name));
+}
+
+export async function updateContact(id: number, userId: number, data: Partial<InsertContact>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(contacts).set(data).where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
+}
+
+export async function deleteContact(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(contacts).where(and(eq(contacts.id, id), eq(contacts.userId, userId)));
+}
+
+export async function getContactByEmail(userId: number, email: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(contacts).where(and(eq(contacts.userId, userId), eq(contacts.email, email))).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+// ==================== KANBAN CHECKLIST QUERIES ====================
+export async function createKanbanChecklist(data: InsertKanbanCardChecklist) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(kanbanCardChecklists).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function getKanbanChecklists(cardId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(kanbanCardChecklists).where(eq(kanbanCardChecklists.cardId, cardId)).orderBy(asc(kanbanCardChecklists.position));
+}
+
+export async function updateKanbanChecklist(id: number, data: Partial<InsertKanbanCardChecklist>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(kanbanCardChecklists).set(data).where(eq(kanbanCardChecklists.id, id));
+}
+
+export async function deleteKanbanChecklist(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(kanbanCardChecklists).where(eq(kanbanCardChecklists.id, id));
+}
+
+// ==================== KANBAN CARD COMMENTS QUERIES ====================
+export async function createKanbanComment(data: InsertKanbanCardComment) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(kanbanCardComments).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function getKanbanComments(cardId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: kanbanCardComments.id,
+    cardId: kanbanCardComments.cardId,
+    userId: kanbanCardComments.userId,
+    content: kanbanCardComments.content,
+    createdAt: kanbanCardComments.createdAt,
+    userName: users.name,
+    userEmail: users.email
+  }).from(kanbanCardComments)
+    .leftJoin(users, eq(kanbanCardComments.userId, users.id))
+    .where(eq(kanbanCardComments.cardId, cardId))
+    .orderBy(desc(kanbanCardComments.createdAt));
+}
+
+export async function deleteKanbanComment(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(kanbanCardComments).where(and(eq(kanbanCardComments.id, id), eq(kanbanCardComments.userId, userId)));
+}
+
+// ==================== MOVE KANBAN CARD ====================
+export async function moveKanbanCard(cardId: number, newColumnId: number, newPosition: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(kanbanCards).set({ columnId: newColumnId, position: newPosition }).where(eq(kanbanCards.id, cardId));
 }

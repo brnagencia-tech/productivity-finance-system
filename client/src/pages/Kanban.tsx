@@ -8,9 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Edit2, MoreVertical, Calendar, User, MessageSquare, ArrowLeft, Users, Lock, Globe } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Plus, Trash2, Edit2, MoreVertical, Calendar, User, MessageSquare, ArrowLeft, Users, Lock, Globe, CheckSquare, Send, GripVertical } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -40,8 +42,12 @@ export default function Kanban() {
   const [isCreateBoardOpen, setIsCreateBoardOpen] = useState(false);
   const [isCreateColumnOpen, setIsCreateColumnOpen] = useState(false);
   const [isCreateCardOpen, setIsCreateCardOpen] = useState(false);
-  const [editingCard, setEditingCard] = useState<any>(null);
+  const [selectedCard, setSelectedCard] = useState<any>(null);
+  const [isCardDetailOpen, setIsCardDetailOpen] = useState(false);
   const [selectedColumnId, setSelectedColumnId] = useState<number | null>(null);
+  const [newComment, setNewComment] = useState("");
+  const [newChecklistItem, setNewChecklistItem] = useState("");
+  const [draggedCard, setDraggedCard] = useState<any>(null);
 
   const [newBoard, setNewBoard] = useState({
     title: "",
@@ -59,7 +65,8 @@ export default function Kanban() {
     title: "",
     description: "",
     priority: "medium" as const,
-    dueDate: ""
+    dueDate: "",
+    assignedTo: undefined as number | undefined
   });
 
   const utils = trpc.useUtils();
@@ -70,15 +77,26 @@ export default function Kanban() {
     { enabled: !!selectedBoardId }
   );
 
-  // Process columns with their cards
   const columnsWithCards = useMemo(() => {
     if (!boardDetails) return [];
     return boardDetails.columns.map(col => ({
       ...col,
-      cards: boardDetails.cards.filter(card => card.columnId === col.id)
+      cards: boardDetails.cards.filter(card => card.columnId === col.id).sort((a, b) => a.position - b.position)
     }));
   }, [boardDetails]);
+
   const { data: users } = trpc.users.list.useQuery();
+  const { data: contacts } = trpc.contacts.list.useQuery();
+
+  // Card details queries
+  const { data: cardComments } = trpc.kanban.getCardComments.useQuery(
+    { cardId: selectedCard?.id },
+    { enabled: !!selectedCard?.id }
+  );
+  const { data: cardChecklists } = trpc.kanban.getCardChecklists.useQuery(
+    { cardId: selectedCard?.id },
+    { enabled: !!selectedCard?.id }
+  );
 
   const createBoard = trpc.kanban.createBoard.useMutation({
     onSuccess: (data) => {
@@ -122,7 +140,7 @@ export default function Kanban() {
     onSuccess: () => {
       utils.kanban.getBoard.invalidate({ id: selectedBoardId! });
       setIsCreateCardOpen(false);
-      setNewCard({ title: "", description: "", priority: "medium", dueDate: "" });
+      setNewCard({ title: "", description: "", priority: "medium", dueDate: "", assignedTo: undefined });
       setSelectedColumnId(null);
       toast.success("Card criado!");
     },
@@ -132,7 +150,6 @@ export default function Kanban() {
   const updateCard = trpc.kanban.updateCard.useMutation({
     onSuccess: () => {
       utils.kanban.getBoard.invalidate({ id: selectedBoardId! });
-      setEditingCard(null);
       toast.success("Card atualizado!");
     },
     onError: () => toast.error("Erro ao atualizar card")
@@ -141,14 +158,54 @@ export default function Kanban() {
   const deleteCard = trpc.kanban.deleteCard.useMutation({
     onSuccess: () => {
       utils.kanban.getBoard.invalidate({ id: selectedBoardId! });
+      setIsCardDetailOpen(false);
+      setSelectedCard(null);
       toast.success("Card removido!");
     },
     onError: () => toast.error("Erro ao remover card")
   });
 
-  const moveCard = trpc.kanban.updateCard.useMutation({
+  const moveCard = trpc.kanban.moveCard.useMutation({
     onSuccess: () => {
       utils.kanban.getBoard.invalidate({ id: selectedBoardId! });
+    }
+  });
+
+  const addComment = trpc.kanban.addCardComment.useMutation({
+    onSuccess: () => {
+      utils.kanban.getCardComments.invalidate({ cardId: selectedCard?.id });
+      setNewComment("");
+      toast.success("Comentário adicionado!");
+    },
+    onError: () => toast.error("Erro ao adicionar comentário")
+  });
+
+  const deleteComment = trpc.kanban.deleteCardComment.useMutation({
+    onSuccess: () => {
+      utils.kanban.getCardComments.invalidate({ cardId: selectedCard?.id });
+      toast.success("Comentário removido!");
+    }
+  });
+
+  const createChecklist = trpc.kanban.createChecklist.useMutation({
+    onSuccess: () => {
+      utils.kanban.getCardChecklists.invalidate({ cardId: selectedCard?.id });
+      setNewChecklistItem("");
+      toast.success("Item adicionado!");
+    },
+    onError: () => toast.error("Erro ao adicionar item")
+  });
+
+  const updateChecklist = trpc.kanban.updateChecklist.useMutation({
+    onSuccess: () => {
+      utils.kanban.getCardChecklists.invalidate({ cardId: selectedCard?.id });
+    }
+  });
+
+  const deleteChecklist = trpc.kanban.deleteChecklist.useMutation({
+    onSuccess: () => {
+      utils.kanban.getCardChecklists.invalidate({ cardId: selectedCard?.id });
+      toast.success("Item removido!");
     }
   });
 
@@ -166,6 +223,42 @@ export default function Kanban() {
     const user = users.find(u => u.id === userId);
     return user?.name || null;
   };
+
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent, card: any) => {
+    setDraggedCard(card);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, columnId: number) => {
+    e.preventDefault();
+    if (draggedCard && draggedCard.columnId !== columnId) {
+      const targetColumn = columnsWithCards.find(c => c.id === columnId);
+      const newPosition = targetColumn ? targetColumn.cards.length : 0;
+      moveCard.mutate({
+        cardId: draggedCard.id,
+        newColumnId: columnId,
+        newPosition
+      });
+    }
+    setDraggedCard(null);
+  };
+
+  const handleCardClick = (card: any) => {
+    setSelectedCard(card);
+    setIsCardDetailOpen(true);
+  };
+
+  const checklistProgress = useMemo(() => {
+    if (!cardChecklists || cardChecklists.length === 0) return 0;
+    const completed = cardChecklists.filter(c => c.isCompleted).length;
+    return Math.round((completed / cardChecklists.length) * 100);
+  }, [cardChecklists]);
 
   // Board List View
   if (!selectedBoardId) {
@@ -264,62 +357,37 @@ export default function Kanban() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {boards.map(board => (
                 <Card 
-                  key={board.id} 
+                  key={board.id}
                   className="bg-card border-border cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => setSelectedBoardId(board.id)}
                 >
                   <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg text-foreground">{board.title}</CardTitle>
                       <div className="flex items-center gap-2">
                         {getVisibilityIcon(board.visibility)}
-                        <CardTitle className="text-lg text-foreground">{board.title}</CardTitle>
+                        <Badge variant={board.scope === "personal" ? "default" : "secondary"}>
+                          {board.scope === "personal" ? "Pessoal" : "Profissional"}
+                        </Badge>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem 
-                            className="text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (confirm("Remover este quadro?")) {
-                                deleteBoard.mutate({ id: board.id });
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Remover
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
                     {board.description && (
-                      <CardDescription className="line-clamp-2">{board.description}</CardDescription>
+                      <CardDescription className="text-muted-foreground line-clamp-2">
+                        {board.description}
+                      </CardDescription>
                     )}
                   </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="secondary" className="text-xs">
-                        {board.scope === "personal" ? "Pessoal" : "Profissional"}
-                      </Badge>
-                    </div>
-                  </CardContent>
                 </Card>
               ))}
             </div>
           ) : (
             <Card className="bg-card border-border">
               <CardContent className="py-12 text-center">
-                <div className="h-12 w-12 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Plus className="h-6 w-6 text-primary" />
-                </div>
-                <p className="text-muted-foreground">Nenhum quadro criado</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Clique em "Novo Quadro" para começar
-                </p>
+                <p className="text-muted-foreground mb-4">Nenhum quadro criado ainda</p>
+                <Button onClick={() => setIsCreateBoardOpen(true)} className="bg-primary text-primary-foreground">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Criar Primeiro Quadro
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -331,10 +399,10 @@ export default function Kanban() {
   // Board Detail View
   return (
     <DashboardLayout>
-      <div className="space-y-4 h-full">
+      <div className="h-full flex flex-col">
         {/* Board Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
               size="icon"
@@ -351,63 +419,81 @@ export default function Kanban() {
               )}
             </div>
           </div>
-          <Dialog open={isCreateColumnOpen} onOpenChange={setIsCreateColumnOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Coluna
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-card border-border">
-              <DialogHeader>
-                <DialogTitle className="text-foreground">Criar Nova Coluna</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Título</Label>
-                  <Input
-                    value={newColumn.title}
-                    onChange={(e) => setNewColumn({ ...newColumn, title: e.target.value })}
-                    placeholder="Ex: A Fazer, Em Progresso, Concluído..."
-                    className="bg-secondary border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Cor</Label>
-                  <div className="flex gap-2 flex-wrap">
-                    {columnColors.map(color => (
-                      <button
-                        key={color}
-                        onClick={() => setNewColumn({ ...newColumn, color })}
-                        className={`h-8 w-8 rounded-full transition-all ${newColumn.color === color ? "ring-2 ring-offset-2 ring-primary" : ""}`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
+          <div className="flex items-center gap-2">
+            <Dialog open={isCreateColumnOpen} onOpenChange={setIsCreateColumnOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Coluna
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-card border-border">
+                <DialogHeader>
+                  <DialogTitle className="text-foreground">Nova Coluna</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Título</Label>
+                    <Input
+                      value={newColumn.title}
+                      onChange={(e) => setNewColumn({ ...newColumn, title: e.target.value })}
+                      placeholder="Ex: A Fazer, Em Progresso..."
+                      className="bg-secondary border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Cor</Label>
+                    <div className="flex gap-2 flex-wrap">
+                      {columnColors.map(color => (
+                        <button
+                          key={color}
+                          className={`w-8 h-8 rounded-full border-2 ${newColumn.color === color ? 'border-white' : 'border-transparent'}`}
+                          style={{ backgroundColor: color }}
+                          onClick={() => setNewColumn({ ...newColumn, color })}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateColumnOpen(false)}>Cancelar</Button>
-                <Button 
-                  onClick={() => createColumn.mutate({
-                    boardId: selectedBoardId!,
-                    title: newColumn.title,
-                    position: boardDetails?.columns?.length || 0,
-                    color: newColumn.color
-                  })}
-                  disabled={!newColumn.title || createColumn.isPending}
-                  className="bg-primary text-primary-foreground"
-                >
-                  {createColumn.isPending ? "Criando..." : "Criar"}
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreateColumnOpen(false)}>Cancelar</Button>
+                  <Button 
+                    onClick={() => createColumn.mutate({
+                      boardId: selectedBoardId!,
+                      title: newColumn.title,
+                      position: columnsWithCards.length,
+                      color: newColumn.color
+                    })}
+                    disabled={!newColumn.title || createColumn.isPending}
+                    className="bg-primary text-primary-foreground"
+                  >
+                    Criar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVertical className="h-4 w-4" />
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem 
+                  className="text-destructive"
+                  onClick={() => deleteBoard.mutate({ id: selectedBoardId! })}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Excluir Quadro
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
-        {/* Kanban Board */}
-        <ScrollArea className="w-full">
-          <div className="flex gap-4 pb-4 min-h-[calc(100vh-220px)]">
+        {/* Columns */}
+        <div className="flex-1 overflow-x-auto">
+          <div className="flex gap-4 h-full pb-4" style={{ minWidth: 'max-content' }}>
             {boardLoading ? (
               <div className="flex-1 flex items-center justify-center text-muted-foreground">
                 Carregando quadro...
@@ -417,6 +503,8 @@ export default function Kanban() {
                 <div 
                   key={column.id} 
                   className="w-72 shrink-0 bg-secondary/50 rounded-lg p-3"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, column.id)}
                 >
                   {/* Column Header */}
                   <div className="flex items-center justify-between mb-3">
@@ -437,25 +525,19 @@ export default function Kanban() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setSelectedColumnId(column.id);
-                            setIsCreateCardOpen(true);
-                          }}
-                        >
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedColumnId(column.id);
+                          setIsCreateCardOpen(true);
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Adicionar Card
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className="text-destructive"
-                          onClick={() => {
-                            if (confirm("Remover esta coluna e todos os cards?")) {
-                              deleteColumn.mutate({ id: column.id });
-                            }
-                          }}
+                          onClick={() => deleteColumn.mutate({ id: column.id })}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Remover Coluna
+                          Excluir Coluna
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -467,244 +549,391 @@ export default function Kanban() {
                       <Card 
                         key={card.id} 
                         className="bg-card border-border cursor-pointer hover:border-primary/30 transition-colors"
-                        onClick={() => setEditingCard(card)}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, card)}
+                        onClick={() => handleCardClick(card)}
                       >
                         <CardContent className="p-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="font-medium text-sm text-foreground">{card.title}</h4>
-                            <div 
-                              className="h-2 w-2 rounded-full shrink-0 mt-1.5"
-                              style={{ backgroundColor: priorityColors[card.priority] }}
-                              title={priorityLabels[card.priority]}
-                            />
-                          </div>
-                          {card.description && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                              {card.description}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2 mt-2 flex-wrap">
-                            {card.dueDate && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Calendar className="h-3 w-3" />
-                                {new Date(card.dueDate).toLocaleDateString("pt-BR")}
+                          <div className="flex items-start gap-2">
+                            <GripVertical className="h-4 w-4 text-muted-foreground mt-0.5 cursor-grab" />
+                            <div className="flex-1">
+                              <p className="font-medium text-sm text-foreground">{card.title}</p>
+                              {card.description && (
+                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                  {card.description}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                <Badge 
+                                  variant="outline" 
+                                  className="text-xs"
+                                  style={{ borderColor: priorityColors[card.priority], color: priorityColors[card.priority] }}
+                                >
+                                  {priorityLabels[card.priority]}
+                                </Badge>
+                                {card.dueDate && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    {new Date(card.dueDate).toLocaleDateString('pt-BR')}
+                                  </span>
+                                )}
+                                {card.assignedTo && (
+                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <User className="h-3 w-3" />
+                                    {getUserName(card.assignedTo)}
+                                  </span>
+                                )}
                               </div>
-                            )}
-                            {card.assignedTo && (
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <User className="h-3 w-3" />
-                                {getUserName(card.assignedTo) || "Atribuído"}
-                              </div>
-                            )}
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
                     ))}
-                    
-                    {/* Add Card Button */}
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-muted-foreground hover:text-foreground"
-                      onClick={() => {
-                        setSelectedColumnId(column.id);
-                        setIsCreateCardOpen(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar card
-                    </Button>
                   </div>
+
+                  {/* Add Card Button */}
+                  <Button 
+                    variant="ghost" 
+                    className="w-full mt-2 text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      setSelectedColumnId(column.id);
+                      setIsCreateCardOpen(true);
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Card
+                  </Button>
                 </div>
               ))
             ) : (
               <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <p>Nenhuma coluna criada</p>
-                  <p className="text-sm mt-1">Clique em "Nova Coluna" para começar</p>
-                </div>
+                Nenhuma coluna criada. Clique em "Nova Coluna" para começar.
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
+      </div>
 
-        {/* Create Card Dialog */}
-        <Dialog open={isCreateCardOpen} onOpenChange={setIsCreateCardOpen}>
-          <DialogContent className="bg-card border-border">
-            <DialogHeader>
-              <DialogTitle className="text-foreground">Criar Novo Card</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
+      {/* Create Card Dialog */}
+      <Dialog open={isCreateCardOpen} onOpenChange={setIsCreateCardOpen}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Novo Card</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Título</Label>
+              <Input
+                value={newCard.title}
+                onChange={(e) => setNewCard({ ...newCard, title: e.target.value })}
+                placeholder="Título do card..."
+                className="bg-secondary border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Descrição</Label>
+              <Textarea
+                value={newCard.description}
+                onChange={(e) => setNewCard({ ...newCard, description: e.target.value })}
+                placeholder="Descrição..."
+                className="bg-secondary border-border"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Título</Label>
+                <Label>Prioridade</Label>
+                <Select
+                  value={newCard.priority}
+                  onValueChange={(v: any) => setNewCard({ ...newCard, priority: v })}
+                >
+                  <SelectTrigger className="bg-secondary border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Baixa</SelectItem>
+                    <SelectItem value="medium">Média</SelectItem>
+                    <SelectItem value="high">Alta</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Data Limite</Label>
                 <Input
-                  value={newCard.title}
-                  onChange={(e) => setNewCard({ ...newCard, title: e.target.value })}
-                  placeholder="Título do card..."
+                  type="date"
+                  value={newCard.dueDate}
+                  onChange={(e) => setNewCard({ ...newCard, dueDate: e.target.value })}
                   className="bg-secondary border-border"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Responsável</Label>
+              <Select
+                value={newCard.assignedTo?.toString() || "none"}
+                onValueChange={(v) => setNewCard({ ...newCard, assignedTo: v === "none" ? undefined : parseInt(v) })}
+              >
+                <SelectTrigger className="bg-secondary border-border">
+                  <SelectValue placeholder="Selecionar responsável" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {users?.map(user => (
+                    <SelectItem key={user.id} value={user.id.toString()}>
+                      {user.name || user.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateCardOpen(false)}>Cancelar</Button>
+            <Button 
+              onClick={() => createCard.mutate({
+                columnId: selectedColumnId!,
+                boardId: selectedBoardId!,
+                title: newCard.title,
+                description: newCard.description || undefined,
+                priority: newCard.priority,
+                dueDate: newCard.dueDate || undefined,
+                assignedTo: newCard.assignedTo,
+                position: columnsWithCards.find(c => c.id === selectedColumnId)?.cards.length || 0
+              })}
+              disabled={!newCard.title || createCard.isPending}
+              className="bg-primary text-primary-foreground"
+            >
+              Criar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Card Detail Dialog */}
+      <Dialog open={isCardDetailOpen} onOpenChange={setIsCardDetailOpen}>
+        <DialogContent className="bg-card border-border max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-foreground text-xl">{selectedCard?.title}</DialogTitle>
+              <Badge 
+                variant="outline"
+                style={{ borderColor: priorityColors[selectedCard?.priority || "medium"], color: priorityColors[selectedCard?.priority || "medium"] }}
+              >
+                {priorityLabels[selectedCard?.priority || "medium"]}
+              </Badge>
+            </div>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1 pr-4">
+            <div className="space-y-6 py-4">
+              {/* Description */}
               <div className="space-y-2">
-                <Label>Descrição</Label>
-                <Textarea
-                  value={newCard.description}
-                  onChange={(e) => setNewCard({ ...newCard, description: e.target.value })}
-                  placeholder="Descrição..."
-                  className="bg-secondary border-border"
-                />
+                <Label className="text-muted-foreground">Descrição</Label>
+                <p className="text-foreground">
+                  {selectedCard?.description || "Sem descrição"}
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Prioridade</Label>
-                  <Select
-                    value={newCard.priority}
-                    onValueChange={(v: any) => setNewCard({ ...newCard, priority: v })}
-                  >
-                    <SelectTrigger className="bg-secondary border-border">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Baixa</SelectItem>
-                      <SelectItem value="medium">Média</SelectItem>
-                      <SelectItem value="high">Alta</SelectItem>
-                    </SelectContent>
-                  </Select>
+
+              {/* Meta Info */}
+              <div className="flex flex-wrap gap-4 text-sm">
+                {selectedCard?.dueDate && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>Vence em {new Date(selectedCard.dueDate).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                )}
+                {selectedCard?.assignedTo && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    <span>{getUserName(selectedCard.assignedTo)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Move to Column */}
+              <div className="space-y-2">
+                <Label className="text-muted-foreground">Mover para</Label>
+                <Select
+                  value={selectedCard?.columnId?.toString()}
+                  onValueChange={(v) => {
+                    const newColumnId = parseInt(v);
+                    if (newColumnId !== selectedCard?.columnId) {
+                      moveCard.mutate({
+                        cardId: selectedCard.id,
+                        newColumnId,
+                        newPosition: columnsWithCards.find(c => c.id === newColumnId)?.cards.length || 0
+                      });
+                      setSelectedCard({ ...selectedCard, columnId: newColumnId });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="bg-secondary border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {columnsWithCards.map(col => (
+                      <SelectItem key={col.id} value={col.id.toString()}>
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: col.color || "#6366f1" }} />
+                          {col.title}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Separator />
+
+              {/* Checklist */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-muted-foreground flex items-center gap-2">
+                    <CheckSquare className="h-4 w-4" />
+                    Checklist
+                    {cardChecklists && cardChecklists.length > 0 && (
+                      <span className="text-xs">({checklistProgress}%)</span>
+                    )}
+                  </Label>
                 </div>
+                
+                {cardChecklists && cardChecklists.length > 0 && (
+                  <div className="w-full bg-secondary rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full transition-all"
+                      style={{ width: `${checklistProgress}%` }}
+                    />
+                  </div>
+                )}
+
                 <div className="space-y-2">
-                  <Label>Data Limite</Label>
+                  {cardChecklists?.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-2 group">
+                      <Checkbox
+                        checked={item.isCompleted}
+                        onCheckedChange={(checked) => {
+                          updateChecklist.mutate({ id: item.id, isCompleted: !!checked });
+                        }}
+                      />
+                      <span className={`flex-1 text-sm ${item.isCompleted ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                        {item.title}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                        onClick={() => deleteChecklist.mutate({ id: item.id })}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
                   <Input
-                    type="date"
-                    value={newCard.dueDate}
-                    onChange={(e) => setNewCard({ ...newCard, dueDate: e.target.value })}
+                    value={newChecklistItem}
+                    onChange={(e) => setNewChecklistItem(e.target.value)}
+                    placeholder="Adicionar item..."
                     className="bg-secondary border-border"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newChecklistItem.trim()) {
+                        createChecklist.mutate({
+                          cardId: selectedCard.id,
+                          title: newChecklistItem,
+                          position: cardChecklists?.length || 0
+                        });
+                      }
+                    }}
                   />
+                  <Button
+                    size="icon"
+                    disabled={!newChecklistItem.trim()}
+                    onClick={() => {
+                      createChecklist.mutate({
+                        cardId: selectedCard.id,
+                        title: newChecklistItem,
+                        position: cardChecklists?.length || 0
+                      });
+                    }}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Comments */}
+              <div className="space-y-3">
+                <Label className="text-muted-foreground flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  Comentários ({cardComments?.length || 0})
+                </Label>
+
+                <div className="flex gap-2">
+                  <Input
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Escreva um comentário..."
+                    className="bg-secondary border-border"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newComment.trim()) {
+                        addComment.mutate({ cardId: selectedCard.id, content: newComment });
+                      }
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    disabled={!newComment.trim() || addComment.isPending}
+                    onClick={() => addComment.mutate({ cardId: selectedCard.id, content: newComment })}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  {cardComments?.map((comment: any) => (
+                    <div key={comment.id} className="bg-secondary/50 rounded-lg p-3 group">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-foreground">
+                          {comment.userName || comment.userEmail || "Usuário"}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(comment.createdAt).toLocaleString('pt-BR')}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                            onClick={() => deleteComment.mutate({ id: comment.id })}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{comment.content}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateCardOpen(false)}>Cancelar</Button>
-              <Button 
-                onClick={() => createCard.mutate({
-                  columnId: selectedColumnId!,
-                  boardId: selectedBoardId!,
-                  title: newCard.title,
-                  description: newCard.description,
-                  priority: newCard.priority,
-                  dueDate: newCard.dueDate || undefined,
-                  position: 0
-                })}
-                disabled={!newCard.title || createCard.isPending}
-                className="bg-primary text-primary-foreground"
-              >
-                {createCard.isPending ? "Criando..." : "Criar"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          </ScrollArea>
 
-        {/* Edit Card Dialog */}
-        <Dialog open={!!editingCard} onOpenChange={() => setEditingCard(null)}>
-          <DialogContent className="bg-card border-border">
-            <DialogHeader>
-              <DialogTitle className="text-foreground">Editar Card</DialogTitle>
-            </DialogHeader>
-            {editingCard && (
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Título</Label>
-                  <Input
-                    value={editingCard.title}
-                    onChange={(e) => setEditingCard({ ...editingCard, title: e.target.value })}
-                    className="bg-secondary border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Descrição</Label>
-                  <Textarea
-                    value={editingCard.description || ""}
-                    onChange={(e) => setEditingCard({ ...editingCard, description: e.target.value })}
-                    className="bg-secondary border-border"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Prioridade</Label>
-                    <Select
-                      value={editingCard.priority}
-                      onValueChange={(v) => setEditingCard({ ...editingCard, priority: v })}
-                    >
-                      <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Baixa</SelectItem>
-                        <SelectItem value="medium">Média</SelectItem>
-                        <SelectItem value="high">Alta</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Mover para</Label>
-                    <Select
-                      value={editingCard.columnId?.toString()}
-                      onValueChange={(v) => setEditingCard({ ...editingCard, columnId: parseInt(v) })}
-                    >
-                      <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {columnsWithCards.map(col => (
-                          <SelectItem key={col.id} value={col.id.toString()}>
-                            {col.title}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Data Limite</Label>
-                  <Input
-                    type="date"
-                    value={editingCard.dueDate ? new Date(editingCard.dueDate).toISOString().split("T")[0] : ""}
-                    onChange={(e) => setEditingCard({ ...editingCard, dueDate: e.target.value })}
-                    className="bg-secondary border-border"
-                  />
-                </div>
-              </div>
-            )}
-            <DialogFooter className="flex justify-between">
-              <Button 
-                variant="destructive"
-                onClick={() => {
-                  if (confirm("Remover este card?")) {
-                    deleteCard.mutate({ id: editingCard.id });
-                  }
-                }}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Remover
-              </Button>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setEditingCard(null)}>Cancelar</Button>
-                <Button 
-                  onClick={() => updateCard.mutate({
-                    id: editingCard.id,
-                    title: editingCard.title,
-                    description: editingCard.description,
-                    priority: editingCard.priority,
-                    columnId: editingCard.columnId,
-                    dueDate: editingCard.dueDate || undefined
-                  })}
-                  disabled={updateCard.isPending}
-                  className="bg-primary text-primary-foreground"
-                >
-                  {updateCard.isPending ? "Salvando..." : "Salvar"}
-                </Button>
-              </div>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+          <DialogFooter className="border-t border-border pt-4">
+            <Button 
+              variant="destructive"
+              onClick={() => deleteCard.mutate({ id: selectedCard.id })}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Excluir Card
+            </Button>
+            <Button variant="outline" onClick={() => setIsCardDetailOpen(false)}>
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

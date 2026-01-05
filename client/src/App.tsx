@@ -12,6 +12,7 @@ import FixedExpenses from "./pages/FixedExpenses";
 import AnnualExpenses from "./pages/AnnualExpenses";
 import Habits from "./pages/Habits";
 import Categories from "./pages/Categories";
+import Contacts from "./pages/Contacts";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path={"/expenses/annual"} component={AnnualExpenses} />
       <Route path={"/habits"} component={Habits} />
       <Route path={"/categories"} component={Categories} />
+      <Route path={"/contacts"} component={Contacts} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
@@ -33,7 +35,7 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />
