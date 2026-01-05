@@ -264,3 +264,94 @@ export const kanbanCardChecklists = mysqlTable("kanban_card_checklists", {
 
 export type KanbanCardChecklist = typeof kanbanCardChecklists.$inferSelect;
 export type InsertKanbanCardChecklist = typeof kanbanCardChecklists.$inferInsert;
+
+
+// ==================== MANAGED USERS (Usuários criados pelo admin) ====================
+export const managedUsers = mysqlTable("managed_users", {
+  id: int("id").autoincrement().primaryKey(),
+  createdByUserId: int("createdByUserId").notNull(),
+  firstName: varchar("firstName", { length: 100 }).notNull(),
+  lastName: varchar("lastName", { length: 100 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  phoneBR: varchar("phoneBR", { length: 20 }),
+  phoneUS: varchar("phoneUS", { length: 20 }),
+  passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  lastLogin: timestamp("lastLogin"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ManagedUser = typeof managedUsers.$inferSelect;
+export type InsertManagedUser = typeof managedUsers.$inferInsert;
+
+// ==================== SYSTEM SETTINGS (Configurações do Sistema) ====================
+export const systemSettings = mysqlTable("system_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  settingKey: varchar("settingKey", { length: 100 }).notNull(),
+  settingValue: text("settingValue"),
+  isEncrypted: boolean("isEncrypted").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = typeof systemSettings.$inferInsert;
+
+// ==================== SALES/REVENUE (Vendas/Faturamento) ====================
+export const sales = mysqlTable("sales", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  date: timestamp("date").notNull(),
+  description: varchar("description", { length: 500 }),
+  company: varchar("company", { length: 255 }),
+  amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+  paymentMethod: varchar("paymentMethod", { length: 100 }),
+  status: mysqlEnum("status", ["pending", "completed", "cancelled"]).default("completed").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Sale = typeof sales.$inferSelect;
+export type InsertSale = typeof sales.$inferInsert;
+
+// ==================== ANALYSIS HISTORY (Histórico de Análises) ====================
+export const analysisHistory = mysqlTable("analysis_history", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  weekStartDate: timestamp("weekStartDate").notNull(),
+  weekEndDate: timestamp("weekEndDate").notNull(),
+  overallScore: int("overallScore").notNull(),
+  taskCompletionRate: decimal("taskCompletionRate", { precision: 5, scale: 2 }),
+  habitCompletionRate: decimal("habitCompletionRate", { precision: 5, scale: 2 }),
+  totalExpenses: decimal("totalExpenses", { precision: 12, scale: 2 }),
+  totalRevenue: decimal("totalRevenue", { precision: 12, scale: 2 }),
+  expenseAnalysis: json("expenseAnalysis").$type<object>(),
+  productivityAnalysis: json("productivityAnalysis").$type<object>(),
+  recommendations: json("recommendations").$type<string[]>(),
+  alerts: json("alerts").$type<string[]>(),
+  motivationalMessage: text("motivationalMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AnalysisHistory = typeof analysisHistory.$inferSelect;
+export type InsertAnalysisHistory = typeof analysisHistory.$inferInsert;
+
+// ==================== NOTIFICATIONS ====================
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["expense_due", "task_reminder", "habit_reminder", "analysis_ready", "system"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  relatedId: int("relatedId"),
+  relatedType: varchar("relatedType", { length: 50 }),
+  isRead: boolean("isRead").default(false).notNull(),
+  scheduledFor: timestamp("scheduledFor"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

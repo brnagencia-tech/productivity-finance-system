@@ -504,6 +504,202 @@ export const appRouter = router({
       return generateWeeklyInsights(ctx.user.id);
     }),
   }),
+
+  // ==================== MANAGED USERS (Admin) ====================
+  managedUsers: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      return db.getManagedUsersByAdmin(ctx.user.id);
+    }),
+    create: protectedProcedure.input(z.object({
+      firstName: z.string().min(1),
+      lastName: z.string().min(1),
+      email: z.string().email(),
+      phoneBR: z.string().optional(),
+      phoneUS: z.string().optional(),
+      password: z.string().min(8)
+    })).mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      // Simple hash for demo - in production use bcrypt
+      const passwordHash = Buffer.from(input.password).toString('base64');
+      return db.createManagedUser({
+        createdByUserId: ctx.user.id,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email,
+        phoneBR: input.phoneBR,
+        phoneUS: input.phoneUS,
+        passwordHash
+      });
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      firstName: z.string().min(1).optional(),
+      lastName: z.string().min(1).optional(),
+      phoneBR: z.string().optional(),
+      phoneUS: z.string().optional(),
+      isActive: z.boolean().optional()
+    })).mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const { id, ...data } = input;
+      await db.updateManagedUser(id, ctx.user.id, data);
+      return { success: true };
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      await db.deleteManagedUser(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    resetPassword: protectedProcedure.input(z.object({
+      id: z.number(),
+      newPassword: z.string().min(8)
+    })).mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      const passwordHash = Buffer.from(input.newPassword).toString('base64');
+      await db.updateManagedUser(input.id, ctx.user.id, { passwordHash });
+      return { success: true };
+    }),
+  }),
+
+  // ==================== SYSTEM SETTINGS ====================
+  settings: router({
+    get: protectedProcedure.input(z.object({ key: z.string() })).query(async ({ ctx, input }) => {
+      return db.getSetting(ctx.user.id, input.key);
+    }),
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      return db.getAllSettings(ctx.user.id);
+    }),
+    set: protectedProcedure.input(z.object({
+      key: z.string(),
+      value: z.string(),
+      isEncrypted: z.boolean().default(false)
+    })).mutation(async ({ ctx, input }) => {
+      return db.upsertSetting(ctx.user.id, input.key, input.value, input.isEncrypted);
+    }),
+  }),
+
+  // ==================== SALES/REVENUE ====================
+  sales: router({
+    list: protectedProcedure.input(z.object({
+      month: z.number().min(1).max(12).optional(),
+      year: z.number().optional()
+    }).optional()).query(async ({ ctx, input }) => {
+      if (input?.month && input?.year) {
+        return db.getSalesByMonth(ctx.user.id, input.month, input.year);
+      }
+      return db.getSalesByUser(ctx.user.id);
+    }),
+    create: protectedProcedure.input(z.object({
+      date: z.string().transform(s => new Date(s)),
+      description: z.string().optional(),
+      company: z.string().optional(),
+      amount: z.number().positive(),
+      paymentMethod: z.string().optional(),
+      status: z.enum(["pending", "completed", "cancelled"]).default("completed"),
+      notes: z.string().optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { amount, ...rest } = input;
+      return db.createSale({ ...rest, amount: amount.toString(), userId: ctx.user.id });
+    }),
+    update: protectedProcedure.input(z.object({
+      id: z.number(),
+      description: z.string().optional(),
+      company: z.string().optional(),
+      amount: z.number().positive().optional(),
+      paymentMethod: z.string().optional(),
+      status: z.enum(["pending", "completed", "cancelled"]).optional(),
+      notes: z.string().optional()
+    })).mutation(async ({ ctx, input }) => {
+      const { id, amount, ...rest } = input;
+      const data = { ...rest, amount: amount?.toString() };
+      await db.updateSale(id, ctx.user.id, data);
+      return { success: true };
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteSale(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    getDailySplit: protectedProcedure.input(z.object({
+      month: z.number().min(1).max(12),
+      year: z.number()
+    })).query(async ({ ctx, input }) => {
+      return db.getDailySalesSplit(ctx.user.id, input.month, input.year);
+    }),
+    getMonthlyRevenue: protectedProcedure.input(z.object({ year: z.number() })).query(async ({ ctx, input }) => {
+      return db.getMonthlyRevenue(ctx.user.id, input.year);
+    }),
+    getProfitLoss: protectedProcedure.input(z.object({
+      month: z.number().min(1).max(12),
+      year: z.number()
+    })).query(async ({ ctx, input }) => {
+      return db.getMonthlyProfitLoss(ctx.user.id, input.month, input.year);
+    }),
+  }),
+
+  // ==================== NOTIFICATIONS ====================
+  notifications: router({
+    list: protectedProcedure.input(z.object({ unreadOnly: z.boolean().default(false) }).optional()).query(async ({ ctx, input }) => {
+      return db.getNotificationsByUser(ctx.user.id, input?.unreadOnly);
+    }),
+    markAsRead: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.markNotificationAsRead(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    markAllAsRead: protectedProcedure.mutation(async ({ ctx }) => {
+      await db.markAllNotificationsAsRead(ctx.user.id);
+      return { success: true };
+    }),
+    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteNotification(input.id, ctx.user.id);
+      return { success: true };
+    }),
+    generateExpenseReminders: protectedProcedure.mutation(async ({ ctx }) => {
+      return db.generateExpenseNotifications(ctx.user.id);
+    }),
+    getUpcomingExpenses: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUpcomingFixedExpenses(ctx.user.id, 7);
+    }),
+  }),
+
+  // ==================== ANALYSIS HISTORY ====================
+  analysisHistory: router({
+    list: protectedProcedure.input(z.object({ limit: z.number().default(12) }).optional()).query(async ({ ctx, input }) => {
+      return db.getAnalysisHistory(ctx.user.id, input?.limit || 12);
+    }),
+    getLatest: protectedProcedure.query(async ({ ctx }) => {
+      return db.getLatestAnalysis(ctx.user.id);
+    }),
+    save: protectedProcedure.input(z.object({
+      weekStartDate: z.string().transform(s => new Date(s)),
+      weekEndDate: z.string().transform(s => new Date(s)),
+      overallScore: z.number(),
+      taskCompletionRate: z.number().optional(),
+      habitCompletionRate: z.number().optional(),
+      totalExpenses: z.number().optional(),
+      totalRevenue: z.number().optional(),
+      expenseAnalysis: z.any().optional(),
+      productivityAnalysis: z.any().optional(),
+      recommendations: z.array(z.string()).optional(),
+      alerts: z.array(z.string()).optional(),
+      motivationalMessage: z.string().optional()
+    })).mutation(async ({ ctx, input }) => {
+      return db.saveAnalysisHistory({
+        userId: ctx.user.id,
+        weekStartDate: input.weekStartDate,
+        weekEndDate: input.weekEndDate,
+        overallScore: input.overallScore,
+        taskCompletionRate: input.taskCompletionRate?.toString(),
+        habitCompletionRate: input.habitCompletionRate?.toString(),
+        totalExpenses: input.totalExpenses?.toString(),
+        totalRevenue: input.totalRevenue?.toString(),
+        expenseAnalysis: input.expenseAnalysis,
+        productivityAnalysis: input.productivityAnalysis,
+        recommendations: input.recommendations,
+        alerts: input.alerts,
+        motivationalMessage: input.motivationalMessage
+      });
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

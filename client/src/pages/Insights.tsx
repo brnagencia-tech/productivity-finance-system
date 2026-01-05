@@ -21,9 +21,12 @@ import {
   PieChart
 } from "lucide-react";
 import { useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { History } from "lucide-react";
 
 export default function Insights() {
-  const [activeTab, setActiveTab] = useState<"weekly" | "expenses" | "productivity">("weekly");
+  const [activeTab, setActiveTab] = useState<"weekly" | "expenses" | "productivity" | "history">("weekly");
   
   const { data: weeklyInsights, isLoading: loadingWeekly, refetch: refetchWeekly } = 
     trpc.insights.getWeeklyInsights.useQuery(undefined, { enabled: activeTab === "weekly" });
@@ -91,6 +94,14 @@ export default function Insights() {
             <Target className="h-4 w-4" />
             Produtividade
           </Button>
+          <Button 
+            variant={activeTab === "history" ? "default" : "ghost"}
+            onClick={() => setActiveTab("history")}
+            className="gap-2"
+          >
+            <History className="h-4 w-4" />
+            Histórico
+          </Button>
         </div>
 
         {/* Content */}
@@ -102,6 +113,8 @@ export default function Insights() {
           <ExpenseAnalysisView data={expenseAnalysis} />
         ) : activeTab === "productivity" && productivityAnalysis ? (
           <ProductivityAnalysisView data={productivityAnalysis} />
+        ) : activeTab === "history" ? (
+          <AnalysisHistoryView />
         ) : (
           <EmptyState onRefresh={handleRefresh} />
         )}
@@ -442,6 +455,105 @@ interface ProductivityAnalysisData {
   areasForImprovement: string[];
   achievements: string[];
   recommendations: string[];
+}
+
+function AnalysisHistoryView() {
+  const { data: history, isLoading } = trpc.analysisHistory.list.useQuery({ limit: 12 });
+  const saveAnalysis = trpc.analysisHistory.save.useMutation();
+  const { data: weeklyInsights } = trpc.insights.getWeeklyInsights.useQuery();
+
+  const handleSaveCurrentAnalysis = () => {
+    if (!weeklyInsights) return;
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    
+    saveAnalysis.mutate({
+      weekStartDate: weekStart.toISOString(),
+      weekEndDate: weekEnd.toISOString(),
+      overallScore: weeklyInsights.overallScore,
+      taskCompletionRate: weeklyInsights.productivity.taskCompletionRate,
+      habitCompletionRate: weeklyInsights.productivity.habitCompletionRate,
+      totalExpenses: weeklyInsights.expenses.totalSpent,
+      recommendations: [...weeklyInsights.expenses.recommendations, ...weeklyInsights.productivity.recommendations],
+      alerts: weeklyInsights.expenses.alerts,
+      motivationalMessage: weeklyInsights.motivationalMessage
+    }, {
+      onSuccess: () => {
+        alert("Análise salva no histórico!");
+      }
+    });
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-8">Carregando histórico...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold">Histórico de Análises</h2>
+          <p className="text-muted-foreground">Compare sua evolução ao longo do tempo</p>
+        </div>
+        <Button onClick={handleSaveCurrentAnalysis} disabled={saveAnalysis.isPending || !weeklyInsights}>
+          <CheckCircle2 className="h-4 w-4 mr-2" />
+          Salvar Análise Atual
+        </Button>
+      </div>
+
+      {history && history.length > 0 ? (
+        <Card>
+          <CardContent className="pt-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Semana</TableHead>
+                  <TableHead>Pontuação</TableHead>
+                  <TableHead>Tarefas</TableHead>
+                  <TableHead>Hábitos</TableHead>
+                  <TableHead>Gastos</TableHead>
+                  <TableHead>Data</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {history.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>
+                      {new Date(item.weekStartDate).toLocaleDateString("pt-BR")} - {new Date(item.weekEndDate).toLocaleDateString("pt-BR")}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={item.overallScore >= 70 ? "default" : item.overallScore >= 50 ? "secondary" : "destructive"}>
+                        {item.overallScore}/100
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{item.taskCompletionRate ? `${parseFloat(item.taskCompletionRate).toFixed(0)}%` : "-"}</TableCell>
+                    <TableCell>{item.habitCompletionRate ? `${parseFloat(item.habitCompletionRate).toFixed(0)}%` : "-"}</TableCell>
+                    <TableCell>
+                      {item.totalExpenses ? `R$ ${parseFloat(item.totalExpenses).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : "-"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(item.createdAt).toLocaleDateString("pt-BR")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <History className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+            <p className="text-muted-foreground">Nenhuma análise salva ainda.</p>
+            <p className="text-sm text-muted-foreground">Clique em "Salvar Análise Atual" para começar a rastrear sua evolução.</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 }
 
 function ProductivityAnalysisView({ data }: { data: ProductivityAnalysisData }) {

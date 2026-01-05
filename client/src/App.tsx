@@ -14,6 +14,10 @@ import Habits from "./pages/Habits";
 import Categories from "./pages/Categories";
 import Contacts from "./pages/Contacts";
 import Insights from "./pages/Insights";
+import AdminUsers from "./pages/AdminUsers";
+import Settings from "./pages/Settings";
+import Revenue from "./pages/Revenue";
+import Notifications from "./pages/Notifications";
 
 function Router() {
   return (
@@ -28,6 +32,10 @@ function Router() {
       <Route path={"/categories"} component={Categories} />
       <Route path={"/contacts"} component={Contacts} />
       <Route path={"/insights"} component={Insights} />
+      <Route path={"/admin/users"} component={AdminUsers} />
+      <Route path={"/settings"} component={Settings} />
+      <Route path={"/revenue"} component={Revenue} />
+      <Route path={"/notifications"} component={Notifications} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

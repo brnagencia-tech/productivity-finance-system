@@ -34,7 +34,11 @@ import {
   Tags,
   TrendingUp,
   Users,
-  Brain
+  Brain,
+  Bell,
+  Settings,
+  DollarSign,
+  UserCog
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -48,10 +52,17 @@ const menuItems = [
   { icon: Wallet, label: "Despesas Variáveis", path: "/expenses/variable" },
   { icon: Receipt, label: "Despesas Fixas", path: "/expenses/fixed" },
   { icon: CalendarDays, label: "Planilha Anual", path: "/expenses/annual" },
+  { icon: DollarSign, label: "Faturamento", path: "/revenue" },
   { icon: Heart, label: "Hábitos", path: "/habits" },
   { icon: Tags, label: "Categorias", path: "/categories" },
   { icon: Users, label: "Contatos", path: "/contacts" },
   { icon: Brain, label: "Insights IA", path: "/insights" },
+  { icon: Bell, label: "Notificações", path: "/notifications" },
+];
+
+const adminMenuItems = [
+  { icon: UserCog, label: "Usuários", path: "/admin/users" },
+  { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -225,6 +236,35 @@ function DashboardLayoutContent({
                 );
               })}
             </SidebarMenu>
+
+            {/* Admin Menu - visible only for admins */}
+            {user?.role === "admin" && (
+              <>
+                <div className="px-4 py-2 mt-4">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Administração</span>
+                </div>
+                <SidebarMenu className="px-2 py-1 space-y-1">
+                  {adminMenuItems.map(item => {
+                    const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+                    return (
+                      <SidebarMenuItem key={item.path}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          onClick={() => setLocation(item.path)}
+                          tooltip={item.label}
+                          className={`h-10 transition-all font-normal ${isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}
+                        >
+                          <item.icon
+                            className={`h-4 w-4 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                          />
+                          <span>{item.label}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </>
+            )}
           </SidebarContent>
 
           <SidebarFooter className="p-3 border-t border-sidebar-border">

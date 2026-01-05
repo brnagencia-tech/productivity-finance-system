@@ -697,3 +697,336 @@ export async function moveKanbanCard(cardId: number, newColumnId: number, newPos
   if (!db) throw new Error("Database not available");
   await db.update(kanbanCards).set({ columnId: newColumnId, position: newPosition }).where(eq(kanbanCards.id, cardId));
 }
+
+
+// ==================== MANAGED USERS QUERIES ====================
+import { managedUsers, InsertManagedUser, systemSettings, InsertSystemSetting, sales, InsertSale, analysisHistory, InsertAnalysisHistory, notifications, InsertNotification } from "../drizzle/schema";
+
+export async function createManagedUser(data: InsertManagedUser) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(managedUsers).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function getManagedUsersByAdmin(adminUserId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: managedUsers.id,
+    firstName: managedUsers.firstName,
+    lastName: managedUsers.lastName,
+    email: managedUsers.email,
+    phoneBR: managedUsers.phoneBR,
+    phoneUS: managedUsers.phoneUS,
+    isActive: managedUsers.isActive,
+    lastLogin: managedUsers.lastLogin,
+    createdAt: managedUsers.createdAt
+  }).from(managedUsers).where(eq(managedUsers.createdByUserId, adminUserId)).orderBy(desc(managedUsers.createdAt));
+}
+
+export async function getManagedUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(managedUsers).where(eq(managedUsers.email, email)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getManagedUserById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(managedUsers).where(eq(managedUsers.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function updateManagedUser(id: number, adminUserId: number, data: Partial<InsertManagedUser>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(managedUsers).set(data).where(and(eq(managedUsers.id, id), eq(managedUsers.createdByUserId, adminUserId)));
+}
+
+export async function deleteManagedUser(id: number, adminUserId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(managedUsers).set({ isActive: false }).where(and(eq(managedUsers.id, id), eq(managedUsers.createdByUserId, adminUserId)));
+}
+
+export async function updateManagedUserLogin(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(managedUsers).set({ lastLogin: new Date() }).where(eq(managedUsers.id, id));
+}
+
+// ==================== SYSTEM SETTINGS QUERIES ====================
+export async function getSetting(userId: number, key: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(systemSettings).where(and(eq(systemSettings.userId, userId), eq(systemSettings.settingKey, key))).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function upsertSetting(userId: number, key: string, value: string, isEncrypted: boolean = false) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await getSetting(userId, key);
+  if (existing) {
+    await db.update(systemSettings).set({ settingValue: value, isEncrypted }).where(eq(systemSettings.id, existing.id));
+    return existing;
+  }
+  const result = await db.insert(systemSettings).values({ userId, settingKey: key, settingValue: value, isEncrypted });
+  return { id: Number(result[0].insertId), userId, settingKey: key, settingValue: value, isEncrypted };
+}
+
+export async function getAllSettings(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(systemSettings).where(eq(systemSettings.userId, userId));
+}
+
+// ==================== SALES/REVENUE QUERIES ====================
+export async function createSale(data: InsertSale) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(sales).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function getSalesByUser(userId: number, startDate?: Date, endDate?: Date) {
+  const db = await getDb();
+  if (!db) return [];
+  let query = db.select().from(sales).where(eq(sales.userId, userId));
+  if (startDate && endDate) {
+    return db.select().from(sales).where(and(eq(sales.userId, userId), gte(sales.date, startDate), lte(sales.date, endDate))).orderBy(desc(sales.date));
+  }
+  return db.select().from(sales).where(eq(sales.userId, userId)).orderBy(desc(sales.date));
+}
+
+export async function getSalesByMonth(userId: number, month: number, year: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const startOfMonth = new Date(year, month - 1, 1);
+  const endOfMonth = new Date(year, month, 0, 23, 59, 59);
+  return db.select().from(sales).where(and(eq(sales.userId, userId), gte(sales.date, startOfMonth), lte(sales.date, endOfMonth))).orderBy(desc(sales.date));
+}
+
+export async function getDailySalesSplit(userId: number, month: number, year: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const startOfMonth = new Date(year, month - 1, 1);
+  const endOfMonth = new Date(year, month, 0, 23, 59, 59);
+  
+  const results = await db.select({
+    date: sales.date,
+    total: sql<string>`SUM(${sales.amount})`
+  }).from(sales)
+    .where(and(eq(sales.userId, userId), eq(sales.status, "completed"), gte(sales.date, startOfMonth), lte(sales.date, endOfMonth)))
+    .groupBy(sql`DATE(${sales.date})`)
+    .orderBy(asc(sales.date));
+  
+  return results.map(r => ({ date: r.date, total: parseFloat(r.total || "0") }));
+}
+
+export async function getMonthlyRevenue(userId: number, year: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const results = [];
+  for (let month = 1; month <= 12; month++) {
+    const startOfMonth = new Date(year, month - 1, 1);
+    const endOfMonth = new Date(year, month, 0, 23, 59, 59);
+    
+    const totalRevenue = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+      .from(sales)
+      .where(and(eq(sales.userId, userId), eq(sales.status, "completed"), gte(sales.date, startOfMonth), lte(sales.date, endOfMonth)));
+    
+    results.push({ month, total: parseFloat(totalRevenue[0]?.total || "0") });
+  }
+  return results;
+}
+
+export async function updateSale(id: number, userId: number, data: Partial<InsertSale>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(sales).set(data).where(and(eq(sales.id, id), eq(sales.userId, userId)));
+}
+
+export async function deleteSale(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(sales).where(and(eq(sales.id, id), eq(sales.userId, userId)));
+}
+
+// ==================== ANALYSIS HISTORY QUERIES ====================
+export async function saveAnalysisHistory(data: InsertAnalysisHistory) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(analysisHistory).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function getAnalysisHistory(userId: number, limit: number = 12) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(analysisHistory).where(eq(analysisHistory.userId, userId)).orderBy(desc(analysisHistory.createdAt)).limit(limit);
+}
+
+export async function getLatestAnalysis(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(analysisHistory).where(eq(analysisHistory.userId, userId)).orderBy(desc(analysisHistory.createdAt)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+// ==================== NOTIFICATIONS QUERIES ====================
+export async function createNotification(data: InsertNotification) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(notifications).values(data);
+  return { id: Number(result[0].insertId), ...data };
+}
+
+export async function getNotificationsByUser(userId: number, unreadOnly: boolean = false) {
+  const db = await getDb();
+  if (!db) return [];
+  if (unreadOnly) {
+    return db.select().from(notifications).where(and(eq(notifications.userId, userId), eq(notifications.isRead, false))).orderBy(desc(notifications.createdAt));
+  }
+  return db.select().from(notifications).where(eq(notifications.userId, userId)).orderBy(desc(notifications.createdAt)).limit(50);
+}
+
+export async function markNotificationAsRead(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(notifications).set({ isRead: true }).where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+}
+
+export async function markAllNotificationsAsRead(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(notifications).set({ isRead: true }).where(eq(notifications.userId, userId));
+}
+
+export async function deleteNotification(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(notifications).where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+}
+
+// ==================== EXPENSE DUE NOTIFICATIONS ====================
+export async function getUpcomingFixedExpenses(userId: number, daysAhead: number = 7) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const today = new Date();
+  const currentDay = today.getDate();
+  const currentMonth = today.getMonth() + 1;
+  const currentYear = today.getFullYear();
+  
+  // Get active fixed expenses
+  const expenses = await db.select().from(fixedExpenses).where(and(eq(fixedExpenses.userId, userId), eq(fixedExpenses.isActive, true)));
+  
+  // Filter expenses due within daysAhead
+  const upcoming = [];
+  for (const expense of expenses) {
+    const dueDay = expense.dueDay;
+    let dueDate: Date;
+    
+    if (dueDay >= currentDay) {
+      dueDate = new Date(currentYear, currentMonth - 1, dueDay);
+    } else {
+      // Due next month
+      dueDate = new Date(currentYear, currentMonth, dueDay);
+    }
+    
+    const daysUntilDue = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilDue >= 0 && daysUntilDue <= daysAhead) {
+      // Check if already paid this month
+      const payment = await db.select().from(fixedExpensePayments)
+        .where(and(
+          eq(fixedExpensePayments.fixedExpenseId, expense.id),
+          eq(fixedExpensePayments.month, dueDate.getMonth() + 1),
+          eq(fixedExpensePayments.year, dueDate.getFullYear()),
+          eq(fixedExpensePayments.isPaid, true)
+        )).limit(1);
+      
+      if (payment.length === 0) {
+        upcoming.push({ ...expense, dueDate, daysUntilDue });
+      }
+    }
+  }
+  
+  return upcoming.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+}
+
+export async function generateExpenseNotifications(userId: number) {
+  const upcoming = await getUpcomingFixedExpenses(userId, 7);
+  const createdNotifications = [];
+  
+  for (const expense of upcoming) {
+    // Check if notification already exists for this expense this month
+    const db = await getDb();
+    if (!db) continue;
+    
+    const existing = await db.select().from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.type, "expense_due"),
+        eq(notifications.relatedId, expense.id),
+        gte(notifications.createdAt, new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+      )).limit(1);
+    
+    if (existing.length === 0) {
+      const notification = await createNotification({
+        userId,
+        type: "expense_due",
+        title: `Despesa próxima do vencimento`,
+        message: `A despesa "${expense.description}" de R$ ${expense.amount} vence em ${expense.daysUntilDue} dia(s) (dia ${expense.dueDay}).`,
+        relatedId: expense.id,
+        relatedType: "fixed_expense"
+      });
+      createdNotifications.push(notification);
+    }
+  }
+  
+  return createdNotifications;
+}
+
+// ==================== PROFIT CALCULATION ====================
+export async function getMonthlyProfitLoss(userId: number, month: number, year: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const startOfMonth = new Date(year, month - 1, 1);
+  const endOfMonth = new Date(year, month, 0, 23, 59, 59);
+  
+  // Total revenue
+  const revenueResult = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+    .from(sales)
+    .where(and(eq(sales.userId, userId), eq(sales.status, "completed"), gte(sales.date, startOfMonth), lte(sales.date, endOfMonth)));
+  
+  // Variable expenses
+  const variableResult = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+    .from(variableExpenses)
+    .where(and(eq(variableExpenses.userId, userId), gte(variableExpenses.date, startOfMonth), lte(variableExpenses.date, endOfMonth)));
+  
+  // Fixed expenses (sum of all active fixed expenses)
+  const fixedResult = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+    .from(fixedExpenses)
+    .where(and(eq(fixedExpenses.userId, userId), eq(fixedExpenses.isActive, true)));
+  
+  const revenue = parseFloat(revenueResult[0]?.total || "0");
+  const variableExpensesTotal = parseFloat(variableResult[0]?.total || "0");
+  const fixedExpensesTotal = parseFloat(fixedResult[0]?.total || "0");
+  const totalExpenses = variableExpensesTotal + fixedExpensesTotal;
+  const profit = revenue - totalExpenses;
+  
+  return {
+    revenue,
+    variableExpenses: variableExpensesTotal,
+    fixedExpenses: fixedExpensesTotal,
+    totalExpenses,
+    profit,
+    profitMargin: revenue > 0 ? (profit / revenue) * 100 : 0
+  };
+}

@@ -69,3 +69,48 @@
 - [x] Adicionar cards de resumo com insights principais
 - [ ] Implementar histórico de análises - Pendente
 - [x] Testes unitários das funcionalidades de análise (43 testes passando)
+
+## Nova Iteração - Funcionalidades Avançadas
+
+### Gestão de Usuários (Admin)
+- [x] Menu Usuários no painel admin
+- [x] Criar usuários com nome, sobrenome, email, telefone (BR/US)
+- [x] Geração automática de senha forte
+- [x] Confirmação de senha
+- [ ] Página de login para usuários criados - Pendente (requer fluxo de autenticação customizado)
+### Configurações do Sistema
+- [x] Página de configurações para admin
+- [x] Campo para token GPT customizável
+- [x] Armazenamento seguro de credenciais
+
+### Sistema de Faturamento/Vendas
+- [x] Tabela de vendas/faturamento
+- [x] Split diário de vendas
+- [x] Cálculo de lucro mensal
+- [x] Alertas de gastos vs receitas
+- [ ] Estimativa de despesa mensal por empresa - Pendente
+
+### Despesas Fixas Melhoradas
+- [x] Notificações de vencimento de despesas fixas
+- [x] Mover automaticamente para "pagas" quando marcadas
+- [x] Separação visual despesas pendentes vs pagas
+
+### Histórico de Análises
+- [x] Salvar análises semanais no banco
+- [x] Página de histórico de análises
+- [x] Comparativo de evolução ao longo do tempo
+- [ ] Gráficos de tendência - Pendente
+
+### Monitor de Tarefas Redesenhado
+- [x] Layout em tabela semanal (como referência)
+- [x] Colunas por dia da semana
+- [x] Status coloridos (Feito/Não feito/Em progresso)
+- [x] Taxa de conclusão por tarefa
+
+### Melhorias Visuais (CSS)
+- [x] Design mais moderno e profissional (fonte Inter)
+- [x] Cores consistentes (verde esmeralda como destaque)
+- [x] Tema claro limpo e elegante
+- [x] Animações e transições suaves
+- [x] Scrollbar customizado
+- [x] Classes utilitárias (card-hover, gradient-text, glass, elevation)
