@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, desc, asc, sql } from "drizzle-orm";
+import { eq, and, gte, lte, desc, asc, sql, like } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, 
@@ -714,6 +714,7 @@ export async function getManagedUsersByAdmin(adminUserId: number) {
   if (!db) return [];
   return db.select({
     id: managedUsers.id,
+    username: managedUsers.username,
     firstName: managedUsers.firstName,
     lastName: managedUsers.lastName,
     email: managedUsers.email,
@@ -1029,4 +1030,39 @@ export async function getMonthlyProfitLoss(userId: number, month: number, year: 
     profit,
     profitMargin: revenue > 0 ? (profit / revenue) * 100 : 0
   };
+}
+
+export async function updateManagedUserLastLogin(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(managedUsers).set({ lastLogin: new Date() }).where(eq(managedUsers.id, userId));
+}
+
+export async function searchManagedUsersByUsername(adminUserId: number, query: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: managedUsers.id,
+    username: managedUsers.username,
+    firstName: managedUsers.firstName,
+    lastName: managedUsers.lastName
+  }).from(managedUsers)
+    .where(and(
+      eq(managedUsers.createdByUserId, adminUserId),
+      eq(managedUsers.isActive, true),
+      like(managedUsers.username, `%${query}%`)
+    ))
+    .limit(10);
+}
+
+export async function getKanbanCardById(cardId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select({
+    id: kanbanCards.id,
+    boardId: kanbanCards.boardId,
+    columnId: kanbanCards.columnId,
+    title: kanbanCards.title
+  }).from(kanbanCards).where(eq(kanbanCards.id, cardId)).limit(1);
+  return result[0] || null;
 }

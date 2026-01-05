@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { trpc } from "@/lib/trpc";
 import { Plus, Trash2, Edit2, MoreVertical, Calendar, User, MessageSquare, ArrowLeft, Users, Lock, Globe, CheckSquare, Send, GripVertical } from "lucide-react";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSocket, KanbanEvents } from "@/hooks/useSocket";
 
 const priorityColors: Record<string, string> = {
   low: "#10b981",
@@ -70,6 +71,52 @@ export default function Kanban() {
   });
 
   const utils = trpc.useUtils();
+  const { joinBoard, leaveBoard, onEvent } = useSocket();
+
+  // Socket.IO: Join/leave board room when selected board changes
+  useEffect(() => {
+    if (selectedBoardId) {
+      joinBoard(selectedBoardId);
+      return () => leaveBoard(selectedBoardId);
+    }
+  }, [selectedBoardId, joinBoard, leaveBoard]);
+
+  // Socket.IO: Listen for real-time updates
+  useEffect(() => {
+    if (!selectedBoardId) return;
+
+    const unsubscribers = [
+      onEvent(KanbanEvents.CARD_MOVED, () => {
+        utils.kanban.getBoard.invalidate({ id: selectedBoardId });
+      }),
+      onEvent(KanbanEvents.CARD_CREATED, () => {
+        utils.kanban.getBoard.invalidate({ id: selectedBoardId });
+      }),
+      onEvent(KanbanEvents.CARD_UPDATED, () => {
+        utils.kanban.getBoard.invalidate({ id: selectedBoardId });
+      }),
+      onEvent(KanbanEvents.CARD_DELETED, () => {
+        utils.kanban.getBoard.invalidate({ id: selectedBoardId });
+      }),
+      onEvent(KanbanEvents.COLUMN_CREATED, () => {
+        utils.kanban.getBoard.invalidate({ id: selectedBoardId });
+      }),
+      onEvent(KanbanEvents.COMMENT_ADDED, () => {
+        if (selectedCard?.id) {
+          utils.kanban.getCardComments.invalidate({ cardId: selectedCard.id });
+        }
+      }),
+      onEvent(KanbanEvents.CHECKLIST_UPDATED, () => {
+        if (selectedCard?.id) {
+          utils.kanban.getCardChecklists.invalidate({ cardId: selectedCard.id });
+        }
+      }),
+    ];
+
+    return () => {
+      unsubscribers.forEach(unsub => unsub());
+    };
+  }, [selectedBoardId, selectedCard?.id, onEvent, utils]);
 
   const { data: boards, isLoading: boardsLoading } = trpc.kanban.listBoards.useQuery();
   const { data: boardDetails, isLoading: boardLoading } = trpc.kanban.getBoard.useQuery(

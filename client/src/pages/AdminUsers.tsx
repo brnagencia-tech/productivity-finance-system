@@ -53,6 +53,7 @@ export default function AdminUsers() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
+    username: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -99,6 +100,7 @@ export default function AdminUsers() {
 
   const resetForm = () => {
     setFormData({
+      username: "",
       firstName: "",
       lastName: "",
       email: "",
@@ -107,6 +109,25 @@ export default function AdminUsers() {
       password: "",
       confirmPassword: ""
     });
+  };
+
+  // Gerar username automaticamente baseado no nome
+  const generateUsername = (firstName: string, lastName: string) => {
+    const base = `${firstName}${lastName}`.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const random = Math.floor(Math.random() * 1000);
+    return `${base}${random}`;
+  };
+
+  const handleNameChange = (field: 'firstName' | 'lastName', value: string) => {
+    const newFormData = { ...formData, [field]: value };
+    if (!formData.username || formData.username === generateUsername(formData.firstName, formData.lastName)) {
+      const newUsername = generateUsername(
+        field === 'firstName' ? value : formData.firstName,
+        field === 'lastName' ? value : formData.lastName
+      );
+      newFormData.username = newUsername;
+    }
+    setFormData(newFormData);
   };
 
   const handleGeneratePassword = () => {
@@ -129,7 +150,12 @@ export default function AdminUsers() {
       toast.error("A senha deve ter pelo menos 8 caracteres!");
       return;
     }
+    if (!/^[a-z0-9_]+$/.test(formData.username)) {
+      toast.error("Username deve conter apenas letras minúsculas, números e underscore!");
+      return;
+    }
     createUser.mutate({
+      username: formData.username,
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
@@ -191,7 +217,7 @@ export default function AdminUsers() {
                       <Input
                         id="firstName"
                         value={formData.firstName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                        onChange={(e) => handleNameChange('firstName', e.target.value)}
                         placeholder="João"
                         required
                       />
@@ -201,11 +227,26 @@ export default function AdminUsers() {
                       <Input
                         id="lastName"
                         value={formData.lastName}
-                        onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                        onChange={(e) => handleNameChange('lastName', e.target.value)}
                         placeholder="Silva"
                         required
                       />
                     </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username (@)</Label>
+                    <div className="flex items-center">
+                      <span className="text-muted-foreground mr-1">@</span>
+                      <Input
+                        id="username"
+                        value={formData.username}
+                        onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') }))}
+                        placeholder="joaosilva123"
+                        required
+                        className="flex-1"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">Usado para menções no Kanban. Apenas letras minúsculas, números e _</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">E-mail</Label>
@@ -314,9 +355,9 @@ export default function AdminUsers() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>
+                    <TableHead>Username</TableHead>
                     <TableHead>E-mail</TableHead>
-                    <TableHead>Telefone (BR)</TableHead>
-                    <TableHead>Telefone (US)</TableHead>
+                    <TableHead>Telefone</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Último Login</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
@@ -326,9 +367,9 @@ export default function AdminUsers() {
                   {managedUsers.map((u) => (
                     <TableRow key={u.id}>
                       <TableCell className="font-medium">{u.firstName} {u.lastName}</TableCell>
+                      <TableCell className="text-primary font-medium">@{u.username}</TableCell>
                       <TableCell>{u.email}</TableCell>
-                      <TableCell>{u.phoneBR || "-"}</TableCell>
-                      <TableCell>{u.phoneUS || "-"}</TableCell>
+                      <TableCell>{u.phoneBR || u.phoneUS || "-"}</TableCell>
                       <TableCell>
                         <Badge variant={u.isActive ? "default" : "secondary"}>
                           {u.isActive ? "Ativo" : "Inativo"}

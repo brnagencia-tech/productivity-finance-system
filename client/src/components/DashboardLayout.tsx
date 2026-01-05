@@ -45,21 +45,31 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-const menuItems = [
+// Menu Principal
+const mainMenuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: CheckSquare, label: "Tarefas", path: "/tasks" },
   { icon: Kanban, label: "Kanban", path: "/kanban" },
+  { icon: Heart, label: "Hábitos", path: "/habits" },
+];
+
+// Menu Finanças
+const financeMenuItems = [
   { icon: Wallet, label: "Despesas Variáveis", path: "/expenses/variable" },
   { icon: Receipt, label: "Despesas Fixas", path: "/expenses/fixed" },
   { icon: CalendarDays, label: "Planilha Anual", path: "/expenses/annual" },
   { icon: DollarSign, label: "Faturamento", path: "/revenue" },
-  { icon: Heart, label: "Hábitos", path: "/habits" },
+];
+
+// Menu Ferramentas
+const toolsMenuItems = [
+  { icon: Brain, label: "Insights IA", path: "/insights" },
   { icon: Tags, label: "Categorias", path: "/categories" },
   { icon: Users, label: "Contatos", path: "/contacts" },
-  { icon: Brain, label: "Insights IA", path: "/insights" },
   { icon: Bell, label: "Notificações", path: "/notifications" },
 ];
 
+// Menu Admin
 const adminMenuItems = [
   { icon: UserCog, label: "Usuários", path: "/admin/users" },
   { icon: Settings, label: "Configurações", path: "/settings" },
@@ -148,7 +158,8 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => location.startsWith(item.path) && (item.path === "/" ? location === "/" : true));
+  const allMenuItems = [...mainMenuItems, ...financeMenuItems, ...toolsMenuItems, ...adminMenuItems];
+  const activeMenuItem = allMenuItems.find(item => location.startsWith(item.path) && (item.path === "/" ? location === "/" : true));
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -215,9 +226,10 @@ function DashboardLayoutContent({
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="gap-0 py-2">
+          <SidebarContent className="gap-0 py-2 overflow-y-auto">
+            {/* Menu Principal */}
             <SidebarMenu className="px-2 py-1 space-y-1">
-              {menuItems.map(item => {
+              {mainMenuItems.map(item => {
                 const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
                 return (
                   <SidebarMenuItem key={item.path}>
@@ -237,7 +249,57 @@ function DashboardLayoutContent({
               })}
             </SidebarMenu>
 
-            {/* Admin Menu - visible only for admins */}
+            {/* Menu Finanças */}
+            <div className="px-4 py-2 mt-4">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Finanças</span>
+            </div>
+            <SidebarMenu className="px-2 py-1 space-y-1">
+              {financeMenuItems.map(item => {
+                const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+                return (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      onClick={() => setLocation(item.path)}
+                      tooltip={item.label}
+                      className={`h-10 transition-all font-normal ${isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}
+                    >
+                      <item.icon
+                        className={`h-4 w-4 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                      />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+
+            {/* Menu Ferramentas */}
+            <div className="px-4 py-2 mt-4">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ferramentas</span>
+            </div>
+            <SidebarMenu className="px-2 py-1 space-y-1">
+              {toolsMenuItems.map(item => {
+                const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
+                return (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      onClick={() => setLocation(item.path)}
+                      tooltip={item.label}
+                      className={`h-10 transition-all font-normal ${isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}`}
+                    >
+                      <item.icon
+                        className={`h-4 w-4 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                      />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+
+            {/* Menu Admin - visible only for admins */}
             {user?.role === "admin" && (
               <>
                 <div className="px-4 py-2 mt-4">

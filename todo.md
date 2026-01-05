@@ -114,3 +114,29 @@
 - [x] Animações e transições suaves
 - [x] Scrollbar customizado
 - [x] Classes utilitárias (card-hover, gradient-text, glass, elevation)
+
+## Nova Iteração - WebSocket, Login e Username
+
+### WebSocket Kanban
+- [x] Implementar Socket.IO no servidor
+- [x] Atualização em tempo real quando cards são movidos
+- [x] Notificação visual quando outro usuário faz alterações
+
+### Sistema de Username (@)
+- [x] Adicionar campo username ao schema de usuários
+- [x] Gerar @ único automaticamente baseado no nome
+- [ ] Permitir menções @usuario nos cards do Kanban - Pendente
+- [ ] Autocomplete de usuários ao digitar @ - Pendente
+
+### Tela de Login
+- [x] Criar página de login para usuários gerenciados (/login)
+- [x] Autenticação com email/senha
+- [x] Sessão separada do OAuth principal (token base64)
+
+### Arrumar Menu Lateral
+- [x] Reorganizar itens do menu com seções
+- [x] Separar seções claramente (Principal, Finanças, Ferramentas, Admin)
+- [x] Melhorar espaçamento e hierarquia visual
+
+### Testes
+- [x] 69 testes unitários passando

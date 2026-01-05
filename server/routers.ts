@@ -5,6 +5,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import * as db from "./db";
 import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyInsights } from "./analysis";
+import { emitToBoardRoom, KanbanEvents } from "./_core/socket";
 
 export const appRouter = router({
   system: systemRouter,
@@ -183,10 +184,12 @@ export const appRouter = router({
       position: z.number(),
       labels: z.array(z.string()).optional()
     })).mutation(async ({ input }) => {
-      return db.createKanbanCard({
+      const result = await db.createKanbanCard({
         ...input,
         dueDate: input.dueDate ? new Date(input.dueDate) : undefined
       });
+      emitToBoardRoom(input.boardId, KanbanEvents.CARD_CREATED, result);
+      return result;
     }),
     updateCard: protectedProcedure.input(z.object({
       id: z.number(),
@@ -199,15 +202,28 @@ export const appRouter = router({
       position: z.number().optional(),
       labels: z.array(z.string()).optional()
     })).mutation(async ({ input }) => {
-      const { id, dueDate, ...data } = input;
+      const { id, dueDate, columnId, ...data } = input;
       await db.updateKanbanCard(id, {
         ...data,
+        columnId,
         dueDate: dueDate ? new Date(dueDate) : undefined
       });
+      // Get the card's board to emit event
+      const card = await db.getKanbanCardById(id);
+      if (card) {
+        emitToBoardRoom(card.boardId, KanbanEvents.CARD_UPDATED, { id, ...data });
+        if (columnId) {
+          emitToBoardRoom(card.boardId, KanbanEvents.CARD_MOVED, { cardId: id, columnId });
+        }
+      }
       return { success: true };
     }),
-    deleteCard: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ input }) => {
+    deleteCard: protectedProcedure.input(z.object({ id: z.number(), boardId: z.number().optional() })).mutation(async ({ input }) => {
+      const card = await db.getKanbanCardById(input.id);
       await db.deleteKanbanCard(input.id);
+      if (card) {
+        emitToBoardRoom(card.boardId, KanbanEvents.CARD_DELETED, { id: input.id });
+      }
       return { success: true };
     }),
     getCardComments: protectedProcedure.input(z.object({ cardId: z.number() })).query(async ({ input }) => {
@@ -517,13 +533,15 @@ export const appRouter = router({
       email: z.string().email(),
       phoneBR: z.string().optional(),
       phoneUS: z.string().optional(),
-      password: z.string().min(8)
+      password: z.string().min(8),
+      username: z.string().min(3).max(30).regex(/^[a-z0-9_]+$/, 'Username deve conter apenas letras minúsculas, números e underscore')
     })).mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
       // Simple hash for demo - in production use bcrypt
       const passwordHash = Buffer.from(input.password).toString('base64');
       return db.createManagedUser({
         createdByUserId: ctx.user.id,
+        username: input.username,
         firstName: input.firstName,
         lastName: input.lastName,
         email: input.email,
@@ -558,6 +576,44 @@ export const appRouter = router({
       const passwordHash = Buffer.from(input.newPassword).toString('base64');
       await db.updateManagedUser(input.id, ctx.user.id, { passwordHash });
       return { success: true };
+    }),
+    // Login endpoint for managed users (public)
+    login: publicProcedure.input(z.object({
+      email: z.string().email(),
+      password: z.string()
+    })).mutation(async ({ input }) => {
+      const user = await db.getManagedUserByEmail(input.email);
+      if (!user) {
+        throw new Error('Credenciais inválidas');
+      }
+      if (!user.isActive) {
+        throw new Error('Usuário desativado');
+      }
+      // Simple password check - in production use bcrypt
+      const passwordHash = Buffer.from(input.password).toString('base64');
+      if (user.passwordHash !== passwordHash) {
+        throw new Error('Credenciais inválidas');
+      }
+      // Update last login
+      await db.updateManagedUserLastLogin(user.id);
+      // Generate a simple token (in production use JWT)
+      const token = Buffer.from(`${user.id}:${Date.now()}`).toString('base64');
+      return {
+        user: {
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email
+        },
+        token
+      };
+    }),
+    // Search users by username for mentions
+    search: protectedProcedure.input(z.object({
+      query: z.string()
+    })).query(async ({ ctx, input }) => {
+      return db.searchManagedUsersByUsername(ctx.user.id, input.query);
     }),
   }),
 

@@ -4,6 +4,7 @@ import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean,
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
   openId: varchar("openId", { length: 64 }).notNull().unique(),
+  username: varchar("username", { length: 50 }).unique(), // @username like Instagram
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
@@ -270,6 +271,7 @@ export type InsertKanbanCardChecklist = typeof kanbanCardChecklists.$inferInsert
 export const managedUsers = mysqlTable("managed_users", {
   id: int("id").autoincrement().primaryKey(),
   createdByUserId: int("createdByUserId").notNull(),
+  username: varchar("username", { length: 50 }).notNull().unique(), // @username like Instagram
   firstName: varchar("firstName", { length: 100 }).notNull(),
   lastName: varchar("lastName", { length: 100 }).notNull(),
   email: varchar("email", { length: 320 }).notNull().unique(),
