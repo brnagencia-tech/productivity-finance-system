@@ -341,3 +341,13 @@
 - [x] Endpoint de insights testado
 - [x] Página de insights criada
 - [x] Integração com LLM implementada
+
+
+## Correções de Gerenciamento de Usuários
+
+- [x] Corrigir erro ao criar usuário com telefone vazio (phoneBR ou phoneUS)
+- [x] Implementar exclusão de verdade de usuários (DELETE, não UPDATE isActive)
+- [x] Criar teste de criação e exclusão de usuário (6 testes passando)
+- [x] Validar que usuários excluídos somem da tela
+- [x] Manter opção de editar usuários
+- [x] Todos os 99 testes passando

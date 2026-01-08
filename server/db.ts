@@ -750,7 +750,8 @@ export async function updateManagedUser(id: number, adminUserId: number, data: P
 export async function deleteManagedUser(id: number, adminUserId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(managedUsers).set({ isActive: false }).where(and(eq(managedUsers.id, id), eq(managedUsers.createdByUserId, adminUserId)));
+  // Deletar de verdade, não apenas inativar
+  await db.delete(managedUsers).where(and(eq(managedUsers.id, id), eq(managedUsers.createdByUserId, adminUserId)));
 }
 
 export async function updateManagedUserLogin(id: number) {
