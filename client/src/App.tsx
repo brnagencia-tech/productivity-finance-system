@@ -19,6 +19,7 @@ import Settings from "./pages/Settings";
 import Revenue from "./pages/Revenue";
 import Notifications from "./pages/Notifications";
 import ManagedLogin from "./pages/ManagedLogin";
+import AdvancedUserManagement from "./pages/AdvancedUserManagement";
 
 function Router() {
   return (
@@ -34,9 +35,11 @@ function Router() {
       <Route path={"/contacts"} component={Contacts} />
       <Route path={"/insights"} component={Insights} />
       <Route path={"/admin/users"} component={AdminUsers} />
+      <Route path={"/admin/users/advanced"} component={AdvancedUserManagement} />
       <Route path={"/settings"} component={Settings} />
       <Route path={"/revenue"} component={Revenue} />
       <Route path={"/notifications"} component={Notifications} />
+      <Route path={"/admin/advanced"} component={AdvancedUserManagement} />
       <Route path={"/login"} component={ManagedLogin} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

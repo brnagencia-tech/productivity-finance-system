@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, desc, asc, sql, like } from "drizzle-orm";
+import { eq, and, or, desc, gte, lte, like, between, gt, lt, asc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, 
@@ -15,7 +15,8 @@ import {
   fixedExpensePayments, InsertFixedExpensePayment,
   budgets, InsertBudget,
   habits, InsertHabit, Habit,
-  habitLogs, InsertHabitLog
+  habitLogs, InsertHabitLog,
+  roles, permissions, rolePermissions, userRoles, auditLog, sessions
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -1065,4 +1066,188 @@ export async function getKanbanCardById(cardId: number) {
     title: kanbanCards.title
   }).from(kanbanCards).where(eq(kanbanCards.id, cardId)).limit(1);
   return result[0] || null;
+}
+
+
+// ==================== ROLES & PERMISSIONS ====================
+export async function getRolesByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select({
+      id: roles.id,
+      name: roles.name,
+      description: roles.description,
+    })
+    .from(userRoles)
+    .innerJoin(roles, eq(userRoles.roleId, roles.id))
+    .where(eq(userRoles.userId, userId));
+}
+
+export async function getPermissionsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .selectDistinct({
+      id: permissions.id,
+      name: permissions.name,
+      category: permissions.category,
+    })
+    .from(userRoles)
+    .innerJoin(roles, eq(userRoles.roleId, roles.id))
+    .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+    .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+    .where(eq(userRoles.userId, userId));
+}
+
+export async function hasPermission(userId: number, permissionName: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+
+  const result = await db
+    .selectDistinct({ id: permissions.id })
+    .from(userRoles)
+    .innerJoin(roles, eq(userRoles.roleId, roles.id))
+    .innerJoin(rolePermissions, eq(rolePermissions.roleId, roles.id))
+    .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
+    .where(and(eq(userRoles.userId, userId), eq(permissions.name, permissionName)))
+    .limit(1);
+
+  return result.length > 0;
+}
+
+export async function assignRoleToUser(userId: number, roleId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Check if already assigned
+  const existing = await db
+    .select()
+    .from(userRoles)
+    .where(and(eq(userRoles.userId, userId), eq(userRoles.roleId, roleId)))
+    .limit(1);
+
+  if (existing.length === 0) {
+    await db.insert(userRoles).values({ userId, roleId });
+  }
+}
+
+export async function removeRoleFromUser(userId: number, roleId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .delete(userRoles)
+    .where(and(eq(userRoles.userId, userId), eq(userRoles.roleId, roleId)));
+}
+
+export async function getAllRoles() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(roles);
+}
+
+export async function createAuditLog(
+  userId: number,
+  action: string,
+  resource: string,
+  resourceId?: number,
+  details?: string,
+  ipAddress?: string,
+  userAgent?: string
+) {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.insert(auditLog).values({
+    userId,
+    action,
+    resource,
+    resourceId,
+    details,
+    ipAddress,
+    userAgent,
+  });
+}
+
+export async function getAuditLogs(userId?: number, limit = 100) {
+  const db = await getDb();
+  if (!db) return [];
+
+  if (userId) {
+    return await db
+      .select()
+      .from(auditLog)
+      .where(eq(auditLog.userId, userId))
+      .orderBy(desc(auditLog.createdAt))
+      .limit(limit);
+  }
+
+  return await db.select().from(auditLog).orderBy(desc(auditLog.createdAt)).limit(limit);
+}
+
+// ==================== SESSIONS (MULTI-LOGIN) ====================
+export async function createSession(userId: number, token: string, ipAddress?: string, userAgent?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+  await db.insert(sessions).values({
+    userId,
+    token,
+    ipAddress,
+    userAgent,
+    expiresAt,
+  });
+
+  return token;
+}
+
+export async function getSessionByToken(token: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select()
+    .from(sessions)
+    .where(and(eq(sessions.token, token), gt(sessions.expiresAt, new Date())))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getUserSessions(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(sessions)
+    .where(and(eq(sessions.userId, userId), gt(sessions.expiresAt, new Date())))
+    .orderBy(desc(sessions.lastActivityAt));
+}
+
+export async function deleteSession(sessionId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.delete(sessions).where(eq(sessions.id, sessionId));
+}
+
+export async function updateSessionActivity(sessionId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(sessions).set({ lastActivityAt: new Date() }).where(eq(sessions.id, sessionId));
+}
+
+export async function deleteExpiredSessions() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.delete(sessions).where(lt(sessions.expiresAt, new Date()));
 }

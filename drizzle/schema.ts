@@ -357,3 +357,77 @@ export const notifications = mysqlTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+
+// ==================== ROLES E PERMISSÕES ====================
+export const roles = mysqlTable("roles", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 50 }).notNull().unique(), // admin, manager, user, viewer
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Role = typeof roles.$inferSelect;
+export type InsertRole = typeof roles.$inferInsert;
+
+export const permissions = mysqlTable("permissions", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(), // tasks.create, tasks.edit, tasks.delete, etc
+  description: text("description"),
+  category: varchar("category", { length: 50 }).notNull(), // tasks, expenses, kanban, users, settings
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Permission = typeof permissions.$inferSelect;
+export type InsertPermission = typeof permissions.$inferInsert;
+
+export const rolePermissions = mysqlTable("rolePermissions", {
+  id: int("id").autoincrement().primaryKey(),
+  roleId: int("roleId").notNull(),
+  permissionId: int("permissionId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = typeof rolePermissions.$inferInsert;
+
+export const userRoles = mysqlTable("userRoles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  roleId: int("roleId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type UserRole = typeof userRoles.$inferSelect;
+export type InsertUserRole = typeof userRoles.$inferInsert;
+
+// ==================== AUDITORIA ====================
+export const auditLog = mysqlTable("auditLog", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  action: varchar("action", { length: 100 }).notNull(), // create, update, delete, login, logout
+  resource: varchar("resource", { length: 100 }).notNull(), // task, expense, user, kanban, etc
+  resourceId: int("resourceId"),
+  details: text("details"), // JSON string with details
+  ipAddress: varchar("ipAddress", { length: 45 }),
+  userAgent: text("userAgent"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AuditLog = typeof auditLog.$inferSelect;
+export type InsertAuditLog = typeof auditLog.$inferInsert;
+
+// ==================== SESSÕES MULTI-LOGIN ====================
+export const sessions = mysqlTable("sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  ipAddress: varchar("ipAddress", { length: 45 }),
+  userAgent: text("userAgent"),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  lastActivityAt: timestamp("lastActivityAt").defaultNow().notNull(),
+});
+
+export type Session = typeof sessions.$inferSelect;
+export type InsertSession = typeof sessions.$inferInsert;

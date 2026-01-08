@@ -36,6 +36,13 @@
       "when": 1767654583172,
       "tag": "0004_bright_changeling",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1767902454114,
+      "tag": "0005_hard_rictor",
+      "breakpoints": true
     }
   ]
 }

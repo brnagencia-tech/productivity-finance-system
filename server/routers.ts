@@ -756,6 +756,58 @@ export const appRouter = router({
       });
     }),
   }),
+
+  roles: router({
+    list: protectedProcedure.query(async () => {
+      return db.getAllRoles();
+    }),
+    getUserRoles: protectedProcedure.input(z.object({ userId: z.number() })).query(async ({ input }) => {
+      return db.getRolesByUserId(input.userId);
+    }),
+    getUserPermissions: protectedProcedure.input(z.object({ userId: z.number() })).query(async ({ input }) => {
+      return db.getPermissionsByUserId(input.userId);
+    }),
+    hasPermission: protectedProcedure.input(z.object({ userId: z.number(), permission: z.string() })).query(async ({ input }) => {
+      return db.hasPermission(input.userId, input.permission);
+    }),
+    assignRole: protectedProcedure.input(z.object({ userId: z.number(), roleId: z.number() })).mutation(async ({ ctx, input }) => {
+      // Check if user has permission to assign roles
+      const hasPermission = await db.hasPermission(ctx.user.id, "users.manage");
+      if (!hasPermission) throw new Error("Permission denied");
+      
+      await db.assignRoleToUser(input.userId, input.roleId);
+      await db.createAuditLog(ctx.user.id, "assign_role", "user", input.userId, `Assigned role ${input.roleId}`);
+      return { success: true };
+    }),
+    removeRole: protectedProcedure.input(z.object({ userId: z.number(), roleId: z.number() })).mutation(async ({ ctx, input }) => {
+      const hasPermission = await db.hasPermission(ctx.user.id, "users.manage");
+      if (!hasPermission) throw new Error("Permission denied");
+      
+      await db.removeRoleFromUser(input.userId, input.roleId);
+      await db.createAuditLog(ctx.user.id, "remove_role", "user", input.userId, `Removed role ${input.roleId}`);
+      return { success: true };
+    }),
+  }),
+
+  sessions: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return db.getUserSessions(ctx.user.id);
+    }),
+    logout: protectedProcedure.input(z.object({ sessionId: z.number() })).mutation(async ({ ctx, input }) => {
+      await db.deleteSession(input.sessionId);
+      await db.createAuditLog(ctx.user.id, "logout", "session", input.sessionId);
+      return { success: true };
+    }),
+  }),
+
+  audit: router({
+    getLogs: protectedProcedure.input(z.object({ userId: z.number().optional(), limit: z.number().default(100) })).query(async ({ ctx, input }) => {
+      const hasPermission = await db.hasPermission(ctx.user.id, "audit.view");
+      if (!hasPermission) throw new Error("Permission denied");
+      
+      return db.getAuditLogs(input.userId, input.limit);
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

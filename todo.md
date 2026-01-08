@@ -140,6 +140,7 @@
 
 ### Testes
 - [x] 69 testes unitários passando
+- [x] 93 testes unitários passando (incluindo 16 novos testes de RBAC e multi-login)
 
 ## Correção Urgente
 - [x] Corrigir sobreposição dos títulos das seções no menu lateral (FINANÇAS, FERRAMENTAS, ADMINISTRAÇÃO)
@@ -155,3 +156,19 @@
 - [x] Inserir @username no texto ao selecionar
 - [x] Destacar visualmente as menções no comentário
 - [x] Testes unitários para MentionInput
+
+## Multi-Login e Sistema de Permissões
+- [x] Atualizar schema com roles (admin, manager, user) e permissões
+- [x] Implementar endpoints tRPC para roles, permissões e sessões
+- [x] Criar painel de gestão avançada de usuários com atribuição de roles
+- [x] Implementar controle de acesso baseado em permissões (hasPermission)
+- [x] Adicionar auditoria de ações dos usuários (audit logs)
+- [x] Implementar sistema de sessões para multi-login
+- [x] Testes unitários para sistema de permissões (16 testes passando)
+- [x] Página AdvancedUserManagement com tabs para Usuários, Roles, Sessões e Auditoria
+- [x] Endpoints para gerenciar roles de usuários (assign/remove)
+- [x] Endpoints para visualizar e gerenciar sessões ativas
+- [x] Endpoints para visualizar logs de auditoria
+- [ ] Proteger rotas e funcionalidades por permissões (middleware em progresso)
+- [ ] Interface de multi-login no cliente (account switcher)
+- [ ] Testes de integração completos para RBAC
