@@ -147,3 +147,11 @@
 ## Correção CSS Menu Lateral
 - [x] Investigar por que os títulos das seções ainda sobrepõem os itens
 - [x] Corrigir CSS definitivamente usando SidebarGroup do shadcn/ui
+
+## Autocomplete @Menções
+- [x] Criar componente de autocomplete para @menções
+- [x] Detectar quando usuário digita @ no campo de comentário
+- [x] Mostrar dropdown com lista de usuários filtrada
+- [x] Inserir @username no texto ao selecionar
+- [x] Destacar visualmente as menções no comentário
+- [x] Testes unitários para MentionInput

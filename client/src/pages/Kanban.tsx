@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSocket, KanbanEvents } from "@/hooks/useSocket";
+import { MentionInput, renderMentions } from "@/components/MentionInput";
 
 const priorityColors: Record<string, string> = {
   low: "#10b981",
@@ -134,6 +135,41 @@ export default function Kanban() {
 
   const { data: users } = trpc.users.list.useQuery();
   const { data: contacts } = trpc.contacts.list.useQuery();
+  const { data: managedUsers } = trpc.managedUsers.list.useQuery();
+
+  // Prepare users list for mentions (combine users and managed users)
+  const mentionableUsers = useMemo(() => {
+    const allUsers: { id: number; username: string; firstName: string; lastName: string }[] = [];
+    
+    // Add managed users
+    if (managedUsers) {
+      managedUsers.forEach((u: any) => {
+        if (u.username) {
+          allUsers.push({
+            id: u.id,
+            username: u.username,
+            firstName: u.firstName || '',
+            lastName: u.lastName || ''
+          });
+        }
+      });
+    }
+    
+    // Add contacts as mentionable users
+    if (contacts) {
+      contacts.forEach((c: any) => {
+        const username = c.name.toLowerCase().replace(/\s+/g, '.');
+        allUsers.push({
+          id: c.id + 10000, // Offset to avoid ID collision
+          username: username,
+          firstName: c.name.split(' ')[0] || c.name,
+          lastName: c.name.split(' ').slice(1).join(' ') || ''
+        });
+      });
+    }
+    
+    return allUsers;
+  }, [managedUsers, contacts]);
 
   // Card details queries
   const { data: cardComments } = trpc.kanban.getCardComments.useQuery(
@@ -917,25 +953,29 @@ export default function Kanban() {
                   Comentários ({cardComments?.length || 0})
                 </Label>
 
-                <div className="flex gap-2">
-                  <Input
+                <div className="space-y-2">
+                  <MentionInput
                     value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Escreva um comentário..."
-                    className="bg-secondary border-border"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && newComment.trim()) {
+                    onChange={setNewComment}
+                    onSubmit={() => {
+                      if (newComment.trim()) {
                         addComment.mutate({ cardId: selectedCard.id, content: newComment });
                       }
                     }}
+                    placeholder="Escreva um comentário... Digite @ para mencionar"
+                    users={mentionableUsers}
+                    className="bg-secondary border-border"
                   />
-                  <Button
-                    size="icon"
-                    disabled={!newComment.trim() || addComment.isPending}
-                    onClick={() => addComment.mutate({ cardId: selectedCard.id, content: newComment })}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
+                  <div className="flex justify-end">
+                    <Button
+                      size="sm"
+                      disabled={!newComment.trim() || addComment.isPending}
+                      onClick={() => addComment.mutate({ cardId: selectedCard.id, content: newComment })}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Enviar
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -959,7 +999,7 @@ export default function Kanban() {
                           </Button>
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{comment.content}</p>
+                      <p className="text-sm text-muted-foreground">{renderMentions(comment.content)}</p>
                     </div>
                   ))}
                 </div>
