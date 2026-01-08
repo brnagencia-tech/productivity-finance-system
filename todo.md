@@ -438,3 +438,14 @@
 - [x] Atualizar Profile para usar apenas Team Auth
 - [x] Testar que todos os usuários vão para /team-login
 - [x] Todos os 124 testes passando
+
+
+## Bug Fix - Redirecionamento para /login-selection
+
+- [x] Investigar onde /login-selection está sendo referenciado
+- [x] Remover rota /login-selection do App.tsx
+- [x] Atualizar main.tsx para redirecionar para /team-login
+- [x] Implementar autenticação via header X-Team-User-Id no context.ts
+- [x] Atualizar cliente tRPC para enviar header de autenticação
+- [x] Criar testes para autenticação Team Login (5 testes)
+- [x] Todos os 129 testes passando

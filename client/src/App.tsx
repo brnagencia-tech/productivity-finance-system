@@ -23,13 +23,13 @@ import Notifications from "./pages/Notifications";
 import ManagedLogin from "./pages/ManagedLogin";
 import AdvancedUserManagement from "./pages/AdvancedUserManagement";
 import TeamLogin from "./pages/TeamLogin";
-import LoginSelection from "./pages/LoginSelection";
+// import LoginSelection from "./pages/LoginSelection"; // Removido
 import Profile from "./pages/Profile";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/login-selection"} component={LoginSelection} />
+      {/* Rota /login-selection removida - todos usam /team-login */}
       <Route path={"/team-login"} component={TeamLogin} />
       <Route path={"/login"} component={ManagedLogin} />
       <Route path={"/profile"} component={() => <PrivateRoute><Profile /></PrivateRoute>} />

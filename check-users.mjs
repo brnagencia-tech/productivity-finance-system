@@ -1,25 +1,11 @@
-import mysql from 'mysql2/promise';
+import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
 
-async function checkUsers() {
-  try {
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: 'root',
-      database: 'productivity_finance_system'
-    });
+const connection = await mysql.createConnection(process.env.DATABASE_URL);
+const db = drizzle(connection);
 
-    const [rows] = await connection.execute(
-      'SELECT id, email, firstName, lastName, isActive FROM managed_users LIMIT 10'
-    );
-    
-    console.log('Usuários Gerenciados:');
-    console.log(JSON.stringify(rows, null, 2));
-    
-    await connection.end();
-  } catch (error) {
-    console.error('Erro:', error.message);
-  }
-}
+const [rows] = await connection.execute("SELECT id, email, firstName, lastName, username, isActive FROM managed_users LIMIT 10");
+console.log("Usuários gerenciados:");
+console.log(JSON.stringify(rows, null, 2));
 
-checkUsers();
+await connection.end();

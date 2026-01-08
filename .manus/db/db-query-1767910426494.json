@@ -1,0 +1,90 @@
+{
+  "query": "SELECT id, email, firstName, lastName, username, isActive FROM managed_users LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, email, firstName, lastName, username, isActive FROM managed_users LIMIT 10;",
+  "rows": [
+    {
+      "id": "30007",
+      "email": "testuser2@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456",
+      "isActive": "1"
+    },
+    {
+      "id": "30019",
+      "email": "testuser2-1767906053210@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767906053210",
+      "isActive": "1"
+    },
+    {
+      "id": "30021",
+      "email": "emailtest-1767906053299@example.com",
+      "firstName": "Email",
+      "lastName": "Test",
+      "username": "emailtest-1767906053299",
+      "isActive": "1"
+    },
+    {
+      "id": "30023",
+      "email": "testuser2-1767906067259@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767906067259",
+      "isActive": "1"
+    },
+    {
+      "id": "30026",
+      "email": "karenkmaia@gmail.com",
+      "firstName": "Karen",
+      "lastName": "Maia",
+      "username": "kmaia",
+      "isActive": "1"
+    },
+    {
+      "id": "30028",
+      "email": "testuser2-1767906441553@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767906441553",
+      "isActive": "1"
+    },
+    {
+      "id": "60001",
+      "email": "bruno@agenciabrn.com.br",
+      "firstName": "Bruno",
+      "lastName": "Medeiros",
+      "username": "bruno",
+      "isActive": "1"
+    },
+    {
+      "id": "60003",
+      "email": "testuser2-1767908362792@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767908362792",
+      "isActive": "1"
+    },
+    {
+      "id": "60007",
+      "email": "testuser2-1767909026286@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767909026286",
+      "isActive": "1"
+    },
+    {
+      "id": "60011",
+      "email": "testuser2-1767909483956@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767909483956",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tfirstName\tlastName\tusername\tisActive\n30007\ttestuser2@example.com\tTest\tUser2\ttestuser456\t1\n30019\ttestuser2-1767906053210@example.com\tTest\tUser2\ttestuser456-1767906053210\t1\n30021\temailtest-1767906053299@example.com\tEmail\tTest\temailtest-1767906053299\t1\n30023\ttestuser2-1767906067259@example.com\tTest\tUser2\ttestuser456-1767906067259\t1\n30026\tkarenkmaia@gmail.com\tKaren\tMaia\tkmaia\t1\n30028\ttestuser2-1767906441553@example.com\tTest\tUser2\ttestuser456-1767906441553\t1\n60001\tbruno@agenciabrn.com.br\tBruno\tMedeiros\tbruno\t1\n60003\ttestuser2-1767908362792@example.com\tTest\tUser2\ttestuser456-1767908362792\t1\n60007\ttestuser2-1767909026286@example.com\tTest\tUser2\ttestuser456-1767909026286\t1\n60011\ttestuser2-1767909483956@example.com\tTest\tUser2\ttestuser456-1767909483956\t1\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

@@ -5,7 +5,7 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { getLoginUrl } from "./const";
+// import { getLoginUrl } from "./const"; // Removido - usando apenas Team Login
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -18,16 +18,8 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  // Verificar se o usuário está logado como membro da equipe
-  const teamUser = localStorage.getItem("teamUser");
-  if (teamUser) {
-    // Se é membro da equipe, redirecionar para seleção de login
-    window.location.href = "/login-selection";
-    return;
-  }
-
-  // Caso contrário, redirecionar para login OAuth do Manus
-  window.location.href = getLoginUrl();
+  // Redirecionar para login da equipe
+  window.location.href = "/team-login";
 };
 
 queryClient.getQueryCache().subscribe(event => {
@@ -51,6 +43,23 @@ const trpcClient = trpc.createClient({
     httpBatchLink({
       url: "/api/trpc",
       transformer: superjson,
+      headers() {
+        // Enviar header de autenticação Team Login se o usuário estiver logado
+        const teamUserStr = localStorage.getItem("teamUser");
+        if (teamUserStr) {
+          try {
+            const teamUser = JSON.parse(teamUserStr);
+            if (teamUser && teamUser.id) {
+              return {
+                "X-Team-User-Id": String(teamUser.id),
+              };
+            }
+          } catch (e) {
+            // Ignorar erro de parse
+          }
+        }
+        return {};
+      },
       fetch(input, init) {
         return globalThis.fetch(input, {
           ...(init ?? {}),
