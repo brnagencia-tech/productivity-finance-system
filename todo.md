@@ -399,3 +399,42 @@
 - [x] Atualizar PrivateRoute para aceitar ambos os tipos de autenticação
 - [x] Testar ambos os fluxos de autenticação
 - [x] Todos os 124 testes passando
+
+
+## Novas Funcionalidades - Fase 3
+
+### 1. Logout com Redirecionamento
+- [x] Adicionar botão de logout na sidebar
+- [x] Implementar lógica de logout para usuários da equipe (limpar localStorage)
+- [x] Redirecionar para /team-login após logout
+- [x] Testar logout
+
+### 2. Página de Perfil do Usuário
+- [x] Criar página /profile para visualização de dados
+- [x] Exibir dados do usuário (nome, email, telefone)
+- [x] Permitir edição de dados pessoais
+- [ ] Adicionar upload de foto de perfil (futuro)
+- [ ] Implementar salvamento de alterações no banco de dados (futuro)
+- [x] Adicionar link para perfil no dropdown da sidebar
+
+### 3. Filtros Funcionais do Dashboard
+- [x] Conectar botão "Hoje" para filtrar dados do dia atual
+- [x] Conectar botão "7 dias" para filtrar dados dos últimos 7 dias
+- [x] Conectar botão "30 dias" para filtrar dados dos últimos 30 dias
+- [x] Conectar botão "Ano" para filtrar dados do ano atual
+- [x] Atualizar todos os cards do dashboard com dados filtrados
+- [x] Atualizar gráficos com dados filtrados
+- [x] Indicador visual do filtro ativo (botão verde)
+- [x] Testar todos os filtros
+
+
+## Correção de Redirecionamento - Todos para Team Login
+
+- [x] Remover página de seleção de login (/login-selection)
+- [x] Atualizar PrivateRoute para redirecionar para /team-login
+- [x] Atualizar logout para redirecionar para /team-login
+- [x] Remover referências a OAuth Manus no fluxo de login
+- [x] Atualizar DashboardLayout para usar apenas Team Auth
+- [x] Atualizar Profile para usar apenas Team Auth
+- [x] Testar que todos os usuários vão para /team-login
+- [x] Todos os 124 testes passando

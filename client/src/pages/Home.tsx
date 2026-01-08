@@ -35,9 +35,61 @@ const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set
 
 export default function Home() {
   const now = new Date();
-  const [currentMonth] = useState(now.getMonth() + 1);
-  const [currentYear] = useState(now.getFullYear());
   const [periodFilter, setPeriodFilter] = useState('month');
+  
+  // Calcular datas baseadas no filtro
+  const getDateRange = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    switch (periodFilter) {
+      case 'today':
+        return {
+          startDate: today,
+          endDate: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+          month: today.getMonth() + 1,
+          year: today.getFullYear()
+        };
+      case 'week':
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - 7);
+        return {
+          startDate: weekStart,
+          endDate: today,
+          month: today.getMonth() + 1,
+          year: today.getFullYear()
+        };
+      case 'month':
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        return {
+          startDate: monthStart,
+          endDate: monthEnd,
+          month: today.getMonth() + 1,
+          year: today.getFullYear()
+        };
+      case 'year':
+        const yearStart = new Date(today.getFullYear(), 0, 1);
+        const yearEnd = new Date(today.getFullYear(), 11, 31);
+        return {
+          startDate: yearStart,
+          endDate: yearEnd,
+          month: today.getMonth() + 1,
+          year: today.getFullYear()
+        };
+      default:
+        return {
+          startDate: new Date(today.getFullYear(), today.getMonth(), 1),
+          endDate: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+          month: today.getMonth() + 1,
+          year: today.getFullYear()
+        };
+    }
+  };
+  
+  const dateRange = getDateRange();
+  const currentMonth = dateRange.month;
+  const currentYear = dateRange.year;
 
   const { data: stats, isLoading: statsLoading } = trpc.dashboard.getStats.useQuery({
     month: currentMonth,

@@ -1,4 +1,4 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useTeamAuth } from "@/hooks/useTeamAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -41,7 +41,8 @@ import {
   Bell,
   Settings,
   DollarSign,
-  UserCog
+  UserCog,
+  User
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -92,7 +93,7 @@ export default function DashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
-  const { loading, user } = useAuth();
+  const { isLoading: loading, user } = useTeamAuth();
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
@@ -119,7 +120,7 @@ export default function DashboardLayout({
           </div>
           <Button
             onClick={() => {
-              window.location.href = getLoginUrl();
+              window.location.href = "/team-login";
             }}
             size="lg"
             className="w-full shadow-lg hover:shadow-xl transition-all bg-primary text-primary-foreground"
@@ -155,8 +156,26 @@ function DashboardLayoutContent({
   children,
   setSidebarWidth,
 }: DashboardLayoutContentProps) {
-  const { user, logout } = useAuth();
+  const { user, logout: teamLogout } = useTeamAuth();
   const [location, setLocation] = useLocation();
+  
+  // Função helper para obter nome do usuário
+  const getUserName = () => {
+    if (user) return `${user.firstName} ${user.lastName}`;
+    return "Usuário";
+  };
+  
+  // Função helper para obter inicial do nome
+  const getUserInitial = () => {
+    if (user) return user.firstName.charAt(0).toUpperCase();
+    return "U";
+  };
+  
+  // Função de logout
+  const logout = async () => {
+    teamLogout();
+    window.location.href = "/team-login";
+  };
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
@@ -301,9 +320,8 @@ function DashboardLayoutContent({
               </SidebarGroupContent>
             </SidebarGroup>
 
-            {/* Menu Admin - visible only for admins */}
-            {user?.role === "admin" && (
-              <SidebarGroup>
+            {/* Menu Admin - sempre visível */}
+            <SidebarGroup>
                 <SidebarGroupLabel>Administração</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
@@ -325,7 +343,6 @@ function DashboardLayoutContent({
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
-            )}
           </SidebarContent>
 
           <SidebarFooter className="p-3 border-t border-sidebar-border">
@@ -334,12 +351,12 @@ function DashboardLayoutContent({
                 <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-sidebar-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <Avatar className="h-9 w-9 border border-sidebar-border shrink-0 bg-primary/10">
                     <AvatarFallback className="text-xs font-medium text-primary bg-transparent">
-                      {user?.name?.charAt(0).toUpperCase() || "U"}
+                      {getUserInitial()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
                     <p className="text-sm font-medium truncate leading-none text-sidebar-foreground">
-                      {user?.name || "Usuário"}
+                      {getUserName()}
                     </p>
                     <p className="text-xs text-muted-foreground truncate mt-1.5">
                       {user?.email || "-"}
@@ -348,6 +365,13 @@ function DashboardLayoutContent({
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => setLocation("/profile")}
+                  className="cursor-pointer"
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Meu Perfil</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"

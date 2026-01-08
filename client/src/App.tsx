@@ -24,6 +24,7 @@ import ManagedLogin from "./pages/ManagedLogin";
 import AdvancedUserManagement from "./pages/AdvancedUserManagement";
 import TeamLogin from "./pages/TeamLogin";
 import LoginSelection from "./pages/LoginSelection";
+import Profile from "./pages/Profile";
 
 function Router() {
   return (
@@ -31,6 +32,7 @@ function Router() {
       <Route path={"/login-selection"} component={LoginSelection} />
       <Route path={"/team-login"} component={TeamLogin} />
       <Route path={"/login"} component={ManagedLogin} />
+      <Route path={"/profile"} component={() => <PrivateRoute><Profile /></PrivateRoute>} />
       <Route path={"//"} component={() => <PrivateRoute><Home /></PrivateRoute>} />
       <Route path={"/tasks"} component={() => <PrivateRoute><Tasks /></PrivateRoute>} />
       <Route path={"/kanban"} component={() => <PrivateRoute><Kanban /></PrivateRoute>} />
