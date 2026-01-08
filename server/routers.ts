@@ -136,9 +136,15 @@ export const appRouter = router({
 
   kanban: router({
     listBoards: protectedProcedure.query(async ({ ctx }) => {
-      return db.getKanbanBoardsByUser(ctx.user.id);
+      // Retornar kanban do usuário + kanban compartilhados
+      const ownBoards = await db.getKanbanBoardsByUser(ctx.user.id);
+      const sharedBoards = await db.getSharedKanbanBoardsForUser(ctx.user.id);
+      return [...ownBoards, ...sharedBoards];
      }),
     getBoard: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
+      // Verificar permissão antes de retornar
+      const permission = await db.checkKanbanPermission(input.id, ctx.user.id);
+      if (!permission) throw new Error("Unauthorized");
       return db.getKanbanBoardWithDetails(input.id, ctx.user.id);
      }),
     createBoard: protectedProcedure.input(z.object({
@@ -206,7 +212,9 @@ export const appRouter = router({
       priority: z.enum(["low", "medium", "high"]).default("medium"),
       position: z.number(),
       labels: z.array(z.string()).optional()
-    })).mutation(async ({ input }) => {
+    })).mutation(async ({ ctx, input }) => {
+      const hasPermission = await db.hasKanbanPermission(input.boardId, ctx.user.id, "editor");
+      if (!hasPermission) throw new Error("Unauthorized");
       const result = await db.createKanbanCard({
         ...input,
         dueDate: input.dueDate ? new Date(input.dueDate) : undefined

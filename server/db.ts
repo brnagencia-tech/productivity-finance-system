@@ -1255,3 +1255,90 @@ export async function deleteExpiredSessions() {
 
   await db.delete(sessions).where(lt(sessions.expiresAt, new Date()));
 }
+
+
+// ==================== KANBAN PERMISSIONS ====================
+export async function getKanbanBoardMembers(boardId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: kanbanBoardMembers.id,
+    userId: kanbanBoardMembers.userId,
+    role: kanbanBoardMembers.role,
+    createdAt: kanbanBoardMembers.createdAt
+  }).from(kanbanBoardMembers).where(eq(kanbanBoardMembers.boardId, boardId));
+}
+
+export async function checkKanbanPermission(boardId: number, userId: number): Promise<"owner" | "editor" | "viewer" | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  // Verificar se o usuário é membro do board
+  const member = await db.select({
+    role: kanbanBoardMembers.role
+  }).from(kanbanBoardMembers).where(and(
+    eq(kanbanBoardMembers.boardId, boardId),
+    eq(kanbanBoardMembers.userId, userId)
+  )).limit(1);
+  
+  if (member.length > 0) {
+    return member[0].role;
+  }
+  
+  // Verificar se o usuário é o dono do board
+  const board = await db.select({
+    userId: kanbanBoards.userId
+  }).from(kanbanBoards).where(eq(kanbanBoards.id, boardId)).limit(1);
+  
+  if (board.length > 0 && board[0].userId === userId) {
+    return "owner";
+  }
+  
+  return null;
+}
+
+export async function hasKanbanPermission(boardId: number, userId: number, requiredRole: "owner" | "editor" | "viewer"): Promise<boolean> {
+  const permission = await checkKanbanPermission(boardId, userId);
+  if (!permission) return false;
+  
+  // owner > editor > viewer
+  const roleHierarchy = { owner: 3, editor: 2, viewer: 1 };
+  return roleHierarchy[permission] >= roleHierarchy[requiredRole];
+}
+
+export async function removeKanbanBoardMember(boardId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(kanbanBoardMembers).where(and(
+    eq(kanbanBoardMembers.boardId, boardId),
+    eq(kanbanBoardMembers.userId, userId)
+  ));
+}
+
+export async function updateKanbanBoardMemberRole(boardId: number, userId: number, role: "owner" | "editor" | "viewer") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(kanbanBoardMembers).set({ role }).where(and(
+    eq(kanbanBoardMembers.boardId, boardId),
+    eq(kanbanBoardMembers.userId, userId)
+  ));
+}
+
+export async function getSharedKanbanBoardsForUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Retornar kanban boards compartilhados com o usuário
+  return db.select({
+    id: kanbanBoards.id,
+    title: kanbanBoards.title,
+    description: kanbanBoards.description,
+    userId: kanbanBoards.userId,
+    visibility: kanbanBoards.visibility,
+    scope: kanbanBoards.scope,
+    role: kanbanBoardMembers.role
+  }).from(kanbanBoards)
+    .innerJoin(kanbanBoardMembers, eq(kanbanBoards.id, kanbanBoardMembers.boardId))
+    .where(eq(kanbanBoardMembers.userId, userId))
+    .orderBy(desc(kanbanBoards.createdAt));
+}

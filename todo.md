@@ -365,3 +365,16 @@
 - [x] Criar testes de isolamento de dados (11 testes passando)
 - [x] Validar que usuários não conseguem acessar dados de outros usuários
 - [x] Todos os 110 testes passando
+
+
+## Kanban Compartilhados (Fase 2)
+
+- [x] Adicionar tabela kanban_permissions no schema (já existia)
+- [x] Implementar funções de banco de dados para gerenciar permissões
+- [x] Atualizar endpoint getKanbanBoardsByUser para incluir kanban compartilhados
+- [x] Atualizar endpoint getKanbanBoardWithDetails para validar permissões
+- [x] Implementar lógica de verificação de permissões (owner, editor, viewer)
+- [x] Criar testes de Kanban compartilhados (14 testes passando)
+- [x] Validar que usuários com permissão podem acessar kanban compartilhados
+- [x] Validar que usuários sem permissão não conseguem acessar
+- [x] Todos os 124 testes passando
