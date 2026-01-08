@@ -1,4 +1,5 @@
 import { useTeamAuth } from "@/hooks/useTeamAuth";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
@@ -7,12 +8,16 @@ interface PrivateRouteProps {
 }
 
 export function PrivateRoute({ children }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading } = useTeamAuth();
+  const { isAuthenticated: isTeamAuthenticated, isLoading: teamLoading } = useTeamAuth();
+  const { isAuthenticated: isOAuthAuthenticated, loading: oauthLoading } = useAuth();
   const [, setLocation] = useLocation();
+
+  const isLoading = teamLoading || oauthLoading;
+  const isAuthenticated = isTeamAuthenticated || isOAuthAuthenticated;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      setLocation("/team-login");
+      setLocation("/login-selection");
     }
   }, [isAuthenticated, isLoading, setLocation]);
 

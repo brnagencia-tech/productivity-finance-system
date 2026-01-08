@@ -19,8 +19,9 @@ export default function TeamLogin() {
       localStorage.setItem("teamUser", JSON.stringify(data));
       localStorage.setItem("teamUserToken", data.id.toString());
       
-      // Redirecionar para dashboard
-      setLocation("/");
+      // Redirecionar para home (dashboard)
+      // Usar window.location para garantir que o localStorage seja lido corretamente
+      window.location.href = "/";
     },
     onError: (error) => {
       setError(error.message || "Falha ao fazer login. Verifique suas credenciais.");

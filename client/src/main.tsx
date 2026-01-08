@@ -18,6 +18,15 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
+  // Verificar se o usuário está logado como membro da equipe
+  const teamUser = localStorage.getItem("teamUser");
+  if (teamUser) {
+    // Se é membro da equipe, redirecionar para seleção de login
+    window.location.href = "/login-selection";
+    return;
+  }
+
+  // Caso contrário, redirecionar para login OAuth do Manus
   window.location.href = getLoginUrl();
 };
 

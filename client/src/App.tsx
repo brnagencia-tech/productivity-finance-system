@@ -23,10 +23,12 @@ import Notifications from "./pages/Notifications";
 import ManagedLogin from "./pages/ManagedLogin";
 import AdvancedUserManagement from "./pages/AdvancedUserManagement";
 import TeamLogin from "./pages/TeamLogin";
+import LoginSelection from "./pages/LoginSelection";
 
 function Router() {
   return (
     <Switch>
+      <Route path={"/login-selection"} component={LoginSelection} />
       <Route path={"/team-login"} component={TeamLogin} />
       <Route path={"/login"} component={ManagedLogin} />
       <Route path={"//"} component={() => <PrivateRoute><Home /></PrivateRoute>} />

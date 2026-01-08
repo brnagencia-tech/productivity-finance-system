@@ -389,3 +389,13 @@
 - [x] Implementar logout corretamente
 - [x] Proteger todas as rotas com PrivateRoute
 - [x] Todos os 124 testes passando
+
+## Correção de Fluxo de Autenticação Dual
+
+- [x] Criar página de seleção de login (Manus OAuth vs Team Login)
+- [x] Corrigir redirecionamento após Team Login para não ir para OAuth
+- [x] Garantir Bruno (bruno@agenciabrn.com.br) usa OAuth Manus
+- [x] Garantir demais usuários usam Team Login em /team-login
+- [x] Atualizar PrivateRoute para aceitar ambos os tipos de autenticação
+- [x] Testar ambos os fluxos de autenticação
+- [x] Todos os 124 testes passando
