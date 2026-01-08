@@ -2,6 +2,7 @@ import type { CreateExpressContextOptions } from "@trpc/server/adapters/express"
 import type { User, ManagedUser } from "../../drizzle/schema";
 import { sdk } from "./sdk";
 import * as db from "../db";
+import jwt from "jsonwebtoken";
 
 // Tipo unificado para usuário autenticado (OAuth ou Team)
 export type AuthenticatedUser = {
@@ -33,11 +34,20 @@ export async function createContext(
 ): Promise<TrpcContext> {
   let user: AuthenticatedUser | null = null;
 
-  // Primeiro, tentar autenticação via Team Login (header X-Team-User-Id)
-  const teamUserId = opts.req.headers["x-team-user-id"];
-  if (teamUserId && typeof teamUserId === "string") {
+  // Primeiro, tentar autenticação via Team Login (header Authorization com JWT)
+  const authHeader = opts.req.headers["authorization"];
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.substring(7); // Remover "Bearer "
     try {
-      const teamUser = await db.getManagedUserById(parseInt(teamUserId, 10));
+      // Verificar e decodificar JWT
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as {
+        userId: number;
+        email: string;
+        username: string;
+      };
+      
+      // Buscar usuário no banco
+      const teamUser = await db.getManagedUserById(decoded.userId);
       if (teamUser && teamUser.isActive) {
         // Converter ManagedUser para formato compatível com User
         user = {
@@ -58,7 +68,7 @@ export async function createContext(
         };
       }
     } catch (error) {
-      // Falha na autenticação Team Login
+      // Token inválido ou expirado
       user = null;
     }
   }

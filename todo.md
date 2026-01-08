@@ -449,3 +449,16 @@
 - [x] Atualizar cliente tRPC para enviar header de autenticação
 - [x] Criar testes para autenticação Team Login (5 testes)
 - [x] Todos os 129 testes passando
+
+
+## Correção de Senha e Segurança JWT
+
+- [x] Verificar usuário bruno@agenciabrn.com.br no banco
+- [x] Corrigir senha do usuário Bruno (V9!mQ#72zL@xP3^fR6%N)
+- [x] Instalar jsonwebtoken e @types/jsonwebtoken
+- [x] Implementar geração de JWT no login (7 dias de validade)
+- [x] Implementar validação de JWT no context.ts (header Authorization)
+- [x] Atualizar TeamLogin.tsx para salvar token JWT
+- [x] Atualizar main.tsx para enviar JWT no header Authorization
+- [x] Atualizar useTeamAuth para limpar token no logout
+- [x] Todos os 129 testes passando

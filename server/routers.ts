@@ -8,6 +8,7 @@ import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyIn
 import { emitToBoardRoom, KanbanEvents } from "./_core/socket";
 import { collectLLMContextData, formatContextForLLM } from "./llmContext";
 import { invokeLLM } from "./_core/llm";
+import jwt from "jsonwebtoken";
 
 export const appRouter = router({
   system: systemRouter,
@@ -29,13 +30,26 @@ export const appRouter = router({
       const passwordHash = Buffer.from(input.password).toString('base64');
       if (user.passwordHash !== passwordHash) throw new Error('Invalid credentials');
       await db.updateManagedUser(user.id, user.createdByUserId, { lastLogin: new Date() });
+      
+      // Gerar JWT token
+      const token = jwt.sign(
+        {
+          userId: user.id,
+          email: user.email,
+          username: user.username,
+        },
+        process.env.JWT_SECRET || 'fallback-secret',
+        { expiresIn: '7d' } // Token válido por 7 dias
+      );
+      
       return {
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         username: user.username,
-        isActive: user.isActive
+        isActive: user.isActive,
+        token, // Retornar token JWT
       };
      }),
   }),

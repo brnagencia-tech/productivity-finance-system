@@ -44,19 +44,12 @@ const trpcClient = trpc.createClient({
       url: "/api/trpc",
       transformer: superjson,
       headers() {
-        // Enviar header de autenticação Team Login se o usuário estiver logado
-        const teamUserStr = localStorage.getItem("teamUser");
-        if (teamUserStr) {
-          try {
-            const teamUser = JSON.parse(teamUserStr);
-            if (teamUser && teamUser.id) {
-              return {
-                "X-Team-User-Id": String(teamUser.id),
-              };
-            }
-          } catch (e) {
-            // Ignorar erro de parse
-          }
+        // Enviar JWT token no header Authorization se o usuário estiver logado
+        const teamToken = localStorage.getItem("teamToken");
+        if (teamToken) {
+          return {
+            "Authorization": `Bearer ${teamToken}`,
+          };
         }
         return {};
       },

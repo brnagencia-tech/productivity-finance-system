@@ -15,9 +15,9 @@ export default function TeamLogin() {
 
   const teamLoginMutation = trpc.auth.teamLogin.useMutation({
     onSuccess: (data) => {
-      // Armazenar dados do usuário em localStorage
+      // Armazenar token JWT e dados do usuário em localStorage
+      localStorage.setItem("teamToken", data.token);
       localStorage.setItem("teamUser", JSON.stringify(data));
-      localStorage.setItem("teamUserToken", data.id.toString());
       
       // Redirecionar para home (dashboard)
       // Usar window.location para garantir que o localStorage seja lido corretamente

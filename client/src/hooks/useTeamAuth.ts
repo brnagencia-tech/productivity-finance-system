@@ -22,7 +22,7 @@ export function useTeamAuth() {
       } catch (error) {
         console.error("Erro ao parsear usuário armazenado:", error);
         localStorage.removeItem("teamUser");
-        localStorage.removeItem("teamUserToken");
+        localStorage.removeItem("teamToken");
       }
     }
     setIsLoading(false);
@@ -30,7 +30,7 @@ export function useTeamAuth() {
 
   const logout = () => {
     localStorage.removeItem("teamUser");
-    localStorage.removeItem("teamUserToken");
+    localStorage.removeItem("teamToken");
     setUser(null);
   };
 

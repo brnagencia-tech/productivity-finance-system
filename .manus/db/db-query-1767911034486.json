@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, email, firstName, lastName, username, isActive, passwordHash FROM managed_users WHERE email = 'bruno@agenciabrn.com.br';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, email, firstName, lastName, username, isActive, passwordHash FROM managed_users WHERE email = 'bruno@agenciabrn.com.br';",
+  "rows": [
+    {
+      "id": "60001",
+      "email": "bruno@agenciabrn.com.br",
+      "firstName": "Bruno",
+      "lastName": "Medeiros",
+      "username": "bruno",
+      "isActive": "1",
+      "passwordHash": "$2b$10$XHaXol.wGmna9BSRu2yypukA6iQ29i4Ngc7W1wfy8YgKBWBkW9tTm"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tfirstName\tlastName\tusername\tisActive\tpasswordHash\n60001\tbruno@agenciabrn.com.br\tBruno\tMedeiros\tbruno\t1\t$2b$10$XHaXol.wGmna9BSRu2yypukA6iQ29i4Ngc7W1wfy8YgKBWBkW9tTm\n",
+  "stderr": "",
+  "execution_time_ms": 123
+}
