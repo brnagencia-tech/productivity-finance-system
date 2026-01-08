@@ -431,3 +431,44 @@ export const sessions = mysqlTable("sessions", {
 
 export type Session = typeof sessions.$inferSelect;
 export type InsertSession = typeof sessions.$inferInsert;
+
+
+// ==================== TRACKER ITEMS (Tarefas + Hábitos Unificados) ====================
+export const trackerItems = mysqlTable("tracker_items", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  categoryId: int("categoryId"),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  type: mysqlEnum("type", ["task", "habit"]).notNull(), // apenas para organização/labels
+  group: mysqlEnum("group", ["personal", "professional", "health"]).default("personal").notNull(),
+  targetPeriod: mysqlEnum("targetPeriod", ["daily", "weekly", "monthly"]).default("daily").notNull(),
+  targetValue: decimal("targetValue", { precision: 10, scale: 2 }).default("1").notNull(), // ex: 8 (para água 8x/dia)
+  unit: varchar("unit", { length: 50 }).default("check").notNull(), // check, liters, ml, times, etc
+  activeDays: varchar("activeDays", { length: 50 }), // "1,2,3,4,5" para seg-sex, ou null para todos
+  timeWindowStart: varchar("timeWindowStart", { length: 5 }), // "09:00" (HH:MM)
+  timeWindowEnd: varchar("timeWindowEnd", { length: 5 }), // "18:00" (HH:MM)
+  icon: varchar("icon", { length: 50 }),
+  color: varchar("color", { length: 20 }),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TrackerItem = typeof trackerItems.$inferSelect;
+export type InsertTrackerItem = typeof trackerItems.$inferInsert;
+
+// ==================== TRACKER CHECK-INS (Marcações) ====================
+export const trackerCheckins = mysqlTable("tracker_checkins", {
+  id: int("id").autoincrement().primaryKey(),
+  trackerItemId: int("trackerItemId").notNull(),
+  userId: int("userId").notNull(),
+  checkedAt: timestamp("checkedAt").notNull(), // timestamp real da marcação
+  value: decimal("value", { precision: 10, scale: 2 }).default("1").notNull(), // 1 para check, 250 para ml, etc
+  status: mysqlEnum("status", ["done", "skipped"]).default("done").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TrackerCheckin = typeof trackerCheckins.$inferSelect;
+export type InsertTrackerCheckin = typeof trackerCheckins.$inferInsert;

@@ -37,6 +37,7 @@ export default function Home() {
   const now = new Date();
   const [currentMonth] = useState(now.getMonth() + 1);
   const [currentYear] = useState(now.getFullYear());
+  const [periodFilter, setPeriodFilter] = useState('month');
 
   const { data: stats, isLoading: statsLoading } = trpc.dashboard.getStats.useQuery({
     month: currentMonth,
@@ -125,12 +126,31 @@ export default function Home() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Visão geral das suas tarefas, finanças e hábitos
-          </p>
+        {/* Header com Filtros */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Visão geral das suas tarefas, finanças e hábitos
+            </p>
+          </div>
+          
+          {/* Filtros de Período */}
+          <div className="flex gap-2 flex-wrap">
+            {['Hoje', '7 dias', '30 dias', 'Ano'].map((label, idx) => (
+              <button
+                key={idx}
+                onClick={() => setPeriodFilter(['today', 'week', 'month', 'year'][idx])}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  periodFilter === ['today', 'week', 'month', 'year'][idx]
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -411,6 +431,105 @@ export default function Home() {
             )}
           </CardContent>
         </Card>
+
+        {/* Novos Cards Informativos */}
+        <div className="grid gap-4 md:grid-cols-2">
+          {/* Card de Alertas */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">Alertas</CardTitle>
+              <CardDescription>Notificações importantes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {(profitLoss?.profit || 0) < 0 && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <TrendingDown className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">Prejuízo no mês</p>
+                      <p className="text-xs text-muted-foreground mt-1">Suas despesas estão maiores que receitas</p>
+                    </div>
+                  </div>
+                )}
+                {stats?.tasksToday?.total === 0 && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                    <CheckCircle2 className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">Sem tarefas</p>
+                      <p className="text-xs text-muted-foreground mt-1">Crie tarefas para hoje</p>
+                    </div>
+                  </div>
+                )}
+                {stats?.habitsToday?.total === 0 && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <Target className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">Sem hábitos</p>
+                      <p className="text-xs text-muted-foreground mt-1">Crie hábitos para acompanhar</p>
+                    </div>
+                  </div>
+                )}
+                {(profitLoss?.profit || 0) >= 0 && stats?.tasksToday && stats.habitsToday && (
+                  <div className="text-center py-6 text-muted-foreground">
+                    <CheckCircle2 className="h-12 w-12 mx-auto mb-2 text-green-500 opacity-50" />
+                    <p className="text-sm">Tudo em dia!</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card de Score do Dia */}
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="text-foreground">Produtividade</CardTitle>
+              <CardDescription>Score do dia</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-muted-foreground mb-2">Progresso geral</p>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-foreground">Tarefas</span>
+                        <span className="text-muted-foreground">{stats?.tasksToday?.completed || 0}/{stats?.tasksToday?.total || 0}</span>
+                      </div>
+                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-blue-500 transition-all"
+                          style={{ width: `${stats?.tasksToday?.total ? (stats.tasksToday.completed / stats.tasksToday.total) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-foreground">Hábitos</span>
+                        <span className="text-muted-foreground">{stats?.habitsToday?.completed || 0}/{stats?.habitsToday?.total || 0}</span>
+                      </div>
+                      <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-green-500 transition-all"
+                          style={{ width: `${stats?.habitsToday?.total ? (stats.habitsToday.completed / stats.habitsToday.total) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="ml-6 text-center">
+                  <div className="text-4xl font-bold text-primary">
+                    {Math.round(
+                      ((stats?.tasksToday?.completed || 0) + (stats?.habitsToday?.completed || 0)) /
+                      ((stats?.tasksToday?.total || 1) + (stats?.habitsToday?.total || 1)) * 100
+                    )}
+                    <span className="text-lg">%</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Hoje</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );

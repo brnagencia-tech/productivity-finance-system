@@ -227,3 +227,32 @@
 - Apenas reorganizar ordem no menu
 - Manter todas as funcionalidades existentes
 - Foco em corrigir cálculos e adicionar visualizações
+
+## Melhoria do Dashboard
+
+### Fase 1: Análise e Planejamento
+- [x] Analisar layout atual do Dashboard
+- [x] Identificar oportunidades de melhoria visual
+- [x] Planejar novos cards informativos
+
+### Fase 2: Redesenho de Layout
+- [x] Reorganizar grid do Dashboard para layout responsivo
+- [x] Melhorar espaçamento e alinhamento
+- [x] Adicionar header com filtros (Hoje | 7 dias | 30 dias | Ano)
+
+### Fase 3: Novos Cards
+- [x] Card de Tarefas do Dia (0/1 - 0% concluídas)
+- [x] Card de Hábitos do Dia (1/1 - 100% completados)
+- [x] Card de Alertas (Prejuízo, Sem tarefas, Sem hábitos)
+- [x] Card de Produtividade (score do dia com progresso)
+
+### Fase 4: Visual e Tipografia
+- [ ] Melhorar cores e contraste dos cards
+- [ ] Padronizar tipografia
+- [ ] Adicionar ícones mais expressivos
+- [ ] Melhorar estados vazios
+
+### Fase 5: Testes
+- [ ] Testar responsividade em mobile
+- [ ] Testar em diferentes navegadores
+- [ ] Validar performance

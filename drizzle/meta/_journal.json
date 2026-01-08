@@ -43,6 +43,13 @@
       "when": 1767902454114,
       "tag": "0005_hard_rictor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1767903772503,
+      "tag": "0006_past_hannibal_king",
+      "breakpoints": true
     }
   ]
 }
