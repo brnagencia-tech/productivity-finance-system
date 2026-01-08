@@ -378,3 +378,14 @@
 - [x] Validar que usuários com permissão podem acessar kanban compartilhados
 - [x] Validar que usuários sem permissão não conseguem acessar
 - [x] Todos os 124 testes passando
+
+
+## Correção de Autenticação de Usuários Gerenciados
+
+- [x] Criar usuário master Bruno (bruno@agenciabrn.com.br) - ID: 60001
+- [x] Corrigir fluxo de autenticação (login -> dashboard -> não volta para login)
+- [x] Garantir persistência de token após login (localStorage)
+- [x] Testar que cada usuário vê apenas seus dados
+- [x] Implementar logout corretamente
+- [x] Proteger todas as rotas com PrivateRoute
+- [x] Todos os 124 testes passando

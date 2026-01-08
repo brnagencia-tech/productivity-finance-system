@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { PrivateRoute } from "./components/PrivateRoute";
 import Home from "./pages/Home";
 import Tasks from "./pages/Tasks";
 import Kanban from "./pages/Kanban";
@@ -26,25 +27,25 @@ import TeamLogin from "./pages/TeamLogin";
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/tasks"} component={Tasks} />
-      <Route path={"/kanban"} component={Kanban} />
-      <Route path={"/expenses/variable"} component={VariableExpenses} />
-      <Route path={"/expenses/fixed"} component={FixedExpenses} />
-      <Route path={"/expenses/annual"} component={AnnualExpenses} />
-      <Route path={"/habits"} component={Habits} />
-      <Route path={"/categories"} component={Categories} />
-      <Route path={"/contacts"} component={Contacts} />
-      <Route path={"/insights"} component={Insights} />
-      <Route path={"/ai-insights"} component={AIInsights} />
-      <Route path={"/admin/users"} component={AdminUsers} />
-      <Route path={"/admin/users/advanced"} component={AdvancedUserManagement} />
-      <Route path={"/settings"} component={Settings} />
-      <Route path={"/revenue"} component={Revenue} />
-      <Route path={"/notifications"} component={Notifications} />
-      <Route path={"/admin/advanced"} component={AdvancedUserManagement} />
-      <Route path={"/login"} component={ManagedLogin} />
       <Route path={"/team-login"} component={TeamLogin} />
+      <Route path={"/login"} component={ManagedLogin} />
+      <Route path={"//"} component={() => <PrivateRoute><Home /></PrivateRoute>} />
+      <Route path={"/tasks"} component={() => <PrivateRoute><Tasks /></PrivateRoute>} />
+      <Route path={"/kanban"} component={() => <PrivateRoute><Kanban /></PrivateRoute>} />
+      <Route path={"/expenses/variable"} component={() => <PrivateRoute><VariableExpenses /></PrivateRoute>} />
+      <Route path={"/expenses/fixed"} component={() => <PrivateRoute><FixedExpenses /></PrivateRoute>} />
+      <Route path={"/expenses/annual"} component={() => <PrivateRoute><AnnualExpenses /></PrivateRoute>} />
+      <Route path={"/habits"} component={() => <PrivateRoute><Habits /></PrivateRoute>} />
+      <Route path={"/categories"} component={() => <PrivateRoute><Categories /></PrivateRoute>} />
+      <Route path={"/contacts"} component={() => <PrivateRoute><Contacts /></PrivateRoute>} />
+      <Route path={"/insights"} component={() => <PrivateRoute><Insights /></PrivateRoute>} />
+      <Route path={"/ai-insights"} component={() => <PrivateRoute><AIInsights /></PrivateRoute>} />
+      <Route path={"/admin/users"} component={() => <PrivateRoute><AdminUsers /></PrivateRoute>} />
+      <Route path={"/admin/users/advanced"} component={() => <PrivateRoute><AdvancedUserManagement /></PrivateRoute>} />
+      <Route path={"/settings"} component={() => <PrivateRoute><Settings /></PrivateRoute>} />
+      <Route path={"/revenue"} component={() => <PrivateRoute><Revenue /></PrivateRoute>} />
+      <Route path={"/notifications"} component={() => <PrivateRoute><Notifications /></PrivateRoute>} />
+      <Route path={"/admin/advanced"} component={() => <PrivateRoute><AdvancedUserManagement /></PrivateRoute>} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
