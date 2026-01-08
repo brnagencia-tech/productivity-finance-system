@@ -224,6 +224,36 @@ export async function addKanbanBoardMembers(boardId: number, userIds: number[]) 
   }
 }
 
+export async function getKanbanBoardMembers(boardId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: kanbanBoardMembers.id,
+    userId: kanbanBoardMembers.userId,
+    role: kanbanBoardMembers.role,
+    firstName: managedUsers.firstName,
+    lastName: managedUsers.lastName,
+    email: managedUsers.email,
+    username: managedUsers.username
+  })
+    .from(kanbanBoardMembers)
+    .leftJoin(managedUsers, eq(kanbanBoardMembers.userId, managedUsers.id))
+    .where(eq(kanbanBoardMembers.boardId, boardId));
+}
+
+export async function addKanbanBoardMember(boardId: number, userId: number, role: "owner" | "editor" | "viewer") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(kanbanBoardMembers).values({ boardId, userId, role });
+}
+
+export async function removeKanbanBoardMember(boardId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(kanbanBoardMembers)
+    .where(and(eq(kanbanBoardMembers.boardId, boardId), eq(kanbanBoardMembers.userId, userId)));
+}
+
 export async function getKanbanBoardsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
@@ -314,12 +344,6 @@ export async function deleteKanbanCard(id: number) {
   if (!db) throw new Error("Database not available");
   await db.delete(kanbanCardComments).where(eq(kanbanCardComments.cardId, id));
   await db.delete(kanbanCards).where(eq(kanbanCards.id, id));
-}
-
-export async function addKanbanBoardMember(boardId: number, userId: number, role: "owner" | "editor" | "viewer" = "viewer") {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  await db.insert(kanbanBoardMembers).values({ boardId, userId, role });
 }
 
 export async function createKanbanCardComment(data: InsertKanbanCardComment) {
@@ -1298,17 +1322,6 @@ export async function deleteExpiredSessions() {
 
 
 // ==================== KANBAN PERMISSIONS ====================
-export async function getKanbanBoardMembers(boardId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db.select({
-    id: kanbanBoardMembers.id,
-    userId: kanbanBoardMembers.userId,
-    role: kanbanBoardMembers.role,
-    createdAt: kanbanBoardMembers.createdAt
-  }).from(kanbanBoardMembers).where(eq(kanbanBoardMembers.boardId, boardId));
-}
-
 export async function checkKanbanPermission(boardId: number, userId: number): Promise<"owner" | "editor" | "viewer" | null> {
   const db = await getDb();
   if (!db) return null;
@@ -1344,15 +1357,6 @@ export async function hasKanbanPermission(boardId: number, userId: number, requi
   // owner > editor > viewer
   const roleHierarchy = { owner: 3, editor: 2, viewer: 1 };
   return roleHierarchy[permission] >= roleHierarchy[requiredRole];
-}
-
-export async function removeKanbanBoardMember(boardId: number, userId: number) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  await db.delete(kanbanBoardMembers).where(and(
-    eq(kanbanBoardMembers.boardId, boardId),
-    eq(kanbanBoardMembers.userId, userId)
-  ));
 }
 
 export async function updateKanbanBoardMemberRole(boardId: number, userId: number, role: "owner" | "editor" | "viewer") {

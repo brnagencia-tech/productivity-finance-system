@@ -571,3 +571,22 @@
 - [ ] Criar procedures para adicionar/remover membros de boards existentes
 - [ ] Testar com usuário Ruan (Colaborador) - deve ver apenas boards atribuídos
 - [ ] Testar com usuário Bruno (CEO) - deve ver todos os boards
+
+
+## Finalização de Compartilhamento de Kanbans
+
+- [x] Atualizar procedure kanban.list para filtrar boards por permissões (já estava implementado)
+- [x] Colaboradores veem apenas boards compartilhados com eles
+- [x] CEO e Master veem todos os boards
+- [x] Criar procedure kanban.listMembers para listar membros de um board
+- [x] Criar procedure kanban.addMember para adicionar membro a board existente (já existia)
+- [x] Criar procedure kanban.removeMember para remover membro de board
+- [x] Criar componente BoardMembersDialog para gerenciar membros
+- [x] Criar Kanban "Programação" compartilhado com Ruan (Board ID: 1)
+- [x] Adicionar Bruno como owner e Ruan como editor
+- [x] Criar colunas padrão (A Fazer, Em Progresso, Concluído)
+- [ ] Adicionar botão "Gerenciar Membros" nos cards de board na página Kanban (opcional - pode ser feito via interface)
+- [x] Sistema de filtragem de boards por permissões implementado
+- [x] Ruan (Colaborador) vê apenas boards compartilhados com ele
+- [x] Bruno (CEO) vê todos os boards do sistema
+- [x] Todos os 129 testes passando

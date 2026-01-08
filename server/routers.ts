@@ -203,6 +203,18 @@ export const appRouter = router({
       await db.addKanbanBoardMember(input.boardId, input.userId, input.role);
       return { success: true };
      }),
+    listMembers: protectedProcedure.input(z.object({
+      boardId: z.number()
+    })).query(async ({ input }) => {
+      return db.getKanbanBoardMembers(input.boardId);
+     }),
+    removeMember: protectedProcedure.input(z.object({
+      boardId: z.number(),
+      userId: z.number()
+    })).mutation(async ({ input }) => {
+      await db.removeKanbanBoardMember(input.boardId, input.userId);
+      return { success: true };
+     }),
     createColumn: protectedProcedure.input(z.object({
       boardId: z.number(),
       title: z.string().min(1),

@@ -1,0 +1,14 @@
+{
+  "query": "SELECT id, title FROM kanban_boards WHERE title = 'Programação' ORDER BY id DESC LIMIT 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, title FROM kanban_boards WHERE title = 'Programação' ORDER BY id DESC LIMIT 1",
+  "rows": [
+    {
+      "id": "60038",
+      "title": "Programação"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\n60038\tProgramação\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO kanban_columns (boardId, title, position, color, createdAt, updatedAt) VALUES (1, 'A Fazer', 0, '#94a3b8', NOW(), NOW()), (1, 'Em Progresso', 1, '#3b82f6', NOW(), NOW()), (1, 'Concluído', 2, '#10b981', NOW(), NOW())",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute INSERT INTO kanban_columns (boardId, title, position, color, createdAt, updatedAt) VALUES (1, 'A Fazer', 0, '#94a3b8', NOW(), NOW()), (1, 'Em Progresso', 1, '#3b82f6', NOW(), NOW()), (1, 'Concluído', 2, '#10b981', NOW(), NOW())",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'updatedAt' in 'field list'"
+  ]
+}
