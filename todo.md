@@ -140,3 +140,6 @@
 
 ### Testes
 - [x] 69 testes unitários passando
+
+## Correção Urgente
+- [x] Corrigir sobreposição dos títulos das seções no menu lateral (FINANÇAS, FERRAMENTAS, ADMINISTRAÇÃO)

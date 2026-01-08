@@ -250,9 +250,11 @@ function DashboardLayoutContent({
             </SidebarMenu>
 
             {/* Menu Finanças */}
-            <div className="px-4 py-2 mt-4">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Finanças</span>
-            </div>
+            {!isCollapsed && (
+              <div className="px-4 py-2 mt-4">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Finanças</span>
+              </div>
+            )}
             <SidebarMenu className="px-2 py-1 space-y-1">
               {financeMenuItems.map(item => {
                 const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
@@ -275,9 +277,11 @@ function DashboardLayoutContent({
             </SidebarMenu>
 
             {/* Menu Ferramentas */}
-            <div className="px-4 py-2 mt-4">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ferramentas</span>
-            </div>
+            {!isCollapsed && (
+              <div className="px-4 py-2 mt-4">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ferramentas</span>
+              </div>
+            )}
             <SidebarMenu className="px-2 py-1 space-y-1">
               {toolsMenuItems.map(item => {
                 const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
@@ -302,9 +306,11 @@ function DashboardLayoutContent({
             {/* Menu Admin - visible only for admins */}
             {user?.role === "admin" && (
               <>
-                <div className="px-4 py-2 mt-4">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Administração</span>
-                </div>
+                {!isCollapsed && (
+                  <div className="px-4 py-2 mt-4">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Administração</span>
+                  </div>
+                )}
                 <SidebarMenu className="px-2 py-1 space-y-1">
                   {adminMenuItems.map(item => {
                     const isActive = location === item.path || (item.path !== "/" && location.startsWith(item.path));
