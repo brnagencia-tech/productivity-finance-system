@@ -76,6 +76,7 @@ const toolsMenuItems = [
 // Menu Admin
 const adminMenuItems = [
   { icon: UserCog, label: "Usuários", path: "/admin/users" },
+  { icon: Users, label: "Gerenciar Usuários", path: "/admin/user-management" },
   { icon: Settings, label: "Configurações", path: "/settings" },
 ];
 

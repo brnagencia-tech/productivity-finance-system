@@ -635,7 +635,8 @@ export const appRouter = router({
       phoneBR: z.string().optional(),
       phoneUS: z.string().optional(),
       password: z.string().min(8),
-      username: z.string().min(3).max(30).regex(/^[a-z0-9_]+$/, 'Username deve conter apenas letras minúsculas, números e underscore')
+      username: z.string().min(3).max(30).regex(/^[a-z0-9_]+$/, 'Username deve conter apenas letras minúsculas, números e underscore'),
+      role: z.enum(['ceo', 'master', 'colaborador']).default('colaborador')
     })).mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
       // Simple hash for demo - in production use bcrypt
@@ -648,6 +649,7 @@ export const appRouter = router({
         email: input.email,
         phoneBR: input.phoneBR || null,
         phoneUS: input.phoneUS || null,
+        role: input.role,
         passwordHash
       });
      }),
@@ -655,13 +657,21 @@ export const appRouter = router({
       id: z.number(),
       firstName: z.string().min(1).optional(),
       lastName: z.string().min(1).optional(),
+      email: z.string().email().optional(),
+      username: z.string().min(3).max(30).optional(),
       phoneBR: z.string().optional(),
       phoneUS: z.string().optional(),
+      role: z.enum(['ceo', 'master', 'colaborador']).optional(),
+      password: z.string().min(8).optional(),
       isActive: z.boolean().optional()
     })).mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
-      const { id, ...data } = input;
-      await db.updateManagedUser(id, ctx.user.id, data);
+      const { id, password, ...data } = input;
+      const updateData: any = { ...data };
+      if (password) {
+        updateData.passwordHash = Buffer.from(password).toString('base64');
+      }
+      await db.updateManagedUser(id, ctx.user.id, updateData);
       return { success: true };
      }),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {

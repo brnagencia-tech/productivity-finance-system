@@ -721,6 +721,7 @@ export async function getManagedUsersByAdmin(adminUserId: number) {
     email: managedUsers.email,
     phoneBR: managedUsers.phoneBR,
     phoneUS: managedUsers.phoneUS,
+    role: managedUsers.role,
     isActive: managedUsers.isActive,
     lastLogin: managedUsers.lastLogin,
     createdAt: managedUsers.createdAt

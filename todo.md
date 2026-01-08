@@ -520,3 +520,37 @@
 - [ ] Testar visualização de gastos por tipo
 - [ ] Testar compartilhamento de Kanbans
 - [ ] Todos os testes passando
+
+
+## Dashboard com Cards Multi-Moeda
+
+- [x] Adicionar query getStatsByTypeAndCurrency no Home.tsx
+- [x] Criar 6 cards no dashboard: Pessoal BRL/USD, Compartilhado BRL/USD, Empresa BRL/USD
+- [x] Integrar com filtros de período existentes (Hoje, 7 dias, 30 dias, Ano)
+- [x] Todos os 129 testes passando
+- [ ] Implementar lógica de permissões (Master não vê cards de Empresa)
+- [ ] Adicionar conversão de moeda em tempo real (API de câmbio) - opcional
+
+## Página de Gerenciamento de Usuários
+
+- [x] Criar página /admin/user-management
+- [x] Criar hook use-toast para notificações
+- [x] Listar todos os usuários com roles e status
+- [x] Implementar formulário de criação de usuário com role
+- [x] Implementar formulário de edição de usuário com role
+- [x] Adicionar controle de deleção de usuários
+- [x] Adicionar busca de usuários por nome/email/username
+- [x] Atualizar procedures create/update para aceitar role
+- [x] Adicionar campo role no getManagedUsersByAdmin
+- [x] Adicionar rota no App.tsx
+- [x] Adicionar link no menu da sidebar
+- [x] Todos os 129 testes passando
+
+## Compartilhamento Seletivo de Kanbans
+
+- [ ] Usar tabela kanban_board_members existente
+- [ ] Implementar lógica de filtro de boards por usuário
+- [ ] Criar interface para compartilhar boards
+- [ ] Criar Kanban "Programação" e compartilhar com Ruan
+- [ ] Criar Kanban "Gestão de Tráfego" e compartilhar com Gestor
+- [ ] Testar que colaboradores veem apenas boards compartilhados

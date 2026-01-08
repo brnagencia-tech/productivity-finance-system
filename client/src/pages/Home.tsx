@@ -111,6 +111,12 @@ export default function Home() {
   });
 
   const { data: habits } = trpc.habits.list.useQuery();
+  
+  // Estatísticas de gastos por tipo e moeda
+  const { data: expenseStats } = trpc.expenses.getStatsByTypeAndCurrency.useQuery({
+    startDate: dateRange.startDate.toISOString(),
+    endDate: dateRange.endDate.toISOString()
+  });
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -331,6 +337,108 @@ export default function Home() {
               </p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Gastos por Tipo e Moeda */}
+        <div>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Gastos Detalhados</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* Gastos Pessoais BRL */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">💰 Pessoal (BRL)</CardTitle>
+                <Wallet className="h-4 w-4 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">
+                  {formatCurrency(expenseStats?.pessoal?.BRL || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Gastos pessoais em reais
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Gastos Pessoais USD */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">💵 Pessoal (USD)</CardTitle>
+                <DollarSign className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">
+                  ${(expenseStats?.pessoal?.USD || 0).toFixed(2)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Gastos pessoais em dólares
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Gastos Compartilhados BRL */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">🤝 Compartilhado (BRL)</CardTitle>
+                <Wallet className="h-4 w-4 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">
+                  {formatCurrency(expenseStats?.compartilhado?.BRL || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Gastos compartilhados em reais
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Gastos Compartilhados USD */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">🤝 Compartilhado (USD)</CardTitle>
+                <DollarSign className="h-4 w-4 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">
+                  ${(expenseStats?.compartilhado?.USD || 0).toFixed(2)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Gastos compartilhados em dólares
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Gastos Empresa BRL */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">🏢 Empresa (BRL)</CardTitle>
+                <Wallet className="h-4 w-4 text-orange-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">
+                  {formatCurrency(expenseStats?.empresa?.BRL || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Gastos da empresa em reais
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Gastos Empresa USD */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">🏢 Empresa (USD)</CardTitle>
+                <DollarSign className="h-4 w-4 text-orange-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-foreground">
+                  ${(expenseStats?.empresa?.USD || 0).toFixed(2)}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Gastos da empresa em dólares
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Charts Row */}

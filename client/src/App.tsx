@@ -25,6 +25,7 @@ import AdvancedUserManagement from "./pages/AdvancedUserManagement";
 import TeamLogin from "./pages/TeamLogin";
 // import LoginSelection from "./pages/LoginSelection"; // Removido
 import Profile from "./pages/Profile";
+import UserManagement from "./pages/UserManagement";
 
 function Router() {
   return (
@@ -46,6 +47,7 @@ function Router() {
       <Route path={"/ai-insights"} component={() => <PrivateRoute><AIInsights /></PrivateRoute>} />
       <Route path={"/admin/users"} component={() => <PrivateRoute><AdminUsers /></PrivateRoute>} />
       <Route path={"/admin/users/advanced"} component={() => <PrivateRoute><AdvancedUserManagement /></PrivateRoute>} />
+      <Route path={"/admin/user-management"} component={() => <PrivateRoute><UserManagement /></PrivateRoute>} />
       <Route path={"/settings"} component={() => <PrivateRoute><Settings /></PrivateRoute>} />
       <Route path={"/revenue"} component={() => <PrivateRoute><Revenue /></PrivateRoute>} />
       <Route path={"/notifications"} component={() => <PrivateRoute><Notifications /></PrivateRoute>} />
