@@ -165,9 +165,18 @@ export const appRouter = router({
       title: z.string().min(1),
       description: z.string().optional(),
       visibility: z.enum(["private", "shared", "public"]).default("private"),
-      scope: z.enum(["personal", "professional"]).default("personal")
+      scope: z.enum(["personal", "professional"]).default("personal"),
+      memberIds: z.array(z.number()).optional()
     })).mutation(async ({ ctx, input }) => {
-      return db.createKanbanBoard({ ...input, userId: ctx.user.id });
+      const { memberIds, ...boardData } = input;
+      const board = await db.createKanbanBoard({ ...boardData, userId: ctx.user.id });
+      
+      // Add members if visibility is shared
+      if (input.visibility === "shared" && memberIds && memberIds.length > 0) {
+        await db.addKanbanBoardMembers(board.id, memberIds);
+      }
+      
+      return board;
      }),
     updateBoard: protectedProcedure.input(z.object({
       id: z.number(),
@@ -628,6 +637,20 @@ export const appRouter = router({
       if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
       return db.getManagedUsersByAdmin(ctx.user.id);
      }),
+    search: protectedProcedure.input(z.object({
+      query: z.string().min(1)
+    })).query(async ({ ctx, input }) => {
+      // CEO and Master can search all users, Colaborador can only see themselves
+      const users = await db.searchManagedUsers(input.query, ctx.user.id);
+      return users.map(u => ({
+        id: u.id,
+        username: u.username,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        email: u.email,
+        displayName: `${u.firstName} ${u.lastName} (@${u.username})`
+      }));
+     }),
     create: protectedProcedure.input(z.object({
       firstName: z.string().min(1),
       lastName: z.string().min(1),
@@ -719,12 +742,6 @@ export const appRouter = router({
         },
         token
       };
-     }),
-    // Search users by username for mentions
-    search: protectedProcedure.input(z.object({
-      query: z.string()
-    })).query(async ({ ctx, input }) => {
-      return db.searchManagedUsersByUsername(ctx.user.id, input.query);
      }),
   }),
 

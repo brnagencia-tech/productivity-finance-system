@@ -554,3 +554,20 @@
 - [ ] Criar Kanban "Programação" e compartilhar com Ruan
 - [ ] Criar Kanban "Gestão de Tráfego" e compartilhar com Gestor
 - [ ] Testar que colaboradores veem apenas boards compartilhados
+
+
+## Compartilhamento Seletivo de Kanbans - Em Andamento
+
+- [x] Criar procedure managedUsers.search para buscar usuários por nome/username
+- [x] Criar função searchManagedUsers no db.ts
+- [x] Criar componente UserSelector com autocomplete @ para selecionar usuários
+- [x] Adicionar campo de compartilhamento no formulário de criar board
+- [x] Quando visibilidade = "Compartilhado", mostrar campo UserSelector
+- [x] Usuários selecionados aparecem como chips/tags
+- [x] Atualizar createBoard para aceitar memberIds
+- [x] Criar função addKanbanBoardMembers no db.ts
+- [x] Todos os 124 testes passando
+- [ ] Atualizar procedure kanban.list para filtrar boards por permissões
+- [ ] Criar procedures para adicionar/remover membros de boards existentes
+- [ ] Testar com usuário Ruan (Colaborador) - deve ver apenas boards atribuídos
+- [ ] Testar com usuário Bruno (CEO) - deve ver todos os boards

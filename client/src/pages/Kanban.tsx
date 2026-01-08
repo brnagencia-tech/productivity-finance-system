@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSocket, KanbanEvents } from "@/hooks/useSocket";
 import { MentionInput, renderMentions } from "@/components/MentionInput";
+import { UserSelector } from "@/components/UserSelector";
 
 const priorityColors: Record<string, string> = {
   low: "#10b981",
@@ -51,12 +52,18 @@ export default function Kanban() {
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [draggedCard, setDraggedCard] = useState<any>(null);
 
-  const [newBoard, setNewBoard] = useState({
+  const [newBoard, setNewBoard] = useState<{
+    title: string;
+    description: string;
+    visibility: "private" | "shared" | "public";
+    scope: "personal" | "professional";
+  }>({
     title: "",
     description: "",
-    visibility: "private" as const,
-    scope: "personal" as const
+    visibility: "private",
+    scope: "personal"
   });
+  const [sharedUserIds, setSharedUserIds] = useState<number[]>([]);
 
   const [newColumn, setNewColumn] = useState({
     title: "",
@@ -389,7 +396,12 @@ export default function Kanban() {
                       <Label>Visibilidade</Label>
                       <Select
                         value={newBoard.visibility}
-                        onValueChange={(v: any) => setNewBoard({ ...newBoard, visibility: v })}
+                        onValueChange={(v: any) => {
+                          setNewBoard({ ...newBoard, visibility: v });
+                          if (v !== "shared") {
+                            setSharedUserIds([]);
+                          }
+                        }}
                       >
                         <SelectTrigger className="bg-secondary border-border">
                           <SelectValue />
@@ -417,11 +429,21 @@ export default function Kanban() {
                       </Select>
                     </div>
                   </div>
+                  {newBoard.visibility === "shared" && (
+                    <div className="space-y-2">
+                      <Label>Compartilhar com</Label>
+                      <UserSelector
+                        selectedUserIds={sharedUserIds}
+                        onUsersChange={setSharedUserIds}
+                        placeholder="Digite @ para mencionar usuários..."
+                      />
+                    </div>
+                  )}
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsCreateBoardOpen(false)}>Cancelar</Button>
                   <Button 
-                    onClick={() => createBoard.mutate(newBoard)}
+                    onClick={() => createBoard.mutate({ ...newBoard, memberIds: sharedUserIds })}
                     disabled={!newBoard.title || createBoard.isPending}
                     className="bg-primary text-primary-foreground"
                   >

@@ -211,6 +211,19 @@ export async function createKanbanBoard(data: InsertKanbanBoard) {
   return { id: boardId, ...data };
 }
 
+export async function addKanbanBoardMembers(boardId: number, userIds: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const values = userIds.map(userId => ({
+    boardId,
+    userId,
+    role: "editor" as const
+  }));
+  if (values.length > 0) {
+    await db.insert(kanbanBoardMembers).values(values);
+  }
+}
+
 export async function getKanbanBoardsByUser(userId: number) {
   const db = await getDb();
   if (!db) return [];
@@ -740,6 +753,32 @@ export async function getManagedUserById(id: number) {
   if (!db) return null;
   const result = await db.select().from(managedUsers).where(eq(managedUsers.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
+}
+
+export async function searchManagedUsers(query: string, adminUserId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const searchTerm = `%${query.toLowerCase()}%`;
+  return db.select({
+    id: managedUsers.id,
+    username: managedUsers.username,
+    firstName: managedUsers.firstName,
+    lastName: managedUsers.lastName,
+    email: managedUsers.email
+  }).from(managedUsers)
+    .where(
+      and(
+        eq(managedUsers.createdByUserId, adminUserId),
+        eq(managedUsers.isActive, true),
+        or(
+          sql`LOWER(${managedUsers.username}) LIKE ${searchTerm}`,
+          sql`LOWER(${managedUsers.firstName}) LIKE ${searchTerm}`,
+          sql`LOWER(${managedUsers.lastName}) LIKE ${searchTerm}`,
+          sql`LOWER(${managedUsers.email}) LIKE ${searchTerm}`
+        )
+      )
+    )
+    .limit(10);
 }
 
 export async function updateManagedUser(id: number, adminUserId: number, data: Partial<InsertManagedUser>) {
