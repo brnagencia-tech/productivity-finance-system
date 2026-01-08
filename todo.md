@@ -304,3 +304,40 @@
 - [x] Endpoint de login testado
 - [x] Redirecionamento automático implementado
 - [x] Proteção de rotas implementada
+
+
+## Integração LLM com Leitura Prévia de Dados
+
+### Fase 1: Endpoint de Coleta de Dados
+- [x] Criar endpoint tRPC para coletar dados de contexto (tarefas, hábitos, despesas, receitas)
+- [x] Agregar dados por período (hoje, 7 dias, 30 dias)
+- [x] Calcular métricas de produtividade e financeiras
+- [x] Formatar dados para análise do LLM
+
+### Fase 2: Análise com LLM
+- [x] Implementar função para chamar LLM com dados coletados
+- [x] Criar prompts estruturados para gerar sugestões
+- [x] Implementar tratamento de erros e fallback
+- [ ] Cachear sugestões para evitar chamadas repetidas
+
+### Fase 3: Página de Insights
+- [x] Criar página /ai-insights com sugestões do LLM
+- [x] Exibir dados de contexto (Produtividade, Financeiro)
+- [x] Adicionar botão para gerar novas sugestões
+- [x] Mostrar loading state durante geração
+
+### Fase 4: Cache de Sugestões
+- [ ] Armazenar sugestões em banco de dados
+- [ ] Implementar invalidação de cache por período
+- [ ] Mostrar sugestões em cache enquanto gera novas
+
+### Fase 5: Streaming de Respostas
+- [ ] Implementar streaming de respostas do LLM
+- [ ] Mostrar sugestões em tempo real enquanto são geradas
+- [ ] Adicionar loading state com animação
+
+### Fase 6: Testes
+- [x] Todos os 93 testes passando
+- [x] Endpoint de insights testado
+- [x] Página de insights criada
+- [x] Integração com LLM implementada

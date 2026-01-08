@@ -14,6 +14,7 @@ import Habits from "./pages/Habits";
 import Categories from "./pages/Categories";
 import Contacts from "./pages/Contacts";
 import Insights from "./pages/Insights";
+import AIInsights from "./pages/AIInsights";
 import AdminUsers from "./pages/AdminUsers";
 import Settings from "./pages/Settings";
 import Revenue from "./pages/Revenue";
@@ -35,6 +36,7 @@ function Router() {
       <Route path={"/categories"} component={Categories} />
       <Route path={"/contacts"} component={Contacts} />
       <Route path={"/insights"} component={Insights} />
+      <Route path={"/ai-insights"} component={AIInsights} />
       <Route path={"/admin/users"} component={AdminUsers} />
       <Route path={"/admin/users/advanced"} component={AdvancedUserManagement} />
       <Route path={"/settings"} component={Settings} />

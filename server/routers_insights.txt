@@ -1,0 +1,29 @@
+
+  insights: router({
+    generateSuggestions: protectedProcedure.input(z.object({ period: z.enum(["today", "week", "month"]) })).mutation(async ({ ctx, input }) => {
+      const contextData = await collectLLMContextData(ctx.user.id, input.period);
+      const formattedContext = formatContextForLLM(contextData);
+      
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: "Você é um assistente de produtividade e gestão financeira. Analise os dados fornecidos e forneça 3-5 sugestões práticas e acionáveis para melhorar a produtividade e a saúde financeira do usuário. Seja conciso e direto."
+          },
+          {
+            role: "user",
+            content: formattedContext
+          }
+        ]
+      });
+      
+      const suggestions = response.choices[0]?.message?.content || "Não foi possível gerar sugestões.";
+      
+      return {
+        period: input.period,
+        contextData,
+        suggestions,
+        generatedAt: new Date()
+      };
+    }),
+  }),
