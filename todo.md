@@ -143,3 +143,7 @@
 
 ## Correção Urgente
 - [x] Corrigir sobreposição dos títulos das seções no menu lateral (FINANÇAS, FERRAMENTAS, ADMINISTRAÇÃO)
+
+## Correção CSS Menu Lateral
+- [x] Investigar por que os títulos das seções ainda sobrepõem os itens
+- [x] Corrigir CSS definitivamente usando SidebarGroup do shadcn/ui
