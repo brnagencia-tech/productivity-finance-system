@@ -168,7 +168,9 @@ export const appRouter = router({
       boardId: z.number(),
       userId: z.number(),
       role: z.enum(["owner", "editor", "viewer"]).default("viewer")
-    })).mutation(async ({ input }) => {
+    })).mutation(async ({ ctx, input }) => {
+      const board = await db.getKanbanBoardWithDetails(input.boardId, ctx.user.id);
+      if (!board || board.userId !== ctx.user.id) throw new Error("Unauthorized");
       await db.addKanbanBoardMember(input.boardId, input.userId, input.role);
       return { success: true };
      }),

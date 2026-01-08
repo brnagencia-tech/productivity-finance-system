@@ -37,12 +37,13 @@ describe("Managed Users", () => {
   });
 
   it("should create a managed user with empty phone fields", async () => {
+    const timestamp = Date.now();
     const userData = {
       createdByUserId: adminUserId,
-      username: "testuser456",
+      username: `testuser456-${timestamp}`,
       firstName: "Test",
       lastName: "User2",
-      email: "testuser2@example.com",
+      email: `testuser2-${timestamp}@example.com`,
       phoneBR: null,
       phoneUS: null,
       passwordHash: Buffer.from("password456").toString("base64"),
@@ -81,12 +82,13 @@ describe("Managed Users", () => {
 
   it("should not delete a user if admin is different", async () => {
     // Criar um novo usuário
+    const timestamp = Date.now();
     const userData = {
       createdByUserId: adminUserId,
-      username: "protecteduser",
+      username: `protecteduser-${timestamp}`,
       firstName: "Protected",
       lastName: "User",
-      email: "protected@example.com",
+      email: `protected-${timestamp}@example.com`,
       phoneBR: null,
       phoneUS: null,
       passwordHash: Buffer.from("password789").toString("base64"),
@@ -109,23 +111,25 @@ describe("Managed Users", () => {
   });
 
   it("should get managed user by email", async () => {
+    const timestamp = Date.now();
+    const email = `emailtest-${timestamp}@example.com`;
     const userData = {
       createdByUserId: adminUserId,
-      username: "emailtest",
+      username: `emailtest-${timestamp}`,
       firstName: "Email",
       lastName: "Test",
-      email: "emailtest@example.com",
+      email: email,
       phoneBR: null,
       phoneUS: null,
       passwordHash: Buffer.from("passwordemail").toString("base64"),
     };
 
     const created = await db.createManagedUser(userData);
-    const retrieved = await db.getManagedUserByEmail("emailtest@example.com");
+    const retrieved = await db.getManagedUserByEmail(email);
 
     expect(retrieved).toBeDefined();
-    expect(retrieved?.email).toBe("emailtest@example.com");
-    expect(retrieved?.username).toBe("emailtest");
+    expect(retrieved?.email).toBe(email);
+    expect(retrieved?.username).toContain("emailtest");
 
     // Limpar
     await db.deleteManagedUser(created.id, adminUserId);

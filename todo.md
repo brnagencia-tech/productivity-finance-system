@@ -351,3 +351,17 @@
 - [x] Validar que usuários excluídos somem da tela
 - [x] Manter opção de editar usuários
 - [x] Todos os 99 testes passando
+
+
+## Isolamento de Dados por Usuário
+
+- [x] Auditar todos os endpoints para adicionar filtro userId
+- [x] Adicionar filtro userId em queries de tarefas
+- [x] Adicionar filtro userId em queries de hábitos
+- [x] Adicionar filtro userId em queries de despesas (variáveis e fixas)
+- [x] Adicionar filtro userId em queries de receitas/faturamento
+- [ ] Implementar lógica de Kanban compartilhados (múltiplos usuários podem acessar)
+- [x] Adicionar validação de acesso em endpoints protegidos
+- [x] Criar testes de isolamento de dados (11 testes passando)
+- [x] Validar que usuários não conseguem acessar dados de outros usuários
+- [x] Todos os 110 testes passando
