@@ -256,3 +256,15 @@
 - [ ] Testar responsividade em mobile
 - [ ] Testar em diferentes navegadores
 - [ ] Validar performance
+
+
+## Correções Urgentes
+
+### Erro ao Criar Usuário
+- [x] Corrigir campo phoneUS vazio ao criar usuário (estava recebendo default em vez do valor fornecido)
+- [x] Validar que ambos os campos de telefone (BR/US) são salvos corretamente
+
+### Alerta de Prejuízo Melhorado
+- [x] Mostrar cálculo detalhado no alerta: Receita - Despesas = Prejuízo
+- [x] Exemplo: "Receita (R$ 27.000,00) - Despesas (R$ 29.420,00) = Prejuízo (R$ -2.420,00)"
+- [x] Acompanhar os cálculos para que o usuário entenda a origem do prejuízo

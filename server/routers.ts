@@ -545,8 +545,8 @@ export const appRouter = router({
         firstName: input.firstName,
         lastName: input.lastName,
         email: input.email,
-        phoneBR: input.phoneBR,
-        phoneUS: input.phoneUS,
+        phoneBR: input.phoneBR || null,
+        phoneUS: input.phoneUS || null,
         passwordHash
       });
     }),

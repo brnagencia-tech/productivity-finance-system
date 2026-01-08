@@ -446,8 +446,13 @@ export default function Home() {
                   <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
                     <TrendingDown className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground">Prejuízo no mês</p>
-                      <p className="text-xs text-muted-foreground mt-1">Suas despesas estão maiores que receitas</p>
+                      <p className="text-sm font-medium text-foreground">Alerta: Prejuizo no mes!</p>
+                      <div className="text-xs text-muted-foreground mt-2 space-y-1">
+                        <p>Receita: <span className="text-green-600 font-medium">{formatCurrency(profitLoss?.revenue || 0)}</span></p>
+                        <p>Despesas: <span className="text-red-600 font-medium">{formatCurrency(profitLoss?.totalExpenses || 0)}</span></p>
+                        <p className="border-t border-destructive/20 pt-1 mt-1">Resultado: <span className="text-destructive font-bold">{formatCurrency(profitLoss?.profit || 0)}</span></p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">Suas despesas estao maiores que suas receitas. Revise seus gastos.</p>
                     </div>
                   </div>
                 )}
