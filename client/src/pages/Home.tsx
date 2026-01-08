@@ -11,7 +11,8 @@ import {
   Droplets,
   Dumbbell,
   Utensils,
-  Footprints
+  Footprints,
+  DollarSign
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { 
@@ -48,6 +49,11 @@ export default function Home() {
   });
 
   const { data: monthlyTrend } = trpc.expenses.getMonthlyTrend.useQuery({
+    year: currentYear
+  });
+
+  const { data: profitLoss } = trpc.sales.getProfitLoss.useQuery({
+    month: currentMonth,
     year: currentYear
   });
 
@@ -198,6 +204,58 @@ export default function Home() {
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 vs. mês anterior
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Faturamento Cards */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Receita</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {formatCurrency(profitLoss?.revenue || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {monthNames[currentMonth - 1]} {currentYear}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Despesas</CardTitle>
+              <Wallet className="h-4 w-4 text-red-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {formatCurrency(profitLoss?.totalExpenses || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Fixas + Variaveis
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Lucro Liquido</CardTitle>
+              {(profitLoss?.profit || 0) < 0 ? (
+                <TrendingDown className="h-4 w-4 text-red-500" />
+              ) : (
+                <TrendingUp className="h-4 w-4 text-green-500" />
+              )}
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${(profitLoss?.profit || 0) < 0 ? "text-red-600" : "text-green-600"}`}>
+                {formatCurrency(profitLoss?.profit || 0)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Margem: {(profitLoss?.profitMargin || 0).toFixed(1)}%
               </p>
             </CardContent>
           </Card>

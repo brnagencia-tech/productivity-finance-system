@@ -1012,10 +1012,13 @@ export async function getMonthlyProfitLoss(userId: number, month: number, year: 
     .from(variableExpenses)
     .where(and(eq(variableExpenses.userId, userId), gte(variableExpenses.date, startOfMonth), lte(variableExpenses.date, endOfMonth)));
   
-  // Fixed expenses (sum of all active fixed expenses)
+  // Fixed expenses (all active fixed expenses are recurring monthly)
   const fixedResult = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
     .from(fixedExpenses)
-    .where(and(eq(fixedExpenses.userId, userId), eq(fixedExpenses.isActive, true)));
+    .where(and(
+      eq(fixedExpenses.userId, userId), 
+      eq(fixedExpenses.isActive, true)
+    ));
   
   const revenue = parseFloat(revenueResult[0]?.total || "0");
   const variableExpensesTotal = parseFloat(variableResult[0]?.total || "0");

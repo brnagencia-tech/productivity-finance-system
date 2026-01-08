@@ -172,3 +172,58 @@
 - [ ] Proteger rotas e funcionalidades por permissões (middleware em progresso)
 - [ ] Interface de multi-login no cliente (account switcher)
 - [ ] Testes de integração completos para RBAC
+
+
+## Reorganização de Finanças e Reestruturação de Tarefas/Hábitos
+
+### Fase 1: Reorganização Financeira
+- [x] Reorganizar menu lateral: Faturamento em primeiro (antes de Despesas Variáveis)
+- [x] Corrigir cálculo de Lucro Líquido: Faturamento - Despesas Fixas - Despesas Variáveis
+- [x] Verificar por que Lucro Líquido não atualiza ao adicionar vendas (problema: estava somando TODAS as despesas fixas)
+- [x] Adicionar cards de Faturamento no Dashboard Principal
+- [x] Adicionar resumo Receita/Despesa/Saldo no Dashboard
+
+### Fase 2: Reestruturação de Tarefas e Hábitos
+- [ ] Criar entidade única TrackerItem (unificar tarefas e hábitos)
+- [ ] Implementar 4 modos de visualização: Hora | Dia | Semana | Mês
+- [ ] Modo Hora: múltiplas marcações no dia (água, remédio, etc.)
+- [ ] Modo Dia: lista com progresso individual
+- [ ] Modo Semana: grade por dia com status visual
+- [ ] Modo Mês: visão de consistência mensal
+- [ ] Remover "Taxa 257%" e substituir por "done/expected" (ex: 5/8)
+- [ ] Implementar sistema de check-ins para rastreamento
+
+### Fase 3: Redesenho do Dashboard
+- [ ] Criar header fixo com filtros globais (Hoje | 7 dias | 30 dias | Ano)
+- [ ] Adicionar toggle Pessoal | Profissional
+- [ ] Adicionar CTAs rápidas: + Tarefa, + Hábito, + Despesa, + Venda
+- [ ] Implementar linha de Cockpit Cards (4-6 cards clicáveis)
+- [ ] Card: Tarefas Hoje (done/total + próxima tarefa)
+- [ ] Card: Hábitos Hoje (done/total + streak 🔥)
+- [ ] Card: Financeiro do mês (Receita/Despesa/Saldo)
+- [ ] Card: Alertas (vencimentos/tarefas atrasadas)
+- [ ] Card: Produtividade 7 dias (consistência %)
+- [ ] Implementar widgets 2 colunas (Prioridades + Kanban Snapshot | Gastos + Receita x Despesa)
+- [ ] Adicionar linha 3 com Insights IA
+
+### Fase 4: Design System Moderno
+- [ ] Padronizar tamanho dos cards
+- [ ] Aumentar hierarquia tipográfica (título forte, número grande, label pequeno)
+- [ ] Melhorar tabelas com hover, badges discretas, menu "…"
+- [ ] Implementar estados vazios decentes com CTAs
+- [ ] Melhorar sidebar: ícones alinhados, seções com divisória, item ativo mais claro
+- [ ] Reduzir espaços vazios e aumentar densidade
+- [ ] Implementar componentes padrão: Card, Button, Badge, Table, Modal, Empty State, Skeleton
+
+### Fase 5: Testes e Validação
+- [ ] Testar cálculos de lucro com múltiplas vendas
+- [ ] Validar atualização em tempo real do Dashboard
+- [ ] Testar responsividade (desktop/mobile)
+- [ ] Validar 4 modos de visualização (Hora/Dia/Semana/Mês)
+- [ ] Testes unitários para nova lógica de financeiro
+
+### Observações Importantes
+- NÃO deletar nada que já foi criado
+- Apenas reorganizar ordem no menu
+- Manter todas as funcionalidades existentes
+- Foco em corrigir cálculos e adicionar visualizações

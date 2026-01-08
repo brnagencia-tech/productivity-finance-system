@@ -58,10 +58,10 @@ const mainMenuItems = [
 
 // Menu Finanças
 const financeMenuItems = [
+  { icon: DollarSign, label: "Faturamento", path: "/revenue" },
   { icon: Wallet, label: "Despesas Variáveis", path: "/expenses/variable" },
   { icon: Receipt, label: "Despesas Fixas", path: "/expenses/fixed" },
   { icon: CalendarDays, label: "Planilha Anual", path: "/expenses/annual" },
-  { icon: DollarSign, label: "Faturamento", path: "/revenue" },
 ];
 
 // Menu Ferramentas
