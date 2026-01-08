@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 // Tipo unificado para usuário autenticado (OAuth ou Team)
 export type AuthenticatedUser = {
   id: number;
+  managedUserRole?: "ceo" | "master" | "colaborador"; // Role do managed_user
   name: string | null;
   role: "user" | "admin";
   openId: string;
@@ -53,7 +54,8 @@ export async function createContext(
         user = {
           id: teamUser.id,
           name: `${teamUser.firstName} ${teamUser.lastName}`,
-          role: "user" as const,
+          role: "user" as const, // Role padrão para compatibilidade
+          managedUserRole: teamUser.role || "colaborador", // Role real do managed_user
           openId: `team-${teamUser.id}`,
           username: teamUser.username,
           email: teamUser.email,

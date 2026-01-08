@@ -1,0 +1,154 @@
+{
+  "query": "SELECT id, email, firstName, lastName, username, role, isActive FROM managed_users;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, email, firstName, lastName, username, role, isActive FROM managed_users;",
+  "rows": [
+    {
+      "id": "30007",
+      "email": "testuser2@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "30019",
+      "email": "testuser2-1767906053210@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767906053210",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "30021",
+      "email": "emailtest-1767906053299@example.com",
+      "firstName": "Email",
+      "lastName": "Test",
+      "username": "emailtest-1767906053299",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "30023",
+      "email": "testuser2-1767906067259@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767906067259",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "30026",
+      "email": "karenkmaia@gmail.com",
+      "firstName": "Karen",
+      "lastName": "Maia",
+      "username": "kmaia",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "30028",
+      "email": "testuser2-1767906441553@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767906441553",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "60001",
+      "email": "bruno@agenciabrn.com.br",
+      "firstName": "Bruno",
+      "lastName": "Medeiros",
+      "username": "bruno",
+      "role": "ceo",
+      "isActive": "1"
+    },
+    {
+      "id": "60003",
+      "email": "testuser2-1767908362792@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767908362792",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "60007",
+      "email": "testuser2-1767909026286@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767909026286",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "60011",
+      "email": "testuser2-1767909483956@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767909483956",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "60015",
+      "email": "testuser2-1767909659918@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767909659918",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "60019",
+      "email": "testuser2-1767910336425@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767910336425",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "60023",
+      "email": "testuser2-1767910367662@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767910367662",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "60028",
+      "email": "testuser2-1767911191124@example.com",
+      "firstName": "Test",
+      "lastName": "User2",
+      "username": "testuser456-1767911191124",
+      "role": "colaborador",
+      "isActive": "1"
+    },
+    {
+      "id": "60032",
+      "email": "karen@agenciabrn.com.br",
+      "firstName": "Karen",
+      "lastName": "Maia",
+      "username": "karen",
+      "role": "master",
+      "isActive": "1"
+    },
+    {
+      "id": "60033",
+      "email": "ruan@agenciabrn.com.br",
+      "firstName": "Ruan",
+      "lastName": "Programador",
+      "username": "ruan",
+      "role": "colaborador",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tfirstName\tlastName\tusername\trole\tisActive\n30007\ttestuser2@example.com\tTest\tUser2\ttestuser456\tcolaborador\t1\n30019\ttestuser2-1767906053210@example.com\tTest\tUser2\ttestuser456-1767906053210\tcolaborador\t1\n30021\temailtest-1767906053299@example.com\tEmail\tTest\temailtest-1767906053299\tcolaborador\t1\n30023\ttestuser2-1767906067259@example.com\tTest\tUser2\ttestuser456-1767906067259\tcolaborador\t1\n30026\tkarenkmaia@gmail.com\tKaren\tMaia\tkmaia\tcolaborador\t1\n30028\ttestuser2-1767906441553@example.com\tTest\tUser2\ttestuser456-1767906441553\tcolaborador\t1\n60001\tbruno@agenciabrn.com.br\tBruno\tMedeiros\tbruno\tceo\t1\n60003\ttestuser2-1767908362792@example.com\tTest\tUser2\ttestuser456-1767908362792\tcolaborador\t1\n60007\ttestuser2-1767909026286@example.com\tTest\tUser2\ttestuser456-1767909026286\tcolaborador\t1\n60011\ttestuser2-1767909483956@example.com\tTest\tUser2\ttestuser456-1767909483956\tcolaborador\t1\n60015\ttestuser2-1767909659918@example.com\tTest\tUser2\ttestuser456-1767909659918\tcolaborador\t1\n60019\ttestuser2-1767910336425@example.com\tTest\tUser2\ttestuser456-1767910336425\tcolaborador\t1\n60023\ttestuser2-1767910367662@example.com\tTest\tUser2\ttestuser456-1767910367662\tcolaborador\t1\n60028\ttestuser2-1767911191124@example.com\tTest\tUser2\ttestuser456-1767911191124\tcolaborador\t1\n60032\tkaren@agenciabrn.com.br\tKaren\tMaia\tkaren\tmaster\t1\n60033\truan@agenciabrn.com.br\tRuan\tProgramador\truan\tcolaborador\t1\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

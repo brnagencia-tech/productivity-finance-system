@@ -149,6 +149,11 @@ export const variableExpenses = mysqlTable("variable_expenses", {
   receiptUrl: text("receiptUrl"),
   notes: text("notes"),
   scope: mysqlEnum("scope", ["personal", "professional"]).default("personal").notNull(),
+  // Novos campos para controle de gastos
+  expenseType: mysqlEnum("expenseType", ["pessoal", "compartilhado", "empresa"]).default("pessoal").notNull(),
+  currency: mysqlEnum("currency", ["BRL", "USD"]).default("BRL").notNull(),
+  location: mysqlEnum("location", ["BRN", "USA"]).default("BRN"),
+  sharedWith: json("sharedWith").$type<number[]>(), // Array de user IDs para gastos compartilhados
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -278,6 +283,7 @@ export const managedUsers = mysqlTable("managed_users", {
   phoneBR: varchar("phoneBR", { length: 20 }),
   phoneUS: varchar("phoneUS", { length: 20 }),
   passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  role: mysqlEnum("role", ["ceo", "master", "colaborador"]).default("colaborador").notNull(),
   isActive: boolean("isActive").default(true).notNull(),
   lastLogin: timestamp("lastLogin"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

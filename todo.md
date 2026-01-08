@@ -462,3 +462,61 @@
 - [x] Atualizar main.tsx para enviar JWT no header Authorization
 - [x] Atualizar useTeamAuth para limpar token no logout
 - [x] Todos os 129 testes passando
+
+
+## Sistema de Permissões e Controle de Acesso
+
+### 1. Sistema de Roles
+- [x] Adicionar campo `role` na tabela managed_users (CEO, Master, Colaborador)
+- [x] Aplicar migração no banco de dados (pnpm db:push)
+- [x] Atualizar usuário Bruno para role CEO
+- [x] Criar usuário Karen como Master (senha: karen123)
+- [x] Criar usuário Ruan como Colaborador/Programador (senha: ruan123)
+- [ ] Criar usuário Gestor de Tráfego como Colaborador
+- [ ] Criar tabela de permissões (permissions)
+- [ ] Criar tabela de relacionamento user_permissions
+
+### 2. Controle de Permissões por Recurso
+- [ ] Criar enum de recursos (faturamento, gastos_empresa, gastos_pessoais, kanban)
+- [ ] Implementar middleware de verificação de permissões
+- [ ] Proteger endpoints de faturamento (apenas CEO)
+- [ ] Proteger endpoints de gastos da empresa (CEO + notificação para colaboradores)
+
+### 3. Gastos Pessoais vs Compartilhados vs Empresa
+- [x] Adicionar campo `expenseType` na tabela variable_expenses (pessoal, compartilhado, empresa)
+- [x] Adicionar campo `currency` (BRL, USD)
+- [x] Adicionar campo `location` (BRN, USA)
+- [x] Adicionar campo `sharedWith` para gastos compartilhados (array de IDs)
+- [x] Aplicar migração no banco de dados
+- [x] Atualizar createVariable para incluir novos campos
+- [x] Atualizar updateVariable para incluir novos campos
+- [x] Criar procedure getStatsByTypeAndCurrency para estatísticas
+- [x] Todos os 129 testes passando
+- [ ] Implementar lógica de filtragem por permissões (CEO vê tudo, Master não vê empresa)
+- [ ] Atualizar dashboard para mostrar gastos separados por tipo e moeda
+- [ ] Criar componentes de UI para adicionar gastos com tipo/moeda/localização
+
+### 4. Compartilhamento Seletivo de Kanbans
+- [ ] Criar tabela kanban_access (kanban_id, user_id, access_level)
+- [ ] Implementar compartilhamento de boards específicos
+- [ ] Filtrar cards por usuário (apenas cards compartilhados)
+- [ ] Criar Kanban "Programação" para Ruan
+- [ ] Criar Kanban "Gestão de Tráfego" para Gestor
+
+### 5. Página de Gerenciamento de Usuários
+- [ ] Criar página /admin/users para gerenciar usuários
+- [ ] Listar todos os usuários com roles
+- [ ] Editar permissões de usuários
+- [ ] Atribuir/remover acesso a Kanbans
+- [ ] Visualizar histórico de atividades
+
+### 6. Notificação de Despesas da Empresa
+- [ ] Criar notificação quando colaborador adiciona despesa da empresa
+- [ ] Enviar notificação para CEO (Bruno)
+- [ ] Mostrar notificações no dashboard
+
+### 7. Testes
+- [ ] Testar permissões de cada role
+- [ ] Testar visualização de gastos por tipo
+- [ ] Testar compartilhamento de Kanbans
+- [ ] Todos os testes passando

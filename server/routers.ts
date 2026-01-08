@@ -341,7 +341,12 @@ export const appRouter = router({
       amount: z.string(),
       receiptUrl: z.string().optional(),
       notes: z.string().optional(),
-      scope: z.enum(["personal", "professional"]).default("personal")
+      scope: z.enum(["personal", "professional"]).default("personal"),
+      // Novos campos
+      expenseType: z.enum(["pessoal", "compartilhado", "empresa"]).default("pessoal"),
+      currency: z.enum(["BRL", "USD"]).default("BRL"),
+      location: z.enum(["BRN", "USA"]).optional(),
+      sharedWith: z.array(z.number()).optional() // Array de user IDs
     })).mutation(async ({ ctx, input }) => {
       return db.createVariableExpense({
         ...input,
@@ -358,7 +363,12 @@ export const appRouter = router({
       amount: z.string().optional(),
       receiptUrl: z.string().optional(),
       notes: z.string().optional(),
-      scope: z.enum(["personal", "professional"]).optional()
+      scope: z.enum(["personal", "professional"]).optional(),
+      // Novos campos
+      expenseType: z.enum(["pessoal", "compartilhado", "empresa"]).optional(),
+      currency: z.enum(["BRL", "USD"]).optional(),
+      location: z.enum(["BRN", "USA"]).optional(),
+      sharedWith: z.array(z.number()).optional()
     })).mutation(async ({ ctx, input }) => {
       const { id, date, ...data } = input;
       await db.updateVariableExpense(id, ctx.user.id, {
@@ -431,6 +441,36 @@ export const appRouter = router({
       year: z.number()
     })).query(async ({ ctx, input }) => {
       return db.getMonthlyExpenseTrend(ctx.user.id, input.year);
+     }),
+    // Nova procedure para estatísticas por tipo e moeda
+    getStatsByTypeAndCurrency: protectedProcedure.input(z.object({
+      startDate: z.string().optional(),
+      endDate: z.string().optional()
+    }).optional()).query(async ({ ctx, input }) => {
+      const expenses = await db.getVariableExpensesByUser(
+        ctx.user.id,
+        input?.startDate ? new Date(input.startDate) : undefined,
+        input?.endDate ? new Date(input.endDate) : undefined
+      );
+      
+      // Agrupar por tipo e moeda
+      const stats: Record<string, { BRL: number; USD: number }> = {
+        pessoal: { BRL: 0, USD: 0 },
+        compartilhado: { BRL: 0, USD: 0 },
+        empresa: { BRL: 0, USD: 0 }
+      };
+      
+      expenses.forEach(expense => {
+        const type = expense.expenseType || 'pessoal';
+        const currency = expense.currency || 'BRL';
+        const amount = parseFloat(expense.amount);
+        
+        if (stats[type] && !isNaN(amount)) {
+          stats[type][currency] += amount;
+        }
+      });
+      
+      return stats;
      }),
   }),
 
