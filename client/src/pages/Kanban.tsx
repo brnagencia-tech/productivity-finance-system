@@ -23,6 +23,8 @@ import {
 import { useSocket, KanbanEvents } from "@/hooks/useSocket";
 import { MentionInput, renderMentions } from "@/components/MentionInput";
 import { UserSelector } from "@/components/UserSelector";
+import { BoardMembersDialog } from "@/components/BoardMembersDialog";
+import { useTeamAuth } from "@/hooks/useTeamAuth";
 
 const priorityColors: Record<string, string> = {
   low: "#10b981",
@@ -41,7 +43,10 @@ const columnColors = [
 ];
 
 export default function Kanban() {
+  const { user } = useTeamAuth();
   const [selectedBoardId, setSelectedBoardId] = useState<number | null>(null);
+  const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
+  const [selectedBoardForMembers, setSelectedBoardForMembers] = useState<number | null>(null);
   const [isCreateBoardOpen, setIsCreateBoardOpen] = useState(false);
   const [isCreateColumnOpen, setIsCreateColumnOpen] = useState(false);
   const [isCreateCardOpen, setIsCreateCardOpen] = useState(false);
@@ -463,17 +468,35 @@ export default function Kanban() {
               {boards.map(board => (
                 <Card 
                   key={board.id}
-                  className="bg-card border-border cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => setSelectedBoardId(board.id)}
+                  className="bg-card border-border hover:border-primary/50 transition-colors"
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg text-foreground">{board.title}</CardTitle>
+                      <CardTitle 
+                        className="text-lg text-foreground cursor-pointer flex-1"
+                        onClick={() => setSelectedBoardId(board.id)}
+                      >
+                        {board.title}
+                      </CardTitle>
                       <div className="flex items-center gap-2">
                         {getVisibilityIcon(board.visibility)}
                         <Badge variant={board.scope === "personal" ? "default" : "secondary"}>
                           {board.scope === "personal" ? "Pessoal" : "Profissional"}
                         </Badge>
+                        {(user?.role === "ceo" || user?.role === "master") && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBoardForMembers(board.id);
+                              setIsMembersDialogOpen(true);
+                            }}
+                            className="h-8 px-2"
+                          >
+                            <Users className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                     {board.description && (
@@ -497,6 +520,21 @@ export default function Kanban() {
             </Card>
           )}
         </div>
+        
+        {/* Dialog de gerenciamento de membros */}
+        {selectedBoardForMembers && (
+          <BoardMembersDialog
+            boardId={selectedBoardForMembers}
+            boardTitle={boards?.find(b => b.id === selectedBoardForMembers)?.title || "Board"}
+            open={isMembersDialogOpen}
+            onOpenChange={(open) => {
+              setIsMembersDialogOpen(open);
+              if (!open) {
+                setSelectedBoardForMembers(null);
+              }
+            }}
+          />
+        )}
       </DashboardLayout>
     );
   }
@@ -1043,6 +1081,7 @@ export default function Kanban() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </DashboardLayout>
   );
 }

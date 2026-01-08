@@ -7,6 +7,7 @@ export interface TeamUser {
   lastName: string;
   username: string;
   isActive: boolean;
+  role: "ceo" | "master" | "colaborador";
 }
 
 export function useTeamAuth() {

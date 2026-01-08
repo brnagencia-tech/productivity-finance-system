@@ -49,6 +49,7 @@ export const appRouter = router({
         lastName: user.lastName,
         username: user.username,
         isActive: user.isActive,
+        role: user.role, // Incluir role do usuário
         token, // Retornar token JWT
       };
      }),

@@ -585,8 +585,39 @@
 - [x] Criar Kanban "Programação" compartilhado com Ruan (Board ID: 1)
 - [x] Adicionar Bruno como owner e Ruan como editor
 - [x] Criar colunas padrão (A Fazer, Em Progresso, Concluído)
-- [ ] Adicionar botão "Gerenciar Membros" nos cards de board na página Kanban (opcional - pode ser feito via interface)
+- [x] Adicionar botão "Gerenciar Membros" nos cards de board na página Kanban (opcional - pode ser feito via interface)
 - [x] Sistema de filtragem de boards por permissões implementado
 - [x] Ruan (Colaborador) vê apenas boards compartilhados com ele
 - [x] Bruno (CEO) vê todos os boards do sistema
 - [x] Todos os 129 testes passando
+
+
+## Melhorias Finais do Sistema
+
+### 1. Sistema de Documentação de Módulos
+- [ ] Criar docs/KANBAN.md com estrutura e funcionalidades
+- [ ] Criar docs/HABITS.md com estrutura e funcionalidades
+- [ ] Criar docs/BILLING.md com estrutura e funcionalidades
+- [ ] Criar docs/EXPENSES.md com estrutura e funcionalidades
+- [ ] Criar docs/USERS.md com estrutura e funcionalidades
+
+### 2. Botão Gerenciar Membros no Kanban
+- [x] Adicionar botão "Gerenciar Membros" nos cards de board
+- [x] Integrar com BoardMembersDialog
+- [x] Mostrar apenas para CEO e Master
+- [x] Testar funcionalidade completa
+
+### 3. Criar Boards de Exemplo
+- [ ] Criar Kanban "Gestão de Tráfego" compartilhado com gestor
+- [ ] Criar Kanban "Finanças Pessoais" privado do Bruno
+- [ ] Criar Kanban "Projetos da Empresa" compartilhado com equipe
+- [ ] Adicionar colunas e cards de exemplo em cada board
+
+### 4. Sistema de Notificações de Atividade
+- [ ] Criar tabela notifications no schema
+- [ ] Criar procedures para criar/listar/marcar notificações
+- [ ] Implementar notificação quando colaborador adiciona despesa empresa
+- [ ] Implementar notificação quando card é movido em Kanban compartilhado
+- [ ] Criar componente NotificationBell no header
+- [ ] Criar página de visualização de notificações
+- [ ] Testar notificações com diferentes usuários
