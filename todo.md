@@ -268,3 +268,39 @@
 - [x] Mostrar cálculo detalhado no alerta: Receita - Despesas = Prejuízo
 - [x] Exemplo: "Receita (R$ 27.000,00) - Despesas (R$ 29.420,00) = Prejuízo (R$ -2.420,00)"
 - [x] Acompanhar os cálculos para que o usuário entenda a origem do prejuízo
+
+
+## Página de Login da Equipe
+
+### Fase 1: Endpoint de Autenticação
+- [x] Criar endpoint tRPC para autenticação de usuários gerenciados (email/senha)
+- [x] Validar credenciais contra banco de dados
+- [x] Gerar token de sessão para usuários autenticados
+- [x] Retornar dados do usuário e token
+
+### Fase 2: Página de Login
+- [x] Criar página /team-login com formulário de email/senha
+- [x] Adicionar validação de formulário
+- [x] Implementar tratamento de erros
+- [x] Adicionar loading state durante autenticação
+
+### Fase 3: Lógica de Autenticação
+- [x] Implementar hook useTeamAuth para gerenciar estado de autenticação
+- [x] Armazenar token em localStorage ou sessionStorage
+- [x] Criar contexto de autenticação da equipe
+
+### Fase 4: Redirecionamento
+- [x] Redirecionar para dashboard após login bem-sucedido
+- [x] Redirecionar para /team-login se tentar acessar dashboard sem autenticação
+- [x] Implementar proteção de rotas
+
+### Fase 5: Proteção de Rotas
+- [x] Criar PrivateRoute component para rotas protegidas
+- [x] Verificar autenticação antes de renderizar dashboard
+- [x] Implementar logout
+
+### Fase 6: Testes
+- [x] Todos os 93 testes passando
+- [x] Endpoint de login testado
+- [x] Redirecionamento automático implementado
+- [x] Proteção de rotas implementada

@@ -17,6 +17,25 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+    teamLogin: publicProcedure.input(z.object({
+      email: z.string().email(),
+      password: z.string().min(1)
+    })).mutation(async ({ input }) => {
+      const user = await db.getManagedUserByEmail(input.email);
+      if (!user) throw new Error('Invalid credentials');
+      if (!user.isActive) throw new Error('User account is inactive');
+      const passwordHash = Buffer.from(input.password).toString('base64');
+      if (user.passwordHash !== passwordHash) throw new Error('Invalid credentials');
+      await db.updateManagedUser(user.id, user.createdByUserId, { lastLogin: new Date() });
+      return {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        isActive: user.isActive
+      };
+    }),
   }),
 
   users: router({
