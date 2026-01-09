@@ -835,3 +835,17 @@
 - [x] Executar query diretamente no banco para ver erro real - Erro: Unknown column 'location'
 - [x] Identificar campo problemático - Coluna location não existia no banco
 - [x] Corrigir schema - Adicionada coluna location via ALTER TABLE
+
+
+## Erro ao Editar Tarefas - Data Inválida (1970-01-01)
+
+- [x] Diagnosticar problema de conversão de data (epoch 0) - new Date("") retorna 1970-01-01
+- [x] Corrigir endpoint update para validar data antes de converter
+- [x] Remover status "todo" antigo de todos os enums
+- [x] Testar edição de tarefas
+
+## Melhorias na Interface de Tarefas
+
+- [x] Implementar location como link clicável (se começar com http)
+- [x] Criar popup/dialog para visualizar notas completas
+- [x] Adicionar botão de visualização de notas na tabela

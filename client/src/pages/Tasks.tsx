@@ -13,10 +13,9 @@ import { Plus, Trash2, Edit2, Clock, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 
-type TaskStatus = "todo" | "not_started" | "in_progress" | "in_review" | "blocked" | "done";
+type TaskStatus = "not_started" | "in_progress" | "in_review" | "blocked" | "done";
 
 const statusLabels: Record<TaskStatus, string> = {
-  todo: "A fazer",
   not_started: "Não iniciado",
   in_progress: "Em andamento",
   in_review: "Em revisão",
@@ -25,7 +24,6 @@ const statusLabels: Record<TaskStatus, string> = {
 };
 
 const statusColors: Record<TaskStatus, string> = {
-  todo: "bg-gray-100 text-gray-700",
   not_started: "bg-gray-100 text-gray-700",
   in_progress: "bg-yellow-100 text-yellow-700",
   in_review: "bg-blue-100 text-blue-700",
@@ -34,7 +32,6 @@ const statusColors: Record<TaskStatus, string> = {
 };
 
 const statusIcons: Record<TaskStatus, string> = {
-  todo: "⏸️",
   not_started: "🔴",
   in_progress: "✏️",
   in_review: "👀",
@@ -396,8 +393,40 @@ export default function Tasks() {
                         </SelectContent>
                       </Select>
                     </TableCell>
-                    <TableCell>{task.location || "-"}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{task.notes || "-"}</TableCell>
+                    <TableCell>
+                      {task.location ? (
+                        task.location.startsWith("http") ? (
+                          <a href={task.location} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                            {task.location.length > 30 ? task.location.substring(0, 30) + "..." : task.location}
+                          </a>
+                        ) : (
+                          <span>{task.location}</span>
+                        )
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {task.notes ? (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 px-2">
+                              📝 Ver nota
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Notas - {task.title}</DialogTitle>
+                            </DialogHeader>
+                            <div className="whitespace-pre-wrap p-4 bg-gray-50 rounded-md max-h-96 overflow-y-auto">
+                              {task.notes}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
