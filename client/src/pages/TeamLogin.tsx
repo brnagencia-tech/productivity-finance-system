@@ -34,13 +34,25 @@ export default function TeamLogin() {
     setError("");
     setIsLoading(true);
 
-    if (!email || !password) {
+    // Sanitizar email
+    const sanitizedEmail = email.trim().toLowerCase();
+    
+    if (!sanitizedEmail || !password) {
       setError("Por favor, preencha todos os campos");
       setIsLoading(false);
       return;
     }
+    
+    // Validação básica de formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(sanitizedEmail)) {
+      setError("Por favor, insira um email válido");
+      setIsLoading(false);
+      return;
+    }
 
-    teamLoginMutation.mutate({ email, password });
+    console.log('[TeamLogin] Email enviado:', sanitizedEmail);
+    teamLoginMutation.mutate({ email: sanitizedEmail, password });
   };
 
   return (

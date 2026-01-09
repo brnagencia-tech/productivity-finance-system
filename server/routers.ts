@@ -26,7 +26,22 @@ export const appRouter = router({
       email: z.string().email(),
       password: z.string().min(1)
     })).mutation(async ({ input }) => {
-      const user = await db.getManagedUserByEmail(input.email);
+      // Sanitizar e validar email
+      const email = String(input.email || '')
+        .trim()
+        .toLowerCase();
+      
+      console.log('[teamLogin] Email recebido:', JSON.stringify(input.email));
+      console.log('[teamLogin] Email sanitizado:', JSON.stringify(email));
+      
+      // Validação adicional de formato de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        console.error('[teamLogin] Email inválido:', email);
+        throw new Error('Invalid credentials');
+      }
+      
+      const user = await db.getManagedUserByEmail(email);
       if (!user) throw new Error('Invalid credentials');
       if (!user.isActive) throw new Error('User account is inactive');
       
