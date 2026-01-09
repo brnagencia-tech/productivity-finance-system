@@ -804,7 +804,7 @@ export async function getManagedUserByEmail(email: string) {
     console.error('[getManagedUserByEmail] Error:', error);
     // Fallback: usar SQL raw se Drizzle falhar
     const connection = await import('mysql2/promise');
-    const conn = await connection.createConnection(ENV.DATABASE_URL);
+    const conn = await connection.createConnection(ENV.databaseUrl);
     try {
       const [rows] = await conn.execute(
         'SELECT * FROM managed_users WHERE email = ? LIMIT 1',
