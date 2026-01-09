@@ -868,3 +868,13 @@
 - [x] Otimizar dropdowns de status e filtros para touch (min-h-44px)
 - [x] Adicionar padding adequado e botões full-width no mobile
 - [x] Testar TypeScript e build sem erros
+
+
+## Configuração GitHub e Deploy DigitalOcean
+
+- [ ] Criar repositório GitHub via interface Manus (Settings → GitHub)
+- [ ] Fazer push do código para GitHub (automático após criar repo)
+- [x] Criar documentação de deploy (DEPLOY.md)
+- [x] Documentar processo de atualização sem perder dados
+- [x] Listar variáveis de ambiente necessárias
+- [x] Verificar .gitignore (já existe e está correto)
