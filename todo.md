@@ -790,3 +790,11 @@
 - [x] Remover visualização Kanban completamente
 - [x] Manter apenas visualização em tabela
 - [x] Testar criação de tarefas
+
+
+## Erro ao Criar Tarefa - JSON Parse Error
+
+- [x] Diagnosticar erro "Unexpected token '<'" (servidor retornando HTML)
+- [x] Verificar logs do servidor para identificar erro
+- [x] Corrigir problema no backend (remover transform de date no zod)
+- [x] Testar criação de tarefas novamente

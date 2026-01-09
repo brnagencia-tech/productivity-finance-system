@@ -137,7 +137,7 @@ export const appRouter = router({
      }),
     create: protectedProcedure.input(z.object({
       title: z.string().min(1),
-      date: z.string().transform(s => new Date(s)),
+      date: z.string(), // Manter como string, converter no backend
       time: z.string().optional(), // "HH:MM" ou null para "No time"
       hasTime: z.boolean().default(false),
       status: z.enum(["todo", "not_started", "in_progress", "in_review", "blocked", "done"]).optional(),
@@ -146,7 +146,8 @@ export const appRouter = router({
       notes: z.string().optional()
     })).mutation(async ({ ctx, input }) => {
       return db.createTask({ 
-        ...input, 
+        ...input,
+        date: new Date(input.date), // Converter para Date aqui
         userId: ctx.user.id,
         status: input.status || "not_started" // Status padrão ao criar
       });
@@ -154,7 +155,7 @@ export const appRouter = router({
     update: protectedProcedure.input(z.object({
       id: z.number(),
       title: z.string().min(1).optional(),
-      date: z.string().transform(s => new Date(s)).optional(),
+      date: z.string().optional(), // Manter como string
       time: z.string().optional(),
       hasTime: z.boolean().optional(),
       status: z.enum(["todo", "not_started", "in_progress", "in_review", "blocked", "done"]).optional(),
@@ -162,7 +163,11 @@ export const appRouter = router({
       location: z.string().optional(),
       notes: z.string().optional()
     })).mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
+      const { id, date, ...rest } = input;
+      const data = {
+        ...rest,
+        ...(date ? { date: new Date(date) } : {}) // Converter apenas se fornecido
+      };
       await db.updateTask(id, ctx.user.id, data);
       return { success: true };
      }),
