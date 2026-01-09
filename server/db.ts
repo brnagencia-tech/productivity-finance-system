@@ -576,12 +576,17 @@ export async function getDashboardStats(userId: number, month: number, year: num
   const todayEnd = new Date(today);
   todayEnd.setHours(23, 59, 59, 999);
   
-  const todayTasks = await db.select().from(tasks)
-    .where(and(
-      eq(tasks.userId, userId),
-      gte(tasks.date, todayStart),
-      lte(tasks.date, todayEnd)
-    ));
+  // Buscar todas as tarefas do usuário e filtrar em memória
+  // (workaround temporário para evitar problemas de timezone/tipo)
+  const allTasks = await db.select().from(tasks)
+    .where(eq(tasks.userId, userId));
+  
+  const todayTasks = allTasks.filter(task => {
+    const taskDate = new Date(task.date);
+    return taskDate >= todayStart && taskDate <= todayEnd;
+  });
+  
+  console.log("[getDashboardStats] Filtered", todayTasks.length, "tasks for today from", allTasks.length, "total tasks");
   
   const completedToday = todayTasks.filter(t => t.status === "done").length;
   const totalDailyTasks = todayTasks.length;

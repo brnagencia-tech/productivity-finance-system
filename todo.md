@@ -819,3 +819,12 @@
 - [x] Substituir SQL raw por operadores nativos do Drizzle (gte/lte) no dashboard
 - [x] Corrigir createTask - remover campos autogerados (id, createdAt, updatedAt)
 - [x] Testar dashboard e criação de tarefas sem erros
+
+
+## Investigação Profunda - Problema Raiz SQL
+
+- [x] Verificar se colunas no banco são snake_case (user_id, created_at) ou camelCase (userId, createdAt) - Confirmado: camelCase
+- [x] Verificar tipo do campo date no banco (DATE vs DATETIME/TIMESTAMP) - Confirmado: TIMESTAMP
+- [x] Verificar timezone (UTC vs America/Sao_Paulo) - Problema identificado: conversão de Date para SQL
+- [x] Adicionar logging de erro SQL detalhado
+- [x] Implementar workaround: buscar todas as tarefas e filtrar em memória
