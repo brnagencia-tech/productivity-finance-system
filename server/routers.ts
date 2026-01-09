@@ -2,6 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyInsights } from "./analysis";
@@ -56,6 +57,36 @@ export const appRouter = router({
         token, // Retornar token JWT
       };
      }),
+    changePassword: protectedProcedure.input(z.object({
+      currentPassword: z.string().min(1),
+      newPassword: z.string().min(8)
+    })).mutation(async ({ input, ctx }) => {
+      // Verificar se contexto tem usuário autenticado
+      if (!ctx.user || !ctx.user.id) {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'User not authenticated' });
+      }
+      
+      // Buscar usuário gerenciado pelo ID do contexto
+      const user = await db.getManagedUserById(ctx.user.id);
+      if (!user) throw new TRPCError({ code: 'NOT_FOUND', message: 'User not found' });
+      
+      // Verificar senha atual com bcrypt
+      const bcrypt = await import('bcryptjs');
+      const isValidPassword = await bcrypt.compare(input.currentPassword, user.passwordHash);
+      if (!isValidPassword) {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Current password is incorrect' });
+      }
+      
+      // Gerar hash da nova senha
+      const newPasswordHash = await bcrypt.hash(input.newPassword, 10);
+      
+      // Atualizar senha no banco
+      await db.updateManagedUser(user.id, user.createdByUserId, {
+        passwordHash: newPasswordHash
+      });
+      
+      return { success: true };
+    }),
   }),
 
   users: router({

@@ -8,6 +8,7 @@ import { useTeamAuth } from "@/hooks/useTeamAuth";
 import { User, Mail, Phone, Shield, Calendar } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 export default function Profile() {
   const { user } = useTeamAuth();
@@ -38,7 +39,13 @@ export default function Profile() {
   };
 
   const getUserRole = () => {
-    return "Membro da Equipe";
+    if (!user?.role) return "Membro da Equipe";
+    const roleMap: Record<string, string> = {
+      ceo: "CEO",
+      master: "Master",
+      colaborador: "Colaborador"
+    };
+    return roleMap[user.role] || "Membro da Equipe";
   };
 
   const handleSave = async () => {
@@ -207,7 +214,116 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
+
+        {/* Card de Trocar Senha */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Segurança</CardTitle>
+            <CardDescription>
+              Altere sua senha de acesso
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChangePasswordForm />
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
+  );
+}
+
+// Componente separado para trocar senha
+function ChangePasswordForm() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPasswords, setShowPasswords] = useState(false);
+
+  const changePassword = trpc.auth.changePassword.useMutation({
+    onSuccess: () => {
+      toast.success("Senha alterada com sucesso!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    },
+    onError: (error) => {
+      if (error.message.includes('incorrect')) {
+        toast.error("Senha atual incorreta!");
+      } else {
+        toast.error(`Erro ao alterar senha: ${error.message}`);
+      }
+    }
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast.error("As senhas não coincidem!");
+      return;
+    }
+    
+    if (newPassword.length < 8) {
+      toast.error("A nova senha deve ter pelo menos 8 caracteres!");
+      return;
+    }
+    
+    changePassword.mutate({
+      currentPassword,
+      newPassword
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="currentPassword">Senha Atual</Label>
+        <Input
+          id="currentPassword"
+          type={showPasswords ? "text" : "password"}
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          placeholder="Digite sua senha atual"
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="newPassword">Nova Senha</Label>
+        <Input
+          id="newPassword"
+          type={showPasswords ? "text" : "password"}
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder="Digite a nova senha (mínimo 8 caracteres)"
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+        <Input
+          id="confirmPassword"
+          type={showPasswords ? "text" : "password"}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Digite a nova senha novamente"
+          required
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="showPasswords"
+          checked={showPasswords}
+          onChange={(e) => setShowPasswords(e.target.checked)}
+          className="h-4 w-4 rounded border-gray-300"
+        />
+        <Label htmlFor="showPasswords" className="text-sm font-normal cursor-pointer">
+          Mostrar senhas
+        </Label>
+      </div>
+      <Button type="submit" className="w-full" disabled={changePassword.isPending}>
+        {changePassword.isPending ? "Alterando..." : "Alterar Senha"}
+      </Button>
+    </form>
   );
 }

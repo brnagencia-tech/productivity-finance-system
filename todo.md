@@ -645,3 +645,11 @@
 - [x] Remover todos os usuários de teste, deixar apenas Bruno e Karen
 - [x] Testar login do Bruno (CEO)
 - [x] Testar login da Karen (Master)
+
+### 8. Correções de Perfil e Criação de Usuários
+- [x] Corrigir exibição do role no perfil (mostrando "Membro da Equipe" em vez de "CEO")
+- [x] Adicionar opção "Colaborador" no formulário de criação de usuário
+- [x] Implementar funcionalidade de trocar senha no perfil
+- [x] Validar senha atual antes de permitir troca
+- [x] Confirmar nova senha
+- [x] Testar troca de senha com Bruno e Karen

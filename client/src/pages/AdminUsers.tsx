@@ -60,7 +60,8 @@ export default function AdminUsers() {
     phoneBR: "",
     phoneUS: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    role: "colaborador" as "ceo" | "master" | "colaborador"
   });
 
   const { data: managedUsers, refetch } = trpc.managedUsers.list.useQuery(undefined, {
@@ -107,7 +108,8 @@ export default function AdminUsers() {
       phoneBR: "",
       phoneUS: "",
       password: "",
-      confirmPassword: ""
+      confirmPassword: "",
+      role: "colaborador" as "ceo" | "master" | "colaborador"
     });
   };
 
@@ -161,7 +163,8 @@ export default function AdminUsers() {
       email: formData.email,
       phoneBR: formData.phoneBR || undefined,
       phoneUS: formData.phoneUS || undefined,
-      password: formData.password
+      password: formData.password,
+      role: formData.role
     });
   };
 
@@ -258,6 +261,21 @@ export default function AdminUsers() {
                       placeholder="joao@exemplo.com"
                       required
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Cargo</Label>
+                    <select
+                      id="role"
+                      value={formData.role}
+                      onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as "ceo" | "master" | "colaborador" }))}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      required
+                    >
+                      <option value="colaborador">Colaborador</option>
+                      <option value="master">Master</option>
+                      <option value="ceo">CEO</option>
+                    </select>
+                    <p className="text-xs text-muted-foreground">CEO e Master têm acesso total ao sistema</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
