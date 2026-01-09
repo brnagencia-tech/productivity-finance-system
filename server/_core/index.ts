@@ -8,6 +8,10 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { initializeSocket } from "./socket";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { getManagedUserByEmail, updateManagedUserLogin } from "../db";
+import { ENV } from "./env";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -40,6 +44,68 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  
+  // Team Login endpoint
+  app.post("/api/team-login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email e senha são obrigatórios" });
+      }
+      
+      // Buscar usuário por email
+      const user = await getManagedUserByEmail(email);
+      
+      if (!user) {
+        return res.status(401).json({ error: "Credenciais inválidas" });
+      }
+      
+      // Verificar se usuário está ativo
+      if (!user.isActive) {
+        return res.status(403).json({ error: "Usuário inativo" });
+      }
+      
+      // Comparar senha com hash
+      const passwordMatch = await bcrypt.compare(password, user.passwordHash);
+      
+      if (!passwordMatch) {
+        return res.status(401).json({ error: "Credenciais inválidas" });
+      }
+      
+      // Atualizar lastLogin
+      await updateManagedUserLogin(user.id);
+      
+      // Gerar token JWT
+      const token = jwt.sign(
+        { 
+          userId: user.id, 
+          email: user.email, 
+          username: user.username,
+          role: user.role
+        },
+        ENV.jwtSecret,
+        { expiresIn: "7d" }
+      );
+      
+      // Retornar dados do usuário e token
+      return res.json({
+        success: true,
+        token,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      console.error("[Team Login] Error:", error);
+      return res.status(500).json({ error: "Erro interno do servidor" });
+    }
+  });
   // tRPC API
   app.use(
     "/api/trpc",

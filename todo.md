@@ -887,3 +887,6 @@
 - [x] Documentar criação de droplet
 - [x] Documentar configuração de segurança
 - [x] Documentar instalação de dependências
+
+## Correção Crítica: Endpoint de Team Login
+- [x] Implementar endpoint POST /api/team-login no backend para autenticação de managed_users
