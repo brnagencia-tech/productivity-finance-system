@@ -812,3 +812,10 @@
 - [x] Corrigir sintaxe SQL incompatível com Drizzle ORM
 - [x] Usar abordagem de comparação de datas compatível (range de timestamps)
 - [x] Testar dashboard sem erros
+
+
+## Erro Persistente de Query SQL - Usar Operadores Nativos
+
+- [x] Substituir SQL raw por operadores nativos do Drizzle (gte/lte) no dashboard
+- [x] Corrigir createTask - remover campos autogerados (id, createdAt, updatedAt)
+- [x] Testar dashboard e criação de tarefas sem erros

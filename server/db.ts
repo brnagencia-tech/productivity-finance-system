@@ -134,8 +134,8 @@ export async function deleteCategory(id: number, userId: number) {
 export async function createTask(data: InsertTask) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  // Remove id do data se existir, pois é autoincrement
-  const { id, ...insertData } = data as any;
+  // Remove campos autogerados (id, createdAt, updatedAt)
+  const { id, createdAt, updatedAt, ...insertData } = data as any;
   const result = await db.insert(tasks).values(insertData);
   return { id: Number(result[0].insertId), ...insertData };
 }
@@ -579,7 +579,8 @@ export async function getDashboardStats(userId: number, month: number, year: num
   const todayTasks = await db.select().from(tasks)
     .where(and(
       eq(tasks.userId, userId),
-      sql`${tasks.date} >= ${todayStart.toISOString()} AND ${tasks.date} <= ${todayEnd.toISOString()}`
+      gte(tasks.date, todayStart),
+      lte(tasks.date, todayEnd)
     ));
   
   const completedToday = todayTasks.filter(t => t.status === "done").length;
