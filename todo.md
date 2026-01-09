@@ -653,3 +653,10 @@
 - [x] Validar senha atual antes de permitir troca
 - [x] Confirmar nova senha
 - [x] Testar troca de senha com Bruno e Karen
+
+### 9. Correções Urgentes do Kanban
+- [x] Corrigir filtro Pessoal/Profissional (mostra todos os boards independente do filtro)
+- [x] Corrigir layout bagunçado ao entrar no board (colunas duplicadas e boards aparecendo dentro)
+- [x] Adicionar botão de 3 pontos (⋮) para editar ou excluir quadro
+- [x] Testar filtro com boards Pessoal e Profissional
+- [x] Testar visualização de board sem bagunça

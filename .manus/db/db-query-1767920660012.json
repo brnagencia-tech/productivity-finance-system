@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, title, scope FROM kanban_boards ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, title, scope FROM kanban_boards ORDER BY id;",
+  "rows": [
+    {
+      "id": "60046",
+      "title": "Projetos Pessoais",
+      "scope": "personal"
+    },
+    {
+      "id": "60047",
+      "title": "Trabalho - Agência",
+      "scope": "professional"
+    },
+    {
+      "id": "60048",
+      "title": "Projetos Pessoais",
+      "scope": "personal"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tscope\n60046\tProjetos Pessoais\tpersonal\n60047\tTrabalho - Agência\tprofessional\n60048\tProjetos Pessoais\tpersonal\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

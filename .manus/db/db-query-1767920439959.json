@@ -1,0 +1,18 @@
+{
+  "query": "SELECT scope, COUNT(*) as count FROM kanban_boards GROUP BY scope;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT scope, COUNT(*) as count FROM kanban_boards GROUP BY scope;",
+  "rows": [
+    {
+      "scope": "personal",
+      "count": "60"
+    },
+    {
+      "scope": "professional",
+      "count": "2"
+    }
+  ],
+  "messages": [],
+  "stdout": "scope\tcount\npersonal\t60\nprofessional\t2\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

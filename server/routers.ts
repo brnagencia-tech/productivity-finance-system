@@ -185,10 +185,13 @@ export const appRouter = router({
 
   kanban: router({
     listBoards: protectedProcedure.query(async ({ ctx }) => {
-      // Retornar kanban do usuário + kanban compartilhados
+      // Retornar kanban do usuário + kanban compartilhados (sem duplicatas)
       const ownBoards = await db.getKanbanBoardsByUser(ctx.user.id);
       const sharedBoards = await db.getSharedKanbanBoardsForUser(ctx.user.id);
-      return [...ownBoards, ...sharedBoards];
+      const allBoards = [...ownBoards, ...sharedBoards];
+      // Remover duplicatas baseado no ID
+      const uniqueBoards = Array.from(new Map(allBoards.map(board => [board.id, board])).values());
+      return uniqueBoards;
      }),
     getBoard: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
       // Verificar permissão antes de retornar

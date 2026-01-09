@@ -1,0 +1,382 @@
+{
+  "query": "SELECT id, title, scope, visibility FROM kanban_boards ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, title, scope, visibility FROM kanban_boards ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "traqueamento ",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "2",
+      "title": "crm",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "30001",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30002",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30003",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30004",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30005",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30006",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30007",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30008",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30009",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30010",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30011",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30012",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30013",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30014",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "30015",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60001",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60002",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60003",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60004",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60005",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60006",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60007",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60008",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60009",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60010",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60011",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60012",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60013",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60014",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60015",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60016",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60017",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60018",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60019",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60020",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60021",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60022",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60023",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60024",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60025",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60026",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60027",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60028",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60029",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60030",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60031",
+      "title": "afDAdf",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60032",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60033",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60034",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60035",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60036",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60037",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60038",
+      "title": "Programação",
+      "scope": "professional",
+      "visibility": "shared"
+    },
+    {
+      "id": "60039",
+      "title": "User 1 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60040",
+      "title": "User 2 Board",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60041",
+      "title": "Shared Board",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60042",
+      "title": "qkmd'qmd",
+      "scope": "professional",
+      "visibility": "private"
+    },
+    {
+      "id": "60043",
+      "title": "Teste de Criação Rápida",
+      "scope": "personal",
+      "visibility": "private"
+    },
+    {
+      "id": "60044",
+      "title": "teste",
+      "scope": "personal",
+      "visibility": "shared"
+    },
+    {
+      "id": "60045",
+      "title": "teste",
+      "scope": "personal",
+      "visibility": "shared"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tscope\tvisibility\n1\ttraqueamento \tpersonal\tprivate\n2\tcrm\tpersonal\tshared\n30001\tUser 1 Board\tpersonal\tprivate\n30002\tUser 2 Board\tpersonal\tprivate\n30003\tUser 1 Board\tpersonal\tprivate\n30004\tUser 2 Board\tpersonal\tprivate\n30005\tUser 1 Board\tpersonal\tprivate\n30006\tUser 2 Board\tpersonal\tprivate\n30007\tUser 1 Board\tpersonal\tprivate\n30008\tUser 2 Board\tpersonal\tprivate\n30009\tUser 1 Board\tpersonal\tprivate\n30010\tUser 2 Board\tpersonal\tprivate\n30011\tUser 1 Board\tpersonal\tprivate\n30012\tUser 2 Board\tpersonal\tprivate\n30013\tUser 1 Board\tpersonal\tprivate\n30014\tUser 2 Board\tpersonal\tprivate\n30015\tShared Board\tpersonal\tshared\n60001\tShared Board\tpersonal\tshared\n60002\tUser 1 Board\tpersonal\tprivate\n60003\tUser 2 Board\tpersonal\tprivate\n60004\tUser 1 Board\tpersonal\tprivate\n60005\tUser 2 Board\tpersonal\tprivate\n60006\tShared Board\tpersonal\tshared\n60007\tUser 1 Board\tpersonal\tprivate\n60008\tUser 2 Board\tpersonal\tprivate\n60009\tShared Board\tpersonal\tshared\n60010\tShared Board\tpersonal\tshared\n60011\tUser 1 Board\tpersonal\tprivate\n60012\tUser 2 Board\tpersonal\tprivate\n60013\tUser 1 Board\tpersonal\tprivate\n60014\tUser 2 Board\tpersonal\tprivate\n60015\tShared Board\tpersonal\tshared\n60016\tShared Board\tpersonal\tshared\n60017\tUser 1 Board\tpersonal\tprivate\n60018\tUser 2 Board\tpersonal\tprivate\n60019\tUser 1 Board\tpersonal\tprivate\n60020\tShared Board\tpersonal\tshared\n60021\tUser 2 Board\tpersonal\tprivate\n60022\tUser 1 Board\tpersonal\tprivate\n60023\tUser 2 Board\tpersonal\tprivate\n60024\tShared Board\tpersonal\tshared\n60025\tShared Board\tpersonal\tshared\n60026\tUser 1 Board\tpersonal\tprivate\n60027\tUser 2 Board\tpersonal\tprivate\n60028\tUser 1 Board\tpersonal\tprivate\n60029\tShared Board\tpersonal\tshared\n60030\tUser 2 Board\tpersonal\tprivate\n60031\tafDAdf\tpersonal\tshared\n60032\tUser 1 Board\tpersonal\tprivate\n60033\tUser 2 Board\tpersonal\tprivate\n60034\tShared Board\tpersonal\tshared\n60035\tUser 1 Board\tpersonal\tprivate\n60036\tShared Board\tpersonal\tshared\n60037\tUser 2 Board\tpersonal\tprivate\n60038\tProgramação\tprofessional\tshared\n60039\tUser 1 Board\tpersonal\tprivate\n60040\tUser 2 Board\tpersonal\tprivate\n60041\tShared Board\tpersonal\tshared\n60042\tqkmd'qmd\tprofessional\tprivate\n60043\tTeste de Criação Rápida\tpersonal\tprivate\n60044\tteste\tpersonal\tshared\n60045\tteste\tpersonal\tshared\n",
+  "stderr": "",
+  "execution_time_ms": 199
+}

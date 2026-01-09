@@ -514,6 +514,39 @@ export default function Kanban() {
                             <Users className="h-4 w-4" />
                           </Button>
                         )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => e.stopPropagation()}
+                              className="h-8 px-2"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedBoardId(board.id);
+                            }}>
+                              <Edit2 className="h-4 w-4 mr-2" />
+                              Editar Quadro
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm(`Tem certeza que deseja excluir o quadro "${board.title}"?`)) {
+                                  deleteBoard.mutate({ id: board.id });
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Excluir Quadro
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                     {board.description && (
