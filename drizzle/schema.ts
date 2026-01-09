@@ -41,8 +41,9 @@ export const tasks = mysqlTable("tasks", {
   date: timestamp("date").notNull(), // Data da tarefa
   time: varchar("time", { length: 5 }), // Hora no formato HH:mm (ex: "14:30"), nullable
   hasTime: boolean("hasTime").default(false).notNull(), // Se tem hora definida ou é "No time"
-  status: mysqlEnum("status", ["todo", "in_progress", "done"]).default("todo").notNull(),
+  status: mysqlEnum("status", ["todo", "not_started", "in_progress", "in_review", "blocked", "done"]).default("not_started").notNull(),
   scope: mysqlEnum("scope", ["personal", "professional"]).default("personal").notNull(),
+  location: varchar("location", { length: 255 }), // Localização/onde (ONDE)
   notes: text("notes"), // Campo livre para observações
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

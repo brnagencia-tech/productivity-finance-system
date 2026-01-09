@@ -763,3 +763,22 @@
 - [x] Melhorar drag & drop: adicionar feedback visual durante arrasto
 - [x] Otimizar drag & drop para funcionar na primeira tentativa
 - [x] Testar todas as correções
+
+
+## Visualização de Tarefas em Formato Tabela/Planilha
+
+- [x] Atualizar schema: adicionar campo location (localização) na tabela tasks
+- [x] Aplicar migração do banco (pnpm db:push)
+- [x] Atualizar endpoints tRPC para incluir location
+- [x] Atualizar funções do banco (createTask, updateTask)
+- [x] Criar componente de visualização em tabela com colunas:
+  - [x] TAREFA (título editável inline)
+  - [x] DATA (date picker)
+  - [x] HORA (time picker ou "No time")
+  - [x] STATUS (dropdown com opções coloridas: Não iniciado, Em andamento, Em revisão, Bloqueado, Concluído)
+  - [x] ONDE (campo de localização)
+  - [x] NOTAS (campo de texto)
+- [x] Adicionar toggle para alternar entre visualização Kanban e Tabela
+- [x] Implementar edição inline na tabela (via dropdown de status)
+- [x] Adicionar botão "Adicionar tarefa" na visualização tabela
+- [x] Testar ambas as visualizações

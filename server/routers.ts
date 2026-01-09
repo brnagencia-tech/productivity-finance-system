@@ -140,13 +140,15 @@ export const appRouter = router({
       date: z.string().transform(s => new Date(s)),
       time: z.string().optional(), // "HH:MM" ou null para "No time"
       hasTime: z.boolean().default(false),
+      status: z.enum(["todo", "not_started", "in_progress", "in_review", "blocked", "done"]).optional(),
       scope: z.enum(["personal", "professional"]).default("personal"),
+      location: z.string().optional(),
       notes: z.string().optional()
     })).mutation(async ({ ctx, input }) => {
       return db.createTask({ 
         ...input, 
         userId: ctx.user.id,
-        status: "todo" // Status padrão ao criar
+        status: input.status || "not_started" // Status padrão ao criar
       });
      }),
     update: protectedProcedure.input(z.object({
@@ -155,7 +157,9 @@ export const appRouter = router({
       date: z.string().transform(s => new Date(s)).optional(),
       time: z.string().optional(),
       hasTime: z.boolean().optional(),
+      status: z.enum(["todo", "not_started", "in_progress", "in_review", "blocked", "done"]).optional(),
       scope: z.enum(["personal", "professional"]).optional(),
+      location: z.string().optional(),
       notes: z.string().optional()
     })).mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
@@ -164,7 +168,7 @@ export const appRouter = router({
      }),
     updateStatus: protectedProcedure.input(z.object({
       id: z.number(),
-      status: z.enum(["todo", "in_progress", "done"])
+      status: z.enum(["todo", "not_started", "in_progress", "in_review", "blocked", "done"])
     })).mutation(async ({ ctx, input }) => {
       await db.updateTask(input.id, ctx.user.id, { status: input.status });
       return { success: true };
