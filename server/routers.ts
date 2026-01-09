@@ -650,7 +650,10 @@ export const appRouter = router({
   // ==================== MANAGED USERS (Admin) ====================
   managedUsers: router({
     list: protectedProcedure.query(async ({ ctx }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      // Permitir CEO e Master acessarem lista de usuários
+      if (ctx.user.managedUserRole !== 'ceo' && ctx.user.managedUserRole !== 'master') {
+        throw new Error('Unauthorized');
+      }
       return db.getManagedUsersByAdmin(ctx.user.id);
      }),
     search: protectedProcedure.input(z.object({
@@ -677,7 +680,7 @@ export const appRouter = router({
       username: z.string().min(3).max(30).regex(/^[a-z0-9_]+$/, 'Username deve conter apenas letras minúsculas, números e underscore'),
       role: z.enum(['ceo', 'master', 'colaborador']).default('colaborador')
     })).mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (ctx.user.managedUserRole !== 'ceo' && ctx.user.managedUserRole !== 'master') throw new Error('Unauthorized');
       // Simple hash for demo - in production use bcrypt
       const passwordHash = Buffer.from(input.password).toString('base64');
       return db.createManagedUser({
@@ -704,7 +707,7 @@ export const appRouter = router({
       password: z.string().min(8).optional(),
       isActive: z.boolean().optional()
     })).mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (ctx.user.managedUserRole !== 'ceo' && ctx.user.managedUserRole !== 'master') throw new Error('Unauthorized');
       const { id, password, ...data } = input;
       const updateData: any = { ...data };
       if (password) {
@@ -714,7 +717,7 @@ export const appRouter = router({
       return { success: true };
      }),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (ctx.user.managedUserRole !== 'ceo' && ctx.user.managedUserRole !== 'master') throw new Error('Unauthorized');
       await db.deleteManagedUser(input.id, ctx.user.id);
       return { success: true };
      }),
@@ -722,7 +725,7 @@ export const appRouter = router({
       id: z.number(),
       newPassword: z.string().min(8)
     })).mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== 'admin') throw new Error('Unauthorized');
+      if (ctx.user.managedUserRole !== 'ceo' && ctx.user.managedUserRole !== 'master') throw new Error('Unauthorized');
       const passwordHash = Buffer.from(input.newPassword).toString('base64');
       await db.updateManagedUser(input.id, ctx.user.id, { passwordHash });
       return { success: true };

@@ -631,3 +631,9 @@
 - [x] Atualizar Bruno para role CEO
 - [x] Desbloquear acesso total do Bruno
 - [x] Garantir que Bruno veja todos os usuários
+
+### 6. Correção Urgente - Acesso à Página de Usuários
+- [x] Investigar por que CEO e Master estão recebendo "Acesso Negado"
+- [x] Corrigir lógica de autorização na página de Usuários
+- [x] Testar acesso com Bruno (CEO)
+- [x] Testar acesso com Karen (Master)

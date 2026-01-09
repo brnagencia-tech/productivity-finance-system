@@ -750,6 +750,7 @@ export async function createManagedUser(data: InsertManagedUser) {
 export async function getManagedUsersByAdmin(adminUserId: number) {
   const db = await getDb();
   if (!db) return [];
+  // CEO e Master veem todos os usuários, sem filtro por createdByUserId
   return db.select({
     id: managedUsers.id,
     username: managedUsers.username,
@@ -762,7 +763,7 @@ export async function getManagedUsersByAdmin(adminUserId: number) {
     isActive: managedUsers.isActive,
     lastLogin: managedUsers.lastLogin,
     createdAt: managedUsers.createdAt
-  }).from(managedUsers).where(eq(managedUsers.createdByUserId, adminUserId)).orderBy(desc(managedUsers.createdAt));
+  }).from(managedUsers).orderBy(desc(managedUsers.createdAt));
 }
 
 export async function getManagedUserByEmail(email: string) {

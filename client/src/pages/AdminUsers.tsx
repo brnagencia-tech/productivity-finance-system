@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Plus, UserPlus, Copy, Eye, EyeOff, RefreshCw, Trash2, Edit, Check, X } from "lucide-react";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useTeamAuth } from "@/hooks/useTeamAuth";
 
 function generateStrongPassword(): string {
   const lowercase = "abcdefghijklmnopqrstuvwxyz";
@@ -49,7 +49,7 @@ function formatPhoneUS(value: string): string {
 }
 
 export default function AdminUsers() {
-  const { user } = useAuth();
+  const { user } = useTeamAuth();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -64,7 +64,7 @@ export default function AdminUsers() {
   });
 
   const { data: managedUsers, refetch } = trpc.managedUsers.list.useQuery(undefined, {
-    enabled: user?.role === "admin"
+    enabled: user?.role === "ceo" || user?.role === "master"
   });
 
   const createUser = trpc.managedUsers.create.useMutation({
@@ -172,7 +172,7 @@ export default function AdminUsers() {
     }
   };
 
-  if (user?.role !== "admin") {
+  if (user?.role !== "ceo" && user?.role !== "master") {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-[60vh]">
