@@ -134,8 +134,10 @@ export async function deleteCategory(id: number, userId: number) {
 export async function createTask(data: InsertTask) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const result = await db.insert(tasks).values(data);
-  return { id: Number(result[0].insertId), ...data };
+  // Remove id do data se existir, pois é autoincrement
+  const { id, ...insertData } = data as any;
+  const result = await db.insert(tasks).values(insertData);
+  return { id: Number(result[0].insertId), ...insertData };
 }
 
 export async function getTasksByUser(userId: number, scope?: "personal" | "professional") {

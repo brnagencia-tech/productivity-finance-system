@@ -782,3 +782,11 @@
 - [x] Implementar edição inline na tabela (via dropdown de status)
 - [x] Adicionar botão "Adicionar tarefa" na visualização tabela
 - [x] Testar ambas as visualizações
+
+
+## Correções Urgentes - Tarefas
+
+- [x] Corrigir erro ao criar tarefas (problema no insert SQL)
+- [x] Remover visualização Kanban completamente
+- [x] Manter apenas visualização em tabela
+- [x] Testar criação de tarefas
