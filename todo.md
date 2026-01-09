@@ -878,3 +878,12 @@
 - [x] Documentar processo de atualização sem perder dados
 - [x] Listar variáveis de ambiente necessárias
 - [x] Verificar .gitignore (já existe e está correto)
+
+
+## Setup de Servidor DigitalOcean do Zero
+
+- [x] Criar guia completo de preparação do servidor (SERVER-SETUP.md)
+- [x] Criar script automatizado de instalação (setup.sh)
+- [x] Documentar criação de droplet
+- [x] Documentar configuração de segurança
+- [x] Documentar instalação de dependências
