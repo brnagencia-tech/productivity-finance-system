@@ -806,17 +806,18 @@ export async function searchManagedUsers(query: string, adminUserId: number) {
     .limit(10);
 }
 
-export async function updateManagedUser(id: number, adminUserId: number, data: Partial<InsertManagedUser>) {
+export async function updateManagedUser(id: number, adminUserId: number, data: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(managedUsers).set(data).where(and(eq(managedUsers.id, id), eq(managedUsers.createdByUserId, adminUserId)));
+  // CEO e Master podem editar qualquer usuário
+  await db.update(managedUsers).set(data).where(eq(managedUsers.id, id));
 }
 
 export async function deleteManagedUser(id: number, adminUserId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  // Deletar de verdade, não apenas inativar
-  await db.delete(managedUsers).where(and(eq(managedUsers.id, id), eq(managedUsers.createdByUserId, adminUserId)));
+  // CEO e Master podem deletar qualquer usuário
+  await db.delete(managedUsers).where(eq(managedUsers.id, id));
 }
 
 export async function updateManagedUserLogin(id: number) {

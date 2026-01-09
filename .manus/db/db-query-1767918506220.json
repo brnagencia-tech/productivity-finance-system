@@ -1,0 +1,26 @@
+{
+  "query": "SELECT id, firstName, lastName, username, email, role FROM managed_users;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, firstName, lastName, username, email, role FROM managed_users;",
+  "rows": [
+    {
+      "id": "60001",
+      "firstName": "Bruno",
+      "lastName": "Medeiros",
+      "username": "bruno",
+      "email": "bruno@agenciabrn.com.br",
+      "role": "ceo"
+    },
+    {
+      "id": "60032",
+      "firstName": "Karen",
+      "lastName": "Maia",
+      "username": "karen",
+      "email": "karen@agenciabrn.com.br",
+      "role": "master"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfirstName\tlastName\tusername\temail\trole\n60001\tBruno\tMedeiros\tbruno\tbruno@agenciabrn.com.br\tceo\n60032\tKaren\tMaia\tkaren\tkaren@agenciabrn.com.br\tmaster\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

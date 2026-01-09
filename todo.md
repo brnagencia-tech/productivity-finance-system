@@ -637,3 +637,11 @@
 - [x] Corrigir lógica de autorização na página de Usuários
 - [x] Testar acesso com Bruno (CEO)
 - [x] Testar acesso com Karen (Master)
+
+### 7. Limpeza e Correções Finais
+- [x] Unificar menus "Usuários" e "Gerenciar Usuários" (remover duplicata)
+- [x] Adicionar botão de excluir usuários na página AdminUsers
+- [x] Corrigir senha da Karen (Master) - karen@agenciabrn.com.br
+- [x] Remover todos os usuários de teste, deixar apenas Bruno e Karen
+- [x] Testar login do Bruno (CEO)
+- [x] Testar login da Karen (Master)
