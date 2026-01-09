@@ -570,11 +570,16 @@ export async function getDashboardStats(userId: number, month: number, year: num
     .where(and(eq(variableExpenses.userId, userId), gte(variableExpenses.date, startOfMonth), lte(variableExpenses.date, endOfMonth)));
 
   // Get today's tasks (nova estrutura: tarefas únicas com status)
-  const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+  // Comparar usando range de timestamps (início e fim do dia)
+  const todayStart = new Date(today);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(today);
+  todayEnd.setHours(23, 59, 59, 999);
+  
   const todayTasks = await db.select().from(tasks)
     .where(and(
       eq(tasks.userId, userId),
-      sql`DATE(${tasks.date}) = ${todayStr}`
+      sql`${tasks.date} >= ${todayStart.toISOString()} AND ${tasks.date} <= ${todayEnd.toISOString()}`
     ));
   
   const completedToday = todayTasks.filter(t => t.status === "done").length;

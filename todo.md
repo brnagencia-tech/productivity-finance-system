@@ -805,3 +805,10 @@
 - [x] Localizar query problemática com `date >= ? and date <= ?`
 - [x] Corrigir query usando DATE() do SQL
 - [x] Testar página sem erros
+
+
+## Erro de Sintaxe SQL - DATE() não compatível
+
+- [x] Corrigir sintaxe SQL incompatível com Drizzle ORM
+- [x] Usar abordagem de comparação de datas compatível (range de timestamps)
+- [x] Testar dashboard sem erros
