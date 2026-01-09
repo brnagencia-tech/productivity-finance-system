@@ -857,7 +857,26 @@ export async function updateManagedUser(id: number, adminUserId: number, data: a
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   // CEO e Master podem editar qualquer usuário
-  await db.update(managedUsers).set(data).where(eq(managedUsers.id, id));
+  try {
+    await db.update(managedUsers).set(data).where(eq(managedUsers.id, id));
+  } catch (error) {
+    console.error('[updateManagedUser] Drizzle error, using fallback SQL:', error);
+    const connection = await import('mysql2/promise');
+    const conn = await connection.createConnection(ENV.databaseUrl);
+    try {
+      const fields = Object.keys(data).map(k => `${k} = ?`).join(', ');
+      const values = Object.values(data);
+      await conn.execute(
+        `UPDATE managed_users SET ${fields} WHERE id = ?`,
+        [...values, id]
+      );
+      await conn.end();
+    } catch (fallbackError) {
+      console.error('[updateManagedUser] Fallback error:', fallbackError);
+      await conn.end();
+      throw fallbackError;
+    }
+  }
 }
 
 export async function deleteManagedUser(id: number, adminUserId: number) {
