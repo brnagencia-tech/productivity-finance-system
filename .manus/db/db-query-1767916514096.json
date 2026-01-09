@@ -1,0 +1,90 @@
+{
+  "query": "SELECT id, firstName, lastName, email, username, role FROM managed_users LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, firstName, lastName, email, username, role FROM managed_users LIMIT 10;",
+  "rows": [
+    {
+      "id": "30007",
+      "firstName": "Test",
+      "lastName": "User2",
+      "email": "testuser2@example.com",
+      "username": "testuser456",
+      "role": "colaborador"
+    },
+    {
+      "id": "30019",
+      "firstName": "Test",
+      "lastName": "User2",
+      "email": "testuser2-1767906053210@example.com",
+      "username": "testuser456-1767906053210",
+      "role": "colaborador"
+    },
+    {
+      "id": "30021",
+      "firstName": "Email",
+      "lastName": "Test",
+      "email": "emailtest-1767906053299@example.com",
+      "username": "emailtest-1767906053299",
+      "role": "colaborador"
+    },
+    {
+      "id": "30023",
+      "firstName": "Test",
+      "lastName": "User2",
+      "email": "testuser2-1767906067259@example.com",
+      "username": "testuser456-1767906067259",
+      "role": "colaborador"
+    },
+    {
+      "id": "30026",
+      "firstName": "Karen",
+      "lastName": "Maia",
+      "email": "karenkmaia@gmail.com",
+      "username": "kmaia",
+      "role": "colaborador"
+    },
+    {
+      "id": "30028",
+      "firstName": "Test",
+      "lastName": "User2",
+      "email": "testuser2-1767906441553@example.com",
+      "username": "testuser456-1767906441553",
+      "role": "colaborador"
+    },
+    {
+      "id": "60001",
+      "firstName": "Bruno",
+      "lastName": "Medeiros",
+      "email": "bruno@agenciabrn.com.br",
+      "username": "bruno",
+      "role": "ceo"
+    },
+    {
+      "id": "60003",
+      "firstName": "Test",
+      "lastName": "User2",
+      "email": "testuser2-1767908362792@example.com",
+      "username": "testuser456-1767908362792",
+      "role": "colaborador"
+    },
+    {
+      "id": "60007",
+      "firstName": "Test",
+      "lastName": "User2",
+      "email": "testuser2-1767909026286@example.com",
+      "username": "testuser456-1767909026286",
+      "role": "colaborador"
+    },
+    {
+      "id": "60011",
+      "firstName": "Test",
+      "lastName": "User2",
+      "email": "testuser2-1767909483956@example.com",
+      "username": "testuser456-1767909483956",
+      "role": "colaborador"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfirstName\tlastName\temail\tusername\trole\n30007\tTest\tUser2\ttestuser2@example.com\ttestuser456\tcolaborador\n30019\tTest\tUser2\ttestuser2-1767906053210@example.com\ttestuser456-1767906053210\tcolaborador\n30021\tEmail\tTest\temailtest-1767906053299@example.com\temailtest-1767906053299\tcolaborador\n30023\tTest\tUser2\ttestuser2-1767906067259@example.com\ttestuser456-1767906067259\tcolaborador\n30026\tKaren\tMaia\tkarenkmaia@gmail.com\tkmaia\tcolaborador\n30028\tTest\tUser2\ttestuser2-1767906441553@example.com\ttestuser456-1767906441553\tcolaborador\n60001\tBruno\tMedeiros\tbruno@agenciabrn.com.br\tbruno\tceo\n60003\tTest\tUser2\ttestuser2-1767908362792@example.com\ttestuser456-1767908362792\tcolaborador\n60007\tTest\tUser2\ttestuser2-1767909026286@example.com\ttestuser456-1767909026286\tcolaborador\n60011\tTest\tUser2\ttestuser2-1767909483956@example.com\ttestuser456-1767909483956\tcolaborador\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

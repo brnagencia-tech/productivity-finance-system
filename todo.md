@@ -621,3 +621,13 @@
 - [ ] Criar componente NotificationBell no header
 - [ ] Criar página de visualização de notificações
 - [ ] Testar notificações com diferentes usuários
+
+### 4. Correções Urgentes Kanban
+- [x] Corrigir UserSelector para mostrar usuários gerenciados ao digitar @
+- [x] Corrigir demora ao criar quadro e mensagem "Nenhum quadro criado"
+- [x] Adicionar filtro Pessoal/Profissional acima da lista de boards
+
+### 5. Correção Urgente - Usuário Bruno
+- [x] Atualizar Bruno para role CEO
+- [x] Desbloquear acesso total do Bruno
+- [x] Garantir que Bruno veja todos os usuários

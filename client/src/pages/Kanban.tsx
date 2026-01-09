@@ -56,6 +56,7 @@ export default function Kanban() {
   const [newComment, setNewComment] = useState("");
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [draggedCard, setDraggedCard] = useState<any>(null);
+  const [scopeFilter, setScopeFilter] = useState<"all" | "personal" | "professional">("all");
 
   const [newBoard, setNewBoard] = useState<{
     title: string;
@@ -194,10 +195,12 @@ export default function Kanban() {
   );
 
   const createBoard = trpc.kanban.createBoard.useMutation({
-    onSuccess: (data) => {
-      utils.kanban.listBoards.invalidate();
+    onSuccess: async (data) => {
+      // Invalidar e aguardar atualização da lista
+      await utils.kanban.listBoards.invalidate();
       setIsCreateBoardOpen(false);
       setNewBoard({ title: "", description: "", visibility: "private", scope: "personal" });
+      setSharedUserIds([]);
       setSelectedBoardId(data.id);
       toast.success("Quadro criado!");
     },
@@ -365,7 +368,18 @@ export default function Kanban() {
               <h1 className="text-2xl font-bold tracking-tight text-foreground">Quadros Kanban</h1>
               <p className="text-muted-foreground">Gerencie seus projetos com quadros colaborativos</p>
             </div>
-            <Dialog open={isCreateBoardOpen} onOpenChange={setIsCreateBoardOpen}>
+            <div className="flex items-center gap-2">
+              <Select value={scopeFilter} onValueChange={(v: any) => setScopeFilter(v)}>
+                <SelectTrigger className="w-[160px] bg-secondary border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="personal">Pessoal</SelectItem>
+                  <SelectItem value="professional">Profissional</SelectItem>
+                </SelectContent>
+              </Select>
+              <Dialog open={isCreateBoardOpen} onOpenChange={setIsCreateBoardOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-primary text-primary-foreground">
                   <Plus className="h-4 w-4 mr-2" />
@@ -457,6 +471,7 @@ export default function Kanban() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            </div>
           </div>
 
           {boardsLoading ? (
@@ -465,7 +480,9 @@ export default function Kanban() {
             </div>
           ) : boards && boards.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {boards.map(board => (
+              {boards
+                .filter(board => scopeFilter === "all" || board.scope === scopeFilter)
+                .map(board => (
                 <Card 
                   key={board.id}
                   className="bg-card border-border hover:border-primary/50 transition-colors"
@@ -511,7 +528,12 @@ export default function Kanban() {
           ) : (
             <Card className="bg-card border-border">
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground mb-4">Nenhum quadro criado ainda</p>
+                <p className="text-muted-foreground mb-4">
+                  {scopeFilter === "all" 
+                    ? "Nenhum quadro criado ainda" 
+                    : `Nenhum quadro ${scopeFilter === "personal" ? "pessoal" : "profissional"} encontrado`
+                  }
+                </p>
                 <Button onClick={() => setIsCreateBoardOpen(true)} className="bg-primary text-primary-foreground">
                   <Plus className="h-4 w-4 mr-2" />
                   Criar Primeiro Quadro

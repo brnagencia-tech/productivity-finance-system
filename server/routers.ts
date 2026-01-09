@@ -27,8 +27,11 @@ export const appRouter = router({
       const user = await db.getManagedUserByEmail(input.email);
       if (!user) throw new Error('Invalid credentials');
       if (!user.isActive) throw new Error('User account is inactive');
-      const passwordHash = Buffer.from(input.password).toString('base64');
-      if (user.passwordHash !== passwordHash) throw new Error('Invalid credentials');
+      
+      // Verificar senha com bcrypt
+      const bcrypt = await import('bcryptjs');
+      const isValidPassword = await bcrypt.compare(input.password, user.passwordHash);
+      if (!isValidPassword) throw new Error('Invalid credentials');
       await db.updateManagedUser(user.id, user.createdByUserId, { lastLogin: new Date() });
       
       // Gerar JWT token

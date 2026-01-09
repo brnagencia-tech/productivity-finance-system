@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, firstName, lastName, email, username, role FROM managed_users WHERE email LIKE '%bruno%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, firstName, lastName, email, username, role FROM managed_users WHERE email LIKE '%bruno%';",
+  "rows": [
+    {
+      "id": "60001",
+      "firstName": "Bruno",
+      "lastName": "Medeiros",
+      "email": "bruno@agenciabrn.com.br",
+      "username": "bruno",
+      "role": "ceo"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tfirstName\tlastName\temail\tusername\trole\n60001\tBruno\tMedeiros\tbruno@agenciabrn.com.br\tbruno\tceo\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}
