@@ -1,0 +1,24 @@
+{
+  "query": "SELECT id, userId, title, date, time, hasTime, status, scope, location, notes, createdAt, updatedAt FROM tasks WHERE userId = 1 LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, userId, title, date, time, hasTime, status, scope, location, notes, createdAt, updatedAt FROM tasks WHERE userId = 1 LIMIT 1;",
+  "rows": [
+    {
+      "id": "1",
+      "userId": "1",
+      "title": "khflhjf",
+      "date": "0000-00-00 00:00:00",
+      "time": "NULL",
+      "hasTime": "0",
+      "status": "todo",
+      "scope": "personal",
+      "location": "NULL",
+      "notes": "NULL",
+      "createdAt": "2026-01-05 21:24:18",
+      "updatedAt": "2026-01-05 21:24:18"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\ttitle\tdate\ttime\thasTime\tstatus\tscope\tlocation\tnotes\tcreatedAt\tupdatedAt\n1\t1\tkhflhjf\t0000-00-00 00:00:00\tNULL\t0\ttodo\tpersonal\tNULL\tNULL\t2026-01-05 21:24:18\t2026-01-05 21:24:18\n",
+  "stderr": "",
+  "execution_time_ms": 70
+}

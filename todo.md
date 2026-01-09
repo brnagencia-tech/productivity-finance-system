@@ -828,3 +828,10 @@
 - [x] Verificar timezone (UTC vs America/Sao_Paulo) - Problema identificado: conversão de Date para SQL
 - [x] Adicionar logging de erro SQL detalhado
 - [x] Implementar workaround: buscar todas as tarefas e filtrar em memória
+
+
+## Erro na Query Básica SELECT de Tasks
+
+- [x] Executar query diretamente no banco para ver erro real - Erro: Unknown column 'location'
+- [x] Identificar campo problemático - Coluna location não existia no banco
+- [x] Corrigir schema - Adicionada coluna location via ALTER TABLE

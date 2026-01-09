@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, userId, title, date, time, hasTime, status, scope, location, notes, createdAt, updatedAt FROM tasks WHERE userId = 1 LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, userId, title, date, time, hasTime, status, scope, location, notes, createdAt, updatedAt FROM tasks WHERE userId = 1 LIMIT 5;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'location' in 'field list'"
+  ]
+}
