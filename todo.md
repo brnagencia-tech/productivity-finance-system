@@ -857,3 +857,14 @@
 - [x] Corrigir erro ao atualizar tarefa - Corrigido frontend para enviar apenas campos válidos
 - [x] Verificar logs do servidor - Erro: "Data truncated for column 'status'"
 - [x] Aplicar correção definitiva - ALTER TABLE para atualizar enum de status
+
+
+## Otimização Mobile - Página de Tarefas
+
+- [x] Implementar layout responsivo: tabela no desktop, cards no mobile
+- [x] Criar cards empilhados verticalmente para mobile (< 768px)
+- [x] Aumentar área de toque dos botões (min 44x44px)
+- [x] Modal adaptativo com scroll para mobile
+- [x] Otimizar dropdowns de status e filtros para touch (min-h-44px)
+- [x] Adicionar padding adequado e botões full-width no mobile
+- [x] Testar TypeScript e build sem erros

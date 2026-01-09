@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Edit2, Clock, MoreVertical } from "lucide-react";
+import { Plus, Trash2, Edit2, Clock, MoreVertical, MapPin, FileText } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 
@@ -43,25 +43,25 @@ export default function Tasks() {
   const [scope, setScope] = useState<"personal" | "professional" | undefined>(undefined);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
+  const [viewNotesTask, setViewNotesTask] = useState<any>(null);
   const [newTask, setNewTask] = useState({
     title: "",
     date: new Date().toISOString().split("T")[0],
     time: "",
     hasTime: false,
     status: "not_started" as TaskStatus,
-    scope: "personal" as const,
+    scope: "personal" as "personal" | "professional",
     location: "",
     notes: ""
   });
 
+  const { data: tasks, isLoading } = trpc.tasks.list.useQuery({ scope });
   const utils = trpc.useUtils();
-
-  const { data: tasks = [], isLoading } = trpc.tasks.list.useQuery({ scope });
 
   const createMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa criada com sucesso!");
       utils.tasks.list.invalidate();
+      toast.success("Tarefa criada com sucesso!");
       setIsCreateOpen(false);
       resetForm();
     },
@@ -72,9 +72,9 @@ export default function Tasks() {
 
   const updateMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa atualizada com sucesso!");
       utils.tasks.list.invalidate();
-      setEditingTask(null);
+      toast.success("Tarefa atualizada com sucesso!");
+      setIsCreateOpen(false);
       resetForm();
     },
     onError: (error) => {
@@ -84,8 +84,8 @@ export default function Tasks() {
 
   const deleteMutation = trpc.tasks.delete.useMutation({
     onSuccess: () => {
-      toast.success("Tarefa excluída com sucesso!");
       utils.tasks.list.invalidate();
+      toast.success("Tarefa excluída com sucesso!");
     },
     onError: (error) => {
       toast.error(`Erro ao excluir tarefa: ${error.message}`);
@@ -93,6 +93,7 @@ export default function Tasks() {
   });
 
   const resetForm = () => {
+    setEditingTask(null);
     setNewTask({
       title: "",
       date: new Date().toISOString().split("T")[0],
@@ -159,61 +160,76 @@ export default function Tasks() {
   // Ordenar tarefas por data/hora (mais próximas primeiro)
   const sortTasks = (taskList: any[]) => {
     return taskList.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (dateA !== dateB) return dateA - dateB;
       
-      if (dateA.getTime() !== dateB.getTime()) {
-        return dateA.getTime() - dateB.getTime();
-      }
-      
+      // Se datas iguais, ordenar por hora
       if (a.hasTime && b.hasTime) {
         return (a.time || "").localeCompare(b.time || "");
       }
-      
-      if (a.hasTime) return -1;
-      if (b.hasTime) return 1;
-      
+      // Tarefas com hora vêm antes
+      if (a.hasTime && !b.hasTime) return -1;
+      if (!a.hasTime && b.hasTime) return 1;
       return 0;
     });
   };
 
-  // Verificar se tarefa está atrasada
+  const sortedTasks = tasks ? sortTasks([...tasks]) : [];
+
   const isOverdue = (task: any) => {
     if (task.status === "done") return false;
-    
     const taskDate = new Date(task.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
     return taskDate < today;
-  };
-
-  // Formatar data
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    });
   };
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Monitor de Tarefas</h1>
-            <p className="text-muted-foreground">Gerencie suas tarefas em formato de checklist</p>
+      <div className="space-y-6 p-4 md:p-6">
+        {/* Header com título verde estilo planilha */}
+        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 md:p-8 rounded-t-lg shadow-lg">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-wide">CHECKLIST</h1>
+        </div>
+
+        {/* Filtros e Botão Criar - Responsivo */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center bg-green-50 p-4 rounded-b-lg border-x-2 border-b-2 border-green-600">
+          <div className="flex gap-2 flex-1">
+            <Button
+              variant={scope === undefined ? "default" : "outline"}
+              onClick={() => setScope(undefined)}
+              className="flex-1 sm:flex-none min-h-[44px]"
+            >
+              Todas
+            </Button>
+            <Button
+              variant={scope === "personal" ? "default" : "outline"}
+              onClick={() => setScope("personal")}
+              className="flex-1 sm:flex-none min-h-[44px]"
+            >
+              Pessoal
+            </Button>
+            <Button
+              variant={scope === "professional" ? "default" : "outline"}
+              onClick={() => setScope("professional")}
+              className="flex-1 sm:flex-none min-h-[44px]"
+            >
+              Profissional
+            </Button>
           </div>
 
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+          <Dialog open={isCreateOpen} onOpenChange={(open) => {
+            setIsCreateOpen(open);
+            if (!open) resetForm();
+          }}>
             <DialogTrigger asChild>
-              <Button onClick={() => { setEditingTask(null); resetForm(); }}>
-                <Plus className="w-4 h-4 mr-2" />
+              <Button className="bg-green-600 hover:bg-green-700 min-h-[44px] w-full sm:w-auto">
+                <Plus className="mr-2 h-5 w-5" />
                 Nova Tarefa
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingTask ? "Editar Tarefa" : "Nova Tarefa"}</DialogTitle>
               </DialogHeader>
@@ -225,10 +241,11 @@ export default function Tasks() {
                     value={newTask.title}
                     onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                     required
+                    className="min-h-[44px]"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="date">Data *</Label>
                     <Input
@@ -237,6 +254,7 @@ export default function Tasks() {
                       value={newTask.date}
                       onChange={(e) => setNewTask({ ...newTask, date: e.target.value })}
                       required
+                      className="min-h-[44px]"
                     />
                   </div>
 
@@ -249,6 +267,7 @@ export default function Tasks() {
                         value={newTask.time}
                         onChange={(e) => setNewTask({ ...newTask, time: e.target.value, hasTime: !!e.target.value })}
                         disabled={!newTask.hasTime && !newTask.time}
+                        className="min-h-[44px]"
                       />
                       <Button
                         type="button"
@@ -261,18 +280,19 @@ export default function Tasks() {
                             setNewTask({ ...newTask, hasTime: true });
                           }
                         }}
+                        className="min-h-[44px] min-w-[100px]"
                       >
-                        {newTask.hasTime || newTask.time ? <Clock className="w-4 h-4" /> : "No time"}
+                        {newTask.hasTime || newTask.time ? "Remover" : "No time"}
                       </Button>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="status">Status *</Label>
                     <Select value={newTask.status} onValueChange={(value: TaskStatus) => setNewTask({ ...newTask, status: value })}>
-                      <SelectTrigger>
+                      <SelectTrigger className="min-h-[44px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -287,8 +307,8 @@ export default function Tasks() {
 
                   <div>
                     <Label htmlFor="scope">Tipo *</Label>
-                    <Select value={newTask.scope} onValueChange={(value: any) => setNewTask({ ...newTask, scope: value })}>
-                      <SelectTrigger>
+                    <Select value={newTask.scope} onValueChange={(value: "personal" | "professional") => setNewTask({ ...newTask, scope: value })}>
+                      <SelectTrigger className="min-h-[44px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -305,7 +325,8 @@ export default function Tasks() {
                     id="location"
                     value={newTask.location}
                     onChange={(e) => setNewTask({ ...newTask, location: e.target.value })}
-                    placeholder="Ex: Escritório, Casa, Online..."
+                    placeholder="Ex: Escritório, Casa, ou URL"
+                    className="min-h-[44px]"
                   />
                 </div>
 
@@ -315,16 +336,18 @@ export default function Tasks() {
                     id="notes"
                     value={newTask.notes}
                     onChange={(e) => setNewTask({ ...newTask, notes: e.target.value })}
-                    rows={3}
+                    placeholder="Observações adicionais..."
+                    rows={4}
+                    className="min-h-[100px]"
                   />
                 </div>
 
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
+                <DialogFooter className="flex-col sm:flex-row gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)} className="min-h-[44px] w-full sm:w-auto">
                     Cancelar
                   </Button>
-                  <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                    {editingTask ? "Atualizar" : "Criar"}
+                  <Button type="submit" className="bg-green-600 hover:bg-green-700 min-h-[44px] w-full sm:w-auto">
+                    {editingTask ? "Atualizar" : "Criar"} Tarefa
                   </Button>
                 </DialogFooter>
               </form>
@@ -332,157 +355,233 @@ export default function Tasks() {
           </Dialog>
         </div>
 
-        {/* Filtros */}
-        <div className="flex gap-2">
-          <Button
-            variant={scope === undefined ? "default" : "outline"}
-            onClick={() => setScope(undefined)}
-          >
-            Todas
-          </Button>
-          <Button
-            variant={scope === "personal" ? "default" : "outline"}
-            onClick={() => setScope("personal")}
-          >
-            Pessoal
-          </Button>
-          <Button
-            variant={scope === "professional" ? "default" : "outline"}
-            onClick={() => setScope("professional")}
-          >
-            Profissional
-          </Button>
-        </div>
+        {/* Loading/Empty States */}
+        {isLoading && <p className="text-center py-8">Carregando tarefas...</p>}
+        {!isLoading && sortedTasks.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              Nenhuma tarefa encontrada. Crie sua primeira tarefa!
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Visualização em Tabela */}
-        <Card>
-          <CardHeader className="bg-emerald-600 text-white">
-            <CardTitle className="text-2xl">CHECKLIST</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-emerald-500 text-white">
-                <TableRow>
-                  <TableHead className="text-white font-bold">TAREFA</TableHead>
-                  <TableHead className="text-white font-bold">DATA</TableHead>
-                  <TableHead className="text-white font-bold">HORA</TableHead>
-                  <TableHead className="text-white font-bold">STATUS</TableHead>
-                  <TableHead className="text-white font-bold">ONDE</TableHead>
-                  <TableHead className="text-white font-bold">NOTAS</TableHead>
-                  <TableHead className="text-white font-bold w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortTasks(tasks).map((task: any) => (
-                  <TableRow key={task.id} className={isOverdue(task) ? "bg-red-50" : ""}>
-                    <TableCell className="font-medium">{task.title}</TableCell>
-                    <TableCell>{formatDate(task.date)}</TableCell>
-                    <TableCell>
-                      {task.hasTime && task.time ? (
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {task.time}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-400">No time</span>
+        {/* Desktop: Tabela */}
+        {!isLoading && sortedTasks.length > 0 && (
+          <>
+            <div className="hidden md:block overflow-x-auto border-2 border-green-600 rounded-lg">
+              <Table>
+                <TableHeader className="bg-green-600">
+                  <TableRow>
+                    <TableHead className="text-white font-bold">TAREFA</TableHead>
+                    <TableHead className="text-white font-bold">DATA</TableHead>
+                    <TableHead className="text-white font-bold">HORA</TableHead>
+                    <TableHead className="text-white font-bold">STATUS</TableHead>
+                    <TableHead className="text-white font-bold">ONDE</TableHead>
+                    <TableHead className="text-white font-bold">NOTAS</TableHead>
+                    <TableHead className="text-white font-bold text-right">AÇÕES</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sortedTasks.map((task) => (
+                    <TableRow key={task.id} className={isOverdue(task) ? "bg-red-50" : ""}>
+                      <TableCell className="font-medium">{task.title}</TableCell>
+                      <TableCell>
+                        {new Date(task.date).toLocaleDateString("pt-BR")}
+                        {isOverdue(task) && <span className="ml-2 text-red-600 font-bold">⚠️ Atrasada</span>}
+                      </TableCell>
+                      <TableCell>
+                        {task.hasTime && task.time ? (
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {task.time}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">No time</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Select value={task.status} onValueChange={(value: TaskStatus) => handleStatusChange(task.id, value)}>
+                          <SelectTrigger className={`w-[180px] ${statusColors[task.status as TaskStatus]}`}>
+                            <SelectValue>
+                              {statusIcons[task.status as TaskStatus]} {statusLabels[task.status as TaskStatus]}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(statusLabels).map(([key, label]) => (
+                              <SelectItem key={key} value={key}>
+                                {statusIcons[key as TaskStatus]} {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        {task.location ? (
+                          task.location.startsWith("http") ? (
+                            <a href={task.location} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              Link
+                            </a>
+                          ) : (
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {task.location}
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {task.notes ? (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="sm" className="flex items-center gap-1">
+                                <FileText className="h-4 w-4" />
+                                Ver nota
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Notas da Tarefa</DialogTitle>
+                              </DialogHeader>
+                              <div className="max-h-[400px] overflow-y-auto whitespace-pre-wrap p-4 bg-gray-50 rounded">
+                                {task.notes}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-5 w-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEdit(task)}>
+                              <Edit2 className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDelete(task.id)} className="text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile: Cards Empilhados */}
+            <div className="md:hidden space-y-4">
+              {sortedTasks.map((task) => (
+                <Card key={task.id} className={`${isOverdue(task) ? "border-red-500 border-2" : "border-green-600"}`}>
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start gap-2">
+                      <CardTitle className="text-lg flex-1">{task.title}</CardTitle>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="min-h-[44px] min-w-[44px] p-0">
+                            <MoreVertical className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(task)}>
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDelete(task.id)} className="text-red-600">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Excluir
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Data e Hora */}
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-semibold">📅</span>
+                      <span>{new Date(task.date).toLocaleDateString("pt-BR")}</span>
+                      {task.hasTime && task.time && (
+                        <>
+                          <Clock className="h-4 w-4 ml-2" />
+                          <span>{task.time}</span>
+                        </>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <Select
-                        value={task.status}
-                        onValueChange={(value: TaskStatus) => handleStatusChange(task.id, value)}
-                      >
-                        <SelectTrigger className={`w-[180px] ${statusColors[task.status as TaskStatus]}`}>
+                      {isOverdue(task) && <span className="ml-auto text-red-600 font-bold">⚠️ Atrasada</span>}
+                    </div>
+
+                    {/* Status - Touch Friendly */}
+                    <div>
+                      <Select value={task.status} onValueChange={(value: TaskStatus) => handleStatusChange(task.id, value)}>
+                        <SelectTrigger className={`w-full ${statusColors[task.status as TaskStatus]} min-h-[44px]`}>
                           <SelectValue>
                             {statusIcons[task.status as TaskStatus]} {statusLabels[task.status as TaskStatus]}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {Object.entries(statusLabels).map(([key, label]) => (
-                            <SelectItem key={key} value={key}>
+                            <SelectItem key={key} value={key} className="min-h-[44px]">
                               {statusIcons[key as TaskStatus]} {label}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                    </TableCell>
-                    <TableCell>
-                      {task.location ? (
-                        task.location.startsWith("http") ? (
-                          <a href={task.location} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                            {task.location.length > 30 ? task.location.substring(0, 30) + "..." : task.location}
+                    </div>
+
+                    {/* Localização */}
+                    {task.location && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                        {task.location.startsWith("http") ? (
+                          <a href={task.location} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate">
+                            {task.location}
                           </a>
                         ) : (
-                          <span>{task.location}</span>
-                        )
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {task.notes ? (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 px-2">
-                              📝 Ver nota
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Notas - {task.title}</DialogTitle>
-                            </DialogHeader>
-                            <div className="whitespace-pre-wrap p-4 bg-gray-50 rounded-md max-h-96 overflow-y-auto">
-                              {task.notes}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="w-4 h-4" />
+                          <span className="truncate">{task.location}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Notas */}
+                    {task.notes && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="w-full min-h-[44px]">
+                            <FileText className="mr-2 h-4 w-4" />
+                            Ver Notas
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(task)}>
-                            <Edit2 className="w-4 h-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(task.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[95vw] max-h-[80vh]">
+                          <DialogHeader>
+                            <DialogTitle>Notas da Tarefa</DialogTitle>
+                          </DialogHeader>
+                          <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap p-4 bg-gray-50 rounded text-sm">
+                            {task.notes}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
 
-            {!isLoading && tasks.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground mb-4">Nenhuma tarefa encontrada</p>
-                <Button onClick={() => setIsCreateOpen(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Criar primeira tarefa
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {isLoading && (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">Carregando tarefas...</p>
-          </div>
+                    {/* Badge de Tipo */}
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-1 rounded ${task.scope === "personal" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>
+                        {task.scope === "personal" ? "Pessoal" : "Profissional"}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </DashboardLayout>
