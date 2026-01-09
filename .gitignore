@@ -105,3 +105,11 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+
+# one-off / server temp files
+*.bak.*
+*.backup
+tatus
+fix-*.js
+fix-*.cjs
+hash-password*.cjs

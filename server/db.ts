@@ -136,6 +136,11 @@ export async function createTask(data: InsertTask) {
   if (!db) throw new Error("Database not available");
   // Remove campos autogerados (id, createdAt, updatedAt)
   const { id, createdAt, updatedAt, ...insertData } = data as any;
+  // Normaliza status vindo do front (ex: "not_started") para valores válidos do ENUM no MySQL
+  const allowedStatuses = new Set(["todo", "in_progress", "done"] as const);
+  const incomingStatus = (insertData as any).status;
+  const normalizedStatus = incomingStatus === "not_started" ? "todo" : incomingStatus;
+  (insertData as any).status = allowedStatuses.has(normalizedStatus) ? normalizedStatus : "todo";
   const result = await db.insert(tasks).values(insertData);
   return { id: Number(result[0].insertId), ...insertData };
 }
@@ -1454,3 +1459,4 @@ export async function getSharedKanbanBoardsForUser(userId: number) {
     .where(eq(kanbanBoardMembers.userId, userId))
     .orderBy(desc(kanbanBoards.createdAt));
 }
+

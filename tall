@@ -1,0 +1,135 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex c1dbd8b..637c79d 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -105,3 +105,11 @@[m [mtemp/[m
+ *.db[m
+ *.sqlite[m
+ *.sqlite3[m
+[32m+[m
+[32m+[m[32m# one-off / server temp files[m
+[32m+[m[32m*.bak.*[m
+[32m+[m[32m*.backup[m
+[32m+[m[32mtatus[m
+[32m+[m[32mfix-*.js[m
+[32m+[m[32mfix-*.cjs[m
+[32m+[m[32mhash-password*.cjs[m
+[1mdiff --git a/package.json b/package.json[m
+[1mindex a2e4fe8..7906f9d 100644[m
+[1m--- a/package.json[m
+[1m+++ b/package.json[m
+[36m@@ -48,6 +48,7 @@[m
+     "@trpc/react-query": "^11.6.0",[m
+     "@trpc/server": "^11.6.0",[m
+     "axios": "^1.12.0",[m
+[32m+[m[32m    "bcrypt": "^6.0.0",[m
+     "bcryptjs": "^3.0.3",[m
+     "class-variance-authority": "^0.7.1",[m
+     "clsx": "^2.1.1",[m
+[1mdiff --git a/pnpm-lock.yaml b/pnpm-lock.yaml[m
+[1mindex 439cf2b..0365614 100644[m
+[1m--- a/pnpm-lock.yaml[m
+[1m+++ b/pnpm-lock.yaml[m
+[36m@@ -121,6 +121,9 @@[m [mimporters:[m
+       axios:[m
+         specifier: ^1.12.0[m
+         version: 1.12.2[m
+[32m+[m[32m      bcrypt:[m
+[32m+[m[32m        specifier: ^6.0.0[m
+[32m+[m[32m        version: 6.0.0[m
+       bcryptjs:[m
+         specifier: ^3.0.3[m
+         version: 3.0.3[m
+[36m@@ -2454,6 +2457,10 @@[m [mpackages:[m
+     resolution: {integrity: sha512-vAPMQdnyKCBtkmQA6FMCBvU9qFIppS3nzyXnEM+Lo2IAhG4Mpjv9cCxMudhgV3YdNNJv6TNqXy97dfRVL2LmaQ==}[m
+     hasBin: true[m
+ [m
+[32m+[m[32m  bcrypt@6.0.0:[m
+[32m+[m[32m    resolution: {integrity: sha512-cU8v/EGSrnH+HnxV2z0J7/blxH8gq7Xh2JFT6Aroax7UohdmiJJlxApMxtKfuI7z68NvvVcmR78k2LbT6efhRg==}[m
+[32m+[m[32m    engines: {node: '>= 18'}[m
+[32m+[m
+   bcryptjs@3.0.3:[m
+     resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}[m
+     hasBin: true[m
+[36m@@ -3714,6 +3721,14 @@[m [mpackages:[m
+       react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc[m
+       react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc[m
+ [m
+[32m+[m[32m  node-addon-api@8.5.0:[m
+[32m+[m[32m    resolution: {integrity: sha512-/bRZty2mXUIFY/xU5HLvveNHlswNJej+RnxBjOMkidWfwZzgTbPG1E3K5TOxRLOR+5hX7bSofy8yf1hZevMS8A==}[m
+[32m+[m[32m    engines: {node: ^18 || ^20 || >= 21}[m
+[32m+[m
+[32m+[m[32m  node-gyp-build@4.8.4:[m
+[32m+[m[32m    resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}[m
+[32m+[m[32m    hasBin: true[m
+[32m+[m
+   node-releases@2.0.23:[m
+     resolution: {integrity: sha512-cCmFDMSm26S6tQSDpBCg/NR8NENrVPhAJSf+XbxBG4rPFaaonlEoE9wHQmun+cls499TQGSb7ZyPBRlzgKfpeg==}[m
+ [m
+[36m@@ -6957,6 +6972,11 @@[m [msnapshots:[m
+ [m
+   baseline-browser-mapping@2.8.12: {}[m
+ [m
+[32m+[m[32m  bcrypt@6.0.0:[m
+[32m+[m[32m    dependencies:[m
+[32m+[m[32m      node-addon-api: 8.5.0[m
+[32m+[m[32m      node-gyp-build: 4.8.4[m
+[32m+[m
+   bcryptjs@3.0.3: {}[m
+ [m
+   body-parser@1.20.3:[m
+[36m@@ -8492,6 +8512,10 @@[m [msnapshots:[m
+       react: 19.2.1[m
+       react-dom: 19.2.1(react@19.2.1)[m
+ [m
+[32m+[m[32m  node-addon-api@8.5.0: {}[m
+[32m+[m
+[32m+[m[32m  node-gyp-build@4.8.4: {}[m
+[32m+[m
+   node-releases@2.0.23: {}[m
+ [m
+   normalize-range@0.1.2: {}[m
+[1mdiff --git a/server/_core/cookies.ts b/server/_core/cookies.ts[m
+[1mindex 424872c..5acb5aa 100644[m
+[1m--- a/server/_core/cookies.ts[m
+[1m+++ b/server/_core/cookies.ts[m
+[36m@@ -39,10 +39,12 @@[m [mexport function getSessionCookieOptions([m
+   //       ? hostname[m
+   //       : undefined;[m
+ [m
+[31m-  return {[m
+[31m-    httpOnly: true,[m
+[31m-    path: "/",[m
+[31m-    sameSite: "none",[m
+[31m-    secure: isSecureRequest(req),[m
+[31m-  };[m
+[32m+[m[32m  const secure = isSecureRequest(req);[m
+[32m+[m
+[32m+[m[32m    return {[m
+[32m+[m[32m      httpOnly: true,[m
+[32m+[m[32m      path: "/",[m
+[32m+[m[32m      sameSite: secure ? "none" : "lax",[m
+[32m+[m[32m      secure,[m
+[32m+[m[32m    };[m
+ }[m
+[1mdiff --git a/server/db.ts b/server/db.ts[m
+[1mindex 0499284..01f61ba 100644[m
+[1m--- a/server/db.ts[m
+[1m+++ b/server/db.ts[m
+[36m@@ -136,6 +136,11 @@[m [mexport async function createTask(data: InsertTask) {[m
+   if (!db) throw new Error("Database not available");[m
+   // Remove campos autogerados (id, createdAt, updatedAt)[m
+   const { id, createdAt, updatedAt, ...insertData } = data as any;[m
+[32m+[m[32m  // Normaliza status vindo do front (ex: "not_started") para valores válidos do ENUM no MySQL[m
+[32m+[m[32m  const allowedStatuses = new Set(["todo", "in_progress", "done"] as const);[m
+[32m+[m[32m  const incomingStatus = (insertData as any).status;[m
+[32m+[m[32m  const normalizedStatus = incomingStatus === "not_started" ? "todo" : incomingStatus;[m
+[32m+[m[32m  (insertData as any).status = allowedStatuses.has(normalizedStatus) ? normalizedStatus : "todo";[m
+   const result = await db.insert(tasks).values(insertData);[m
+   return { id: Number(result[0].insertId), ...insertData };[m
+ }[m
+[36m@@ -1454,3 +1459,4 @@[m [mexport async function getSharedKanbanBoardsForUser(userId: number) {[m
+     .where(eq(kanbanBoardMembers.userId, userId))[m
+     .orderBy(desc(kanbanBoards.createdAt));[m
+ }[m
+[41m+[m
