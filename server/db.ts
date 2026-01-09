@@ -570,11 +570,11 @@ export async function getDashboardStats(userId: number, month: number, year: num
     .where(and(eq(variableExpenses.userId, userId), gte(variableExpenses.date, startOfMonth), lte(variableExpenses.date, endOfMonth)));
 
   // Get today's tasks (nova estrutura: tarefas únicas com status)
+  const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
   const todayTasks = await db.select().from(tasks)
     .where(and(
       eq(tasks.userId, userId),
-      gte(tasks.date, today),
-      lte(tasks.date, tomorrow)
+      sql`DATE(${tasks.date}) = ${todayStr}`
     ));
   
   const completedToday = todayTasks.filter(t => t.status === "done").length;

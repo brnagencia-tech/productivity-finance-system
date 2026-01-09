@@ -798,3 +798,10 @@
 - [x] Verificar logs do servidor para identificar erro
 - [x] Corrigir problema no backend (remover transform de date no zod)
 - [x] Testar criação de tarefas novamente
+
+
+## Erro de Query SQL com Filtro de Data
+
+- [x] Localizar query problemática com `date >= ? and date <= ?`
+- [x] Corrigir query usando DATE() do SQL
+- [x] Testar página sem erros
