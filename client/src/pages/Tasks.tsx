@@ -108,13 +108,26 @@ export default function Tasks() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Preparar dados removendo campos vazios
+    const cleanData = {
+      title: newTask.title,
+      date: newTask.date,
+      hasTime: newTask.hasTime,
+      status: newTask.status,
+      scope: newTask.scope,
+      // Campos opcionais - enviar apenas se tiver valor
+      ...(newTask.time && newTask.time.trim() !== "" ? { time: newTask.time } : {}),
+      ...(newTask.location && newTask.location.trim() !== "" ? { location: newTask.location } : {}),
+      ...(newTask.notes && newTask.notes.trim() !== "" ? { notes: newTask.notes } : {})
+    };
+    
     if (editingTask) {
       updateMutation.mutate({
         id: editingTask.id,
-        ...newTask
+        ...cleanData
       });
     } else {
-      createMutation.mutate(newTask);
+      createMutation.mutate(cleanData);
     }
   };
 

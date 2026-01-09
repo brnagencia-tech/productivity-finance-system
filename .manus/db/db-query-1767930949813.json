@@ -1,0 +1,18 @@
+{
+  "query": "SHOW COLUMNS FROM tasks WHERE Field = 'status';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SHOW COLUMNS FROM tasks WHERE Field = 'status';",
+  "rows": [
+    {
+      "Field": "status",
+      "Type": "enum('todo','in_progress','done')",
+      "Null": "NO",
+      "Key": "",
+      "Default": "todo",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nstatus\tenum('todo','in_progress','done')\tNO\t\ttodo\t\n",
+  "stderr": "",
+  "execution_time_ms": 70
+}

@@ -1,0 +1,8 @@
+{
+  "query": "INSERT INTO tasks (userId, title, date, time, hasTime, status, scope, location, notes) VALUES (1, 'Teste Manual', '2026-01-10 00:00:00', '10:00', true, 'not_started', 'personal', 'Recreio', 'Nota de teste');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute INSERT INTO tasks (userId, title, date, time, hasTime, status, scope, location, notes) VALUES (1, 'Teste Manual', '2026-01-10 00:00:00', '10:00', true, 'not_started', 'personal', 'Recreio', 'Nota de teste');",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1265 (01000) at line 1: Data truncated for column 'status' at row 1"
+  ]
+}

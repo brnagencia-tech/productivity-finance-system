@@ -849,3 +849,11 @@
 - [x] Implementar location como link clicável (se começar com http)
 - [x] Criar popup/dialog para visualizar notas completas
 - [x] Adicionar botão de visualização de notas na tabela
+
+
+## Erros Persistentes - Criar/Atualizar Tarefas
+
+- [x] Investigar erro ao criar tarefa - CAUSA: enum de status no banco não tinha novos valores
+- [x] Corrigir erro ao atualizar tarefa - Corrigido frontend para enviar apenas campos válidos
+- [x] Verificar logs do servidor - Erro: "Data truncated for column 'status'"
+- [x] Aplicar correção definitiva - ALTER TABLE para atualizar enum de status

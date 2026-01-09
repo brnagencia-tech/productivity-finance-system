@@ -1,0 +1,13 @@
+{
+  "query": "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tasks' AND COLUMN_NAME = 'status';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tasks' AND COLUMN_NAME = 'status';",
+  "rows": [
+    {
+      "COLUMN_TYPE": "enum('todo','in_progress','done')"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_TYPE\nenum('todo','in_progress','done')\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}
