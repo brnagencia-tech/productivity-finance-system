@@ -660,3 +660,10 @@
 - [x] Adicionar botão de 3 pontos (⋮) para editar ou excluir quadro
 - [x] Testar filtro com boards Pessoal e Profissional
 - [x] Testar visualização de board sem bagunça
+
+### 10. Correção Urgente - Erro de Autenticação Dual
+- [x] Investigar erro "Unexpected token '<', "<!doctype "... is not valid JSON"
+- [x] Corrigir context.ts para separar corretamente usuários OAuth e gerenciados
+- [x] Garantir que usuários OAuth não acessem endpoints de usuários gerenciados
+- [x] Testar com usuário OAuth (Bruno via Apple)
+- [x] Testar com usuário gerenciado (Bruno/Karen via email/senha)

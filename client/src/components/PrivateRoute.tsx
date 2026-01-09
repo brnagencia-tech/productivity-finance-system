@@ -1,4 +1,5 @@
 import { useTeamAuth } from "@/hooks/useTeamAuth";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { useEffect } from "react";
 
@@ -7,8 +8,14 @@ interface PrivateRouteProps {
 }
 
 export function PrivateRoute({ children }: PrivateRouteProps) {
-  const { isAuthenticated, isLoading } = useTeamAuth();
+  // Check both OAuth and managed user authentication
+  const teamAuth = useTeamAuth();
+  const oauthAuth = useAuth();
   const [, setLocation] = useLocation();
+
+  // User is authenticated if either OAuth or team auth is valid
+  const isAuthenticated = teamAuth.isAuthenticated || oauthAuth.isAuthenticated;
+  const isLoading = teamAuth.isLoading || oauthAuth.loading;
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
