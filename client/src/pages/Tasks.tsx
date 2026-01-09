@@ -1,474 +1,440 @@
-import DashboardLayout from "@/components/DashboardLayout";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { CheckCircle2, Circle, Clock, Plus, ChevronLeft, ChevronRight, Trash2, Edit2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Plus, Trash2, Edit2, Clock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
-const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const frequencyLabels: Record<string, string> = {
-  daily: "Diário",
-  weekly: "Semanal",
-  monthly: "Mensal",
-  as_needed: "Conforme necessário"
+type TaskStatus = "todo" | "in_progress" | "done";
+
+const statusLabels: Record<TaskStatus, string> = {
+  todo: "A fazer",
+  in_progress: "Em andamento",
+  done: "Feito"
+};
+
+const statusColors: Record<TaskStatus, string> = {
+  todo: "bg-gray-100 text-gray-700 border-gray-300",
+  in_progress: "bg-yellow-100 text-yellow-700 border-yellow-300",
+  done: "bg-green-100 text-green-700 border-green-300"
 };
 
 export default function Tasks() {
-  const [scope, setScope] = useState<"personal" | "professional">("personal");
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [scope, setScope] = useState<"personal" | "professional" | undefined>(undefined);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [newTask, setNewTask] = useState({
     title: "",
-    description: "",
-    frequency: "daily" as const,
-    scope: "personal" as const
+    date: new Date().toISOString().split("T")[0],
+    time: "",
+    hasTime: false,
+    scope: "personal" as const,
+    notes: ""
   });
 
   const utils = trpc.useUtils();
 
-  const { data: tasks, isLoading } = trpc.tasks.list.useQuery({ scope });
-  const { data: categories } = trpc.categories.list.useQuery({ type: "task" });
+  const { data: tasks = [], isLoading } = trpc.tasks.list.useQuery({ scope });
 
-  const weekDates = useMemo(() => {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay() + (weekOffset * 7));
-    
-    return Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + i);
-      return date;
-    });
-  }, [weekOffset]);
-
-  const startDate = weekDates[0];
-  const endDate = weekDates[6];
-
-  const { data: completions } = trpc.tasks.getCompletions.useQuery({
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString()
-  });
-
-  const createTask = trpc.tasks.create.useMutation({
+  const createMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
+      toast.success("Tarefa criada com sucesso!");
       utils.tasks.list.invalidate();
       setIsCreateOpen(false);
-      setNewTask({ title: "", description: "", frequency: "daily", scope: "personal" });
-      toast.success("Tarefa criada com sucesso!");
+      resetForm();
     },
-    onError: () => toast.error("Erro ao criar tarefa")
+    onError: (error) => {
+      toast.error(`Erro ao criar tarefa: ${error.message}`);
+    }
   });
 
-  const updateTask = trpc.tasks.update.useMutation({
+  const updateMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
+      toast.success("Tarefa atualizada com sucesso!");
       utils.tasks.list.invalidate();
       setEditingTask(null);
-      toast.success("Tarefa atualizada!");
+      resetForm();
     },
-    onError: () => toast.error("Erro ao atualizar tarefa")
+    onError: (error) => {
+      toast.error(`Erro ao atualizar tarefa: ${error.message}`);
+    }
   });
 
-  const deleteTask = trpc.tasks.delete.useMutation({
+  const updateStatusMutation = trpc.tasks.updateStatus.useMutation({
     onSuccess: () => {
       utils.tasks.list.invalidate();
-      toast.success("Tarefa removida!");
     },
-    onError: () => toast.error("Erro ao remover tarefa")
+    onError: (error) => {
+      toast.error(`Erro ao atualizar status: ${error.message}`);
+    }
   });
 
-  const setCompletion = trpc.tasks.setCompletion.useMutation({
+  const deleteMutation = trpc.tasks.delete.useMutation({
     onSuccess: () => {
-      utils.tasks.getCompletions.invalidate();
-      utils.dashboard.getStats.invalidate();
+      toast.success("Tarefa excluída com sucesso!");
+      utils.tasks.list.invalidate();
     },
-    onError: () => toast.error("Erro ao atualizar status")
+    onError: (error) => {
+      toast.error(`Erro ao excluir tarefa: ${error.message}`);
+    }
   });
 
-  const getCompletionStatus = (taskId: number, date: Date) => {
-    if (!completions) return null;
-    const dateStr = date.toISOString().split("T")[0];
-    return completions.find(c => 
-      c.taskId === taskId && 
-      new Date(c.date).toISOString().split("T")[0] === dateStr
-    );
-  };
-
-  const calculateCompletionRate = (taskId: number) => {
-    if (!completions) return 0;
-    const taskCompletions = completions.filter(c => c.taskId === taskId);
-    const completed = taskCompletions.filter(c => c.status === "done").length;
-    return Math.round((completed / 7) * 100);
-  };
-
-  const handleStatusClick = (taskId: number, date: Date, currentStatus: string | null) => {
-    const nextStatus = currentStatus === "done" ? "not_done" : currentStatus === "in_progress" ? "done" : "in_progress";
-    setCompletion.mutate({
-      taskId,
-      date: date.toISOString(),
-      status: nextStatus as any
+  const resetForm = () => {
+    setNewTask({
+      title: "",
+      date: new Date().toISOString().split("T")[0],
+      time: "",
+      hasTime: false,
+      scope: "personal",
+      notes: ""
     });
   };
 
-  const getStatusIcon = (status: string | null) => {
-    switch (status) {
-      case "done":
-        return <CheckCircle2 className="h-5 w-5 text-primary" />;
-      case "in_progress":
-        return <Clock className="h-5 w-5 text-yellow-500" />;
-      default:
-        return <Circle className="h-5 w-5 text-muted-foreground" />;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (editingTask) {
+      updateMutation.mutate({
+        id: editingTask.id,
+        ...newTask
+      });
+    } else {
+      createMutation.mutate(newTask);
     }
   };
 
-  const formatWeekRange = () => {
-    const start = weekDates[0];
-    const end = weekDates[6];
-    const startMonth = start.toLocaleDateString("pt-BR", { month: "short" });
-    const endMonth = end.toLocaleDateString("pt-BR", { month: "short" });
-    
-    if (startMonth === endMonth) {
-      return `${start.getDate()} - ${end.getDate()} de ${startMonth}`;
+  const handleEdit = (task: any) => {
+    setEditingTask(task);
+    setNewTask({
+      title: task.title,
+      date: new Date(task.date).toISOString().split("T")[0],
+      time: task.time || "",
+      hasTime: task.hasTime,
+      scope: task.scope,
+      notes: task.notes || ""
+    });
+    setIsCreateOpen(true);
+  };
+
+  const handleDelete = (id: number) => {
+    if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
+      deleteMutation.mutate({ id });
     }
-    return `${start.getDate()} ${startMonth} - ${end.getDate()} ${endMonth}`;
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const taskId = parseInt(result.draggableId);
+    const newStatus = result.destination.droppableId as TaskStatus;
+
+    updateStatusMutation.mutate({ id: taskId, status: newStatus });
+  };
+
+  // Agrupar tarefas por status
+  const tasksByStatus = {
+    todo: tasks.filter((t: any) => t.status === "todo"),
+    in_progress: tasks.filter((t: any) => t.status === "in_progress"),
+    done: tasks.filter((t: any) => t.status === "done")
+  };
+
+  // Ordenar tarefas por data/hora (mais próximas primeiro)
+  const sortTasks = (taskList: any[]) => {
+    return taskList.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateA.getTime() - dateB.getTime();
+      }
+      
+      // Se mesma data, ordenar por hora
+      if (a.hasTime && b.hasTime) {
+        return (a.time || "").localeCompare(b.time || "");
+      }
+      
+      // Tarefas com hora vêm antes
+      if (a.hasTime) return -1;
+      if (b.hasTime) return 1;
+      
+      return 0;
+    });
+  };
+
+  // Verificar se tarefa está atrasada
+  const isOverdue = (task: any) => {
+    if (task.status !== "todo") return false;
+    
+    const taskDate = new Date(task.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return taskDate < today;
+  };
+
+  // Formatar data
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Monitor de Tarefas</h1>
-            <p className="text-muted-foreground">Acompanhe suas tarefas diárias e semanais</p>
-          </div>
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary text-primary-foreground">
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Tarefa
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-card border-border">
-              <DialogHeader>
-                <DialogTitle className="text-foreground">Criar Nova Tarefa</DialogTitle>
-                <DialogDescription>Adicione uma nova tarefa ao seu monitor</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Título</Label>
-                  <Input
-                    id="title"
-                    value={newTask.title}
-                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                    placeholder="Ex: Academia, Beber água..."
-                    className="bg-secondary border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Descrição (opcional)</Label>
-                  <Textarea
-                    id="description"
-                    value={newTask.description}
-                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-                    placeholder="Detalhes da tarefa..."
-                    className="bg-secondary border-border"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Frequência</Label>
-                    <Select
-                      value={newTask.frequency}
-                      onValueChange={(v: any) => setNewTask({ ...newTask, frequency: v })}
-                    >
-                      <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Diário</SelectItem>
-                        <SelectItem value="weekly">Semanal</SelectItem>
-                        <SelectItem value="monthly">Mensal</SelectItem>
-                        <SelectItem value="as_needed">Conforme necessário</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Tipo</Label>
-                    <Select
-                      value={newTask.scope}
-                      onValueChange={(v: any) => setNewTask({ ...newTask, scope: v })}
-                    >
-                      <SelectTrigger className="bg-secondary border-border">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="personal">Pessoal</SelectItem>
-                        <SelectItem value="professional">Profissional</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancelar</Button>
-                <Button 
-                  onClick={() => createTask.mutate(newTask)}
-                  disabled={!newTask.title || createTask.isPending}
-                  className="bg-primary text-primary-foreground"
-                >
-                  {createTask.isPending ? "Criando..." : "Criar Tarefa"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Monitor de Tarefas</h1>
+          <p className="text-muted-foreground">Gerencie suas tarefas com drag & drop</p>
         </div>
 
-        {/* Tabs for Personal/Professional */}
-        <Tabs value={scope} onValueChange={(v) => setScope(v as any)}>
-          <TabsList className="bg-secondary">
-            <TabsTrigger value="personal" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Pessoal
-            </TabsTrigger>
-            <TabsTrigger value="professional" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-              Profissional
-            </TabsTrigger>
-          </TabsList>
+        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => { setEditingTask(null); resetForm(); }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Tarefa
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingTask ? "Editar Tarefa" : "Nova Tarefa"}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="title">Título *</Label>
+                <Input
+                  id="title"
+                  value={newTask.title}
+                  onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                  required
+                />
+              </div>
 
-          <TabsContent value={scope} className="mt-4">
-            {/* Week Navigation */}
-            <Card className="bg-card border-border mb-4">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => setWeekOffset(weekOffset - 1)}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="date">Data *</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={newTask.date}
+                    onChange={(e) => setNewTask({ ...newTask, date: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="time">Hora</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="time"
+                      type="time"
+                      value={newTask.time}
+                      onChange={(e) => setNewTask({ ...newTask, time: e.target.value, hasTime: !!e.target.value })}
+                      disabled={!newTask.hasTime && !newTask.time}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (newTask.hasTime) {
+                          setNewTask({ ...newTask, time: "", hasTime: false });
+                        } else {
+                          setNewTask({ ...newTask, hasTime: true });
+                        }
+                      }}
                     >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span className="text-sm font-medium text-foreground min-w-[180px] text-center">
-                      {formatWeekRange()}
-                    </span>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => setWeekOffset(weekOffset + 1)}
-                    >
-                      <ChevronRight className="h-4 w-4" />
+                      {newTask.hasTime || newTask.time ? <Clock className="w-4 h-4" /> : "No time"}
                     </Button>
                   </div>
-                  {weekOffset !== 0 && (
-                    <Button variant="ghost" size="sm" onClick={() => setWeekOffset(0)}>
-                      Hoje
-                    </Button>
-                  )}
                 </div>
-              </CardHeader>
-            </Card>
+              </div>
 
-            {/* Tasks Table */}
-            <Card className="bg-card border-border overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-border bg-secondary/50">
-                      <th className="text-left p-4 font-medium text-muted-foreground min-w-[200px]">Tarefa</th>
-                      <th className="text-center p-4 font-medium text-muted-foreground w-24">Frequência</th>
-                      <th className="text-center p-4 font-medium text-muted-foreground w-20">Taxa</th>
-                      {weekDates.map((date, i) => {
-                        const isToday = date.toDateString() === new Date().toDateString();
-                        return (
-                          <th 
-                            key={i} 
-                            className={`text-center p-4 font-medium w-16 ${isToday ? "bg-primary/10" : ""}`}
-                          >
-                            <div className="text-xs text-muted-foreground">{dayNames[i]}</div>
-                            <div className={`text-sm ${isToday ? "text-primary font-bold" : "text-foreground"}`}>
-                              {date.getDate()}
-                            </div>
-                          </th>
-                        );
-                      })}
-                      <th className="w-20"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {isLoading ? (
-                      <tr>
-                        <td colSpan={11} className="text-center p-8 text-muted-foreground">
-                          Carregando tarefas...
-                        </td>
-                      </tr>
-                    ) : tasks && tasks.length > 0 ? (
-                      tasks.map((task) => {
-                        const rate = calculateCompletionRate(task.id);
-                        return (
-                          <tr key={task.id} className="border-b border-border hover:bg-secondary/30 transition-colors">
-                            <td className="p-4">
-                              <div className="font-medium text-foreground">{task.title}</div>
-                              {task.description && (
-                                <div className="text-xs text-muted-foreground mt-1 truncate max-w-[180px]">
-                                  {task.description}
-                                </div>
-                              )}
-                            </td>
-                            <td className="text-center p-4">
-                              <span className="text-xs px-2 py-1 rounded-full bg-secondary text-muted-foreground">
-                                {frequencyLabels[task.frequency]}
-                              </span>
-                            </td>
-                            <td className="text-center p-4">
-                              <span className={`font-bold ${rate >= 80 ? "text-primary" : rate >= 50 ? "text-yellow-500" : "text-destructive"}`}>
-                                {rate}%
-                              </span>
-                            </td>
-                            {weekDates.map((date, i) => {
-                              const completion = getCompletionStatus(task.id, date);
-                              const isToday = date.toDateString() === new Date().toDateString();
-                              return (
-                                <td 
-                                  key={i} 
-                                  className={`text-center p-4 ${isToday ? "bg-primary/5" : ""}`}
-                                >
-                                  <button
-                                    onClick={() => handleStatusClick(task.id, date, completion?.status || null)}
-                                    className="hover:scale-110 transition-transform"
-                                    disabled={setCompletion.isPending}
-                                  >
-                                    {getStatusIcon(completion?.status || null)}
-                                  </button>
-                                </td>
-                              );
-                            })}
-                            <td className="p-4">
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => setEditingTask(task)}
-                                >
-                                  <Edit2 className="h-4 w-4 text-muted-foreground" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => {
-                                    if (confirm("Remover esta tarefa?")) {
-                                      deleteTask.mutate({ id: task.id });
-                                    }
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
-                      <tr>
-                        <td colSpan={11} className="text-center p-8 text-muted-foreground">
-                          <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p>Nenhuma tarefa {scope === "personal" ? "pessoal" : "profissional"}</p>
-                          <p className="text-sm mt-1">Clique em "Nova Tarefa" para começar</p>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+              <div>
+                <Label htmlFor="scope">Tipo *</Label>
+                <Select value={newTask.scope} onValueChange={(value: any) => setNewTask({ ...newTask, scope: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="personal">Pessoal</SelectItem>
+                    <SelectItem value="professional">Profissional</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </Card>
 
-            {/* Legend */}
-            <div className="flex items-center gap-6 mt-4 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary" />
-                <span>Feito</span>
+              <div>
+                <Label htmlFor="notes">Notas</Label>
+                <Textarea
+                  id="notes"
+                  value={newTask.notes}
+                  onChange={(e) => setNewTask({ ...newTask, notes: e.target.value })}
+                  rows={3}
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-yellow-500" />
-                <span>Em progresso</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Circle className="h-4 w-4 text-muted-foreground" />
-                <span>Não feito</span>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
 
-        {/* Edit Dialog */}
-        <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
-          <DialogContent className="bg-card border-border">
-            <DialogHeader>
-              <DialogTitle className="text-foreground">Editar Tarefa</DialogTitle>
-            </DialogHeader>
-            {editingTask && (
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Título</Label>
-                  <Input
-                    value={editingTask.title}
-                    onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
-                    className="bg-secondary border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Descrição</Label>
-                  <Textarea
-                    value={editingTask.description || ""}
-                    onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                    className="bg-secondary border-border"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Frequência</Label>
-                  <Select
-                    value={editingTask.frequency}
-                    onValueChange={(v) => setEditingTask({ ...editingTask, frequency: v })}
-                  >
-                    <SelectTrigger className="bg-secondary border-border">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="daily">Diário</SelectItem>
-                      <SelectItem value="weekly">Semanal</SelectItem>
-                      <SelectItem value="monthly">Mensal</SelectItem>
-                      <SelectItem value="as_needed">Conforme necessário</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setEditingTask(null)}>Cancelar</Button>
-              <Button 
-                onClick={() => updateTask.mutate({
-                  id: editingTask.id,
-                  title: editingTask.title,
-                  description: editingTask.description,
-                  frequency: editingTask.frequency
-                })}
-                disabled={updateTask.isPending}
-                className="bg-primary text-primary-foreground"
-              >
-                {updateTask.isPending ? "Salvando..." : "Salvar"}
-              </Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                  {editingTask ? "Atualizar" : "Criar"}
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
+
+      {/* Filtros */}
+      <div className="flex gap-2">
+        <Button
+          variant={scope === undefined ? "default" : "outline"}
+          onClick={() => setScope(undefined)}
+        >
+          Todas
+        </Button>
+        <Button
+          variant={scope === "personal" ? "default" : "outline"}
+          onClick={() => setScope("personal")}
+        >
+          Pessoal
+        </Button>
+        <Button
+          variant={scope === "professional" ? "default" : "outline"}
+          onClick={() => setScope("professional")}
+        >
+          Profissional
+        </Button>
+      </div>
+
+      {/* Kanban Board com Drag & Drop */}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {(["todo", "in_progress", "done"] as TaskStatus[]).map((status) => (
+            <Card key={status}>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>{statusLabels[status]}</span>
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {tasksByStatus[status].length}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Droppable droppableId={status}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className="space-y-3 min-h-[200px]"
+                    >
+                      {sortTasks(tasksByStatus[status]).map((task: any, index: number) => (
+                        <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`p-4 rounded-lg border-2 ${
+                                isOverdue(task)
+                                  ? "bg-red-50 border-red-300"
+                                  : "bg-white border-gray-200"
+                              } hover:shadow-md transition-shadow`}
+                            >
+                              <div className="flex justify-between items-start mb-2">
+                                <h3 className="font-semibold">{task.title}</h3>
+                                <div className="flex gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEdit(task)}
+                                  >
+                                    <Edit2 className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDelete(task.id)}
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                  <span>📅 {formatDate(task.date)}</span>
+                                  {task.hasTime && task.time && (
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      {task.time}
+                                    </span>
+                                  )}
+                                  {!task.hasTime && !task.time && (
+                                    <span className="text-xs text-gray-400">No time</span>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <span
+                                    className={`inline-block px-2 py-1 rounded text-xs ${
+                                      task.scope === "personal"
+                                        ? "bg-blue-100 text-blue-700"
+                                        : "bg-purple-100 text-purple-700"
+                                    }`}
+                                  >
+                                    {task.scope === "personal" ? "Pessoal" : "Profissional"}
+                                  </span>
+                                </div>
+
+                                {task.notes && (
+                                  <p className="text-xs mt-2 text-gray-600">{task.notes}</p>
+                                )}
+
+                                {isOverdue(task) && (
+                                  <div className="flex items-center gap-1 text-red-600 font-semibold mt-2">
+                                    <AlertCircle className="w-4 h-4" />
+                                    <span>Atrasada</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </DragDropContext>
+
+      {isLoading && (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Carregando tarefas...</p>
+        </div>
+      )}
+
+      {!isLoading && tasks.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground mb-4">Nenhuma tarefa encontrada</p>
+          <Button onClick={() => setIsCreateOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Criar primeira tarefa
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }

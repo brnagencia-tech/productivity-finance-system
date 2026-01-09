@@ -4,7 +4,7 @@ import {
   InsertUser, users, 
   categories, InsertCategory, Category,
   tasks, InsertTask, Task,
-  taskCompletions, InsertTaskCompletion, TaskCompletion,
+
   kanbanBoards, InsertKanbanBoard, KanbanBoard,
   kanbanBoardMembers, InsertKanbanBoardMember,
   kanbanColumns, InsertKanbanColumn, KanbanColumn,
@@ -142,9 +142,9 @@ export async function getTasksByUser(userId: number, scope?: "personal" | "profe
   const db = await getDb();
   if (!db) return [];
   if (scope) {
-    return db.select().from(tasks).where(and(eq(tasks.userId, userId), eq(tasks.scope, scope), eq(tasks.isActive, true)));
+    return db.select().from(tasks).where(and(eq(tasks.userId, userId), eq(tasks.scope, scope)));
   }
-  return db.select().from(tasks).where(and(eq(tasks.userId, userId), eq(tasks.isActive, true)));
+  return db.select().from(tasks).where(eq(tasks.userId, userId));
 }
 
 export async function updateTask(id: number, userId: number, data: Partial<InsertTask>) {
@@ -156,43 +156,60 @@ export async function updateTask(id: number, userId: number, data: Partial<Inser
 export async function deleteTask(id: number, userId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(tasks).set({ isActive: false }).where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
+  // Nova estrutura: deletar de verdade (não apenas marcar como inativa)
+  await db.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.userId, userId)));
 }
 
-// ==================== TASK COMPLETION QUERIES ====================
-export async function createTaskCompletion(data: InsertTaskCompletion) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const result = await db.insert(taskCompletions).values(data);
-  return { id: Number(result[0].insertId), ...data };
-}
+// ==================== TASK QUERIES (Nova Estrutura Simplificada) ====================
+// Tarefas agora são únicas (não recorrentes) com data, hora opcional, status e notas
 
-export async function getTaskCompletions(taskId: number, startDate: Date, endDate: Date) {
+// Buscar tarefas atrasadas (status "todo" com data passada)
+export async function getOverdueTasks(userId: number) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(taskCompletions)
-    .where(and(eq(taskCompletions.taskId, taskId), gte(taskCompletions.date, startDate), lte(taskCompletions.date, endDate)));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return db.select().from(tasks)
+    .where(and(
+      eq(tasks.userId, userId),
+      eq(tasks.status, "todo"),
+      lt(tasks.date, today)
+    ))
+    .orderBy(asc(tasks.date));
 }
 
-export async function getTaskCompletionsByUser(userId: number, startDate: Date, endDate: Date) {
+// Deletar tarefas "done" com mais de 7 dias
+export async function deleteOldCompletedTasks() {
+  const db = await getDb();
+  if (!db) return 0;
+  
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+  
+  const result = await db.delete(tasks)
+    .where(and(
+      eq(tasks.status, "done"),
+      lt(tasks.updatedAt, sevenDaysAgo)
+    ));
+  
+  return result[0]?.affectedRows || 0;
+}
+
+// Listar tarefas ordenadas por data/hora (mais próximas primeiro)
+export async function getTasksOrderedByDate(userId: number, scope?: "personal" | "professional") {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(taskCompletions)
-    .where(and(eq(taskCompletions.userId, userId), gte(taskCompletions.date, startDate), lte(taskCompletions.date, endDate)));
-}
-
-export async function upsertTaskCompletion(data: InsertTaskCompletion) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const existing = await db.select().from(taskCompletions)
-    .where(and(eq(taskCompletions.taskId, data.taskId), eq(taskCompletions.date, data.date))).limit(1);
-  if (existing.length > 0) {
-    await db.update(taskCompletions).set({ status: data.status, notes: data.notes })
-      .where(eq(taskCompletions.id, existing[0].id));
-    return existing[0];
+  
+  let conditions = [eq(tasks.userId, userId)];
+  if (scope) {
+    conditions.push(eq(tasks.scope, scope));
   }
-  const result = await db.insert(taskCompletions).values(data);
-  return { id: Number(result[0].insertId), ...data };
+  
+  return db.select().from(tasks)
+    .where(and(...conditions))
+    .orderBy(asc(tasks.date), asc(tasks.time));
 }
 
 // ==================== KANBAN QUERIES ====================
@@ -550,18 +567,16 @@ export async function getDashboardStats(userId: number, month: number, year: num
     .from(variableExpenses)
     .where(and(eq(variableExpenses.userId, userId), gte(variableExpenses.date, startOfMonth), lte(variableExpenses.date, endOfMonth)));
 
-  // Get today's tasks (only daily tasks count for today)
-  const dailyTasks = await db.select().from(tasks)
-    .where(and(eq(tasks.userId, userId), eq(tasks.isActive, true), eq(tasks.frequency, "daily")));
+  // Get today's tasks (nova estrutura: tarefas únicas com status)
+  const todayTasks = await db.select().from(tasks)
+    .where(and(
+      eq(tasks.userId, userId),
+      gte(tasks.date, today),
+      lte(tasks.date, tomorrow)
+    ));
   
-  const dailyTaskIds = dailyTasks.map(t => t.id);
-  
-  // Count only completions for daily tasks
-  const todayCompletions = await db.select().from(taskCompletions)
-    .where(and(eq(taskCompletions.userId, userId), gte(taskCompletions.date, today), lte(taskCompletions.date, tomorrow)));
-
-  const completedToday = todayCompletions.filter(t => t.status === "done" && dailyTaskIds.includes(t.taskId)).length;
-  const totalDailyTasks = dailyTasks.length;
+  const completedToday = todayTasks.filter(t => t.status === "done").length;
+  const totalDailyTasks = todayTasks.length;
 
   // Get habits completion
   const habitsList = await getHabitsByUser(userId);

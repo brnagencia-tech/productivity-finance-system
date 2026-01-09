@@ -33,38 +33,23 @@ export const categories = mysqlTable("categories", {
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = typeof categories.$inferInsert;
 
-// ==================== TASKS (Monitor de Tarefas) ====================
+// ==================== TASKS (Monitor de Tarefas - Nova Estrutura) ====================
 export const tasks = mysqlTable("tasks", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  categoryId: int("categoryId"),
   title: varchar("title", { length: 255 }).notNull(),
-  description: text("description"),
-  frequency: mysqlEnum("frequency", ["daily", "weekly", "monthly", "as_needed"]).default("daily").notNull(),
+  date: timestamp("date").notNull(), // Data da tarefa
+  time: varchar("time", { length: 5 }), // Hora no formato HH:mm (ex: "14:30"), nullable
+  hasTime: boolean("hasTime").default(false).notNull(), // Se tem hora definida ou é "No time"
+  status: mysqlEnum("status", ["todo", "in_progress", "done"]).default("todo").notNull(),
   scope: mysqlEnum("scope", ["personal", "professional"]).default("personal").notNull(),
-  assignedTo: int("assignedTo"),
-  targetCompletionRate: int("targetCompletionRate").default(100),
-  isActive: boolean("isActive").default(true).notNull(),
+  notes: text("notes"), // Campo livre para observações
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = typeof tasks.$inferInsert;
-
-// ==================== TASK COMPLETIONS (Status diário) ====================
-export const taskCompletions = mysqlTable("task_completions", {
-  id: int("id").autoincrement().primaryKey(),
-  taskId: int("taskId").notNull(),
-  userId: int("userId").notNull(),
-  date: timestamp("date").notNull(),
-  status: mysqlEnum("status", ["done", "not_done", "in_progress"]).default("not_done").notNull(),
-  notes: text("notes"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type TaskCompletion = typeof taskCompletions.$inferSelect;
-export type InsertTaskCompletion = typeof taskCompletions.$inferInsert;
 
 // ==================== KANBAN BOARDS ====================
 export const kanbanBoards = mysqlTable("kanban_boards", {

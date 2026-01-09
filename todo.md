@@ -667,3 +667,90 @@
 - [x] Garantir que usuários OAuth não acessem endpoints de usuários gerenciados
 - [x] Testar com usuário OAuth (Bruno via Apple)
 - [x] Testar com usuário gerenciado (Bruno/Karen via email/senha)
+
+### 11. Reformulação Completa do Sistema de Tarefas
+- [ ] Atualizar schema tasks: adicionar campos time (hora), hasTime (boolean), notes (texto)
+- [ ] Modificar campo status para: "todo" | "in_progress" | "done"
+- [ ] Modificar campo scope para: "personal" | "professional"
+- [ ] Criar endpoint tRPC para criar tarefa com novos campos
+- [ ] Criar endpoint tRPC para atualizar status da tarefa (drag & drop)
+- [ ] Criar endpoint tRPC para listar tarefas ordenadas por data/hora
+- [ ] Criar endpoint tRPC para deletar tarefas concluídas há mais de 7 dias
+- [ ] Implementar interface de tabela com 6 colunas (Tarefa, Data, Hora, Status, Tipo, Notas)
+- [ ] Implementar drag & drop de status (A fazer → Em andamento → Feito)
+- [ ] Adicionar ordenação automática: mais próximas primeiro
+- [ ] Destacar em vermelho tarefas "A fazer" que passaram do prazo
+- [ ] Implementar campo "No time" para tarefas sem horário específico
+- [ ] Integrar tarefas com hora ao calendário automaticamente
+- [ ] Implementar job para remover tarefas "Feito" após 1 semana
+- [ ] Testar criação de tarefa com hora e sem hora
+- [ ] Testar drag & drop de status
+- [ ] Testar ordenação e destaque de atrasadas
+- [ ] Testar integração com calendário
+
+
+## Reformulação Completa do Sistema de Tarefas (Em Andamento)
+
+### Fase 1: Limpeza e Migração do Schema
+- [x] Atualizar schema da tabela tasks (nova estrutura simplificada)
+- [x] Aplicar migração do banco (pnpm db:push)
+- [x] Remover tabela taskCompletions do schema
+- [x] Comentar temporariamente analysis.ts e llmContext.ts
+- [x] Remover referências a taskCompletions em db.ts
+- [x] Atualizar getDashboardStats para nova estrutura
+- [x] Corrigir getTasksByUser removendo isActive
+- [x] Corrigir deleteTask para deletar de verdade
+- [x] Atualizar endpoints tRPC de tasks no routers.ts
+- [x] Comentar endpoints de insights temporariamente
+
+### Fase 2: Funções Auxiliares no Backend
+- [x] Criar getOverdueTasks() - buscar tarefas atrasadas (status "todo" com data passada)
+- [x] Criar deleteOldCompletedTasks() - deletar tarefas "done" com mais de 7 dias
+- [x] Criar getTasksOrderedByDate() - listar tarefas ordenadas por data/hora (mais próximas primeiro)
+
+### Fase 3: Interface Frontend (Tasks.tsx)
+- [x] Reescrever Tasks.tsx completamente
+- [x] Criar tabela/cards com colunas: Tarefa | Data | Hora | Status | Tipo | Notas
+- [x] Implementar drag & drop para mudança de status (A fazer → Em andamento → Feito)
+- [x] Adicionar destaque vermelho para tarefas atrasadas
+- [x] Implementar filtros Pessoal/Profissional
+- [x] Criar modal de criação/edição de tarefa
+- [x] Adicionar campo hora com opção "No time"
+- [x] Implementar ordenação automática (mais próximas primeiro)
+
+### Fase 4: Integração com Calendário
+- [ ] Criar função para adicionar tarefas com hora ao calendário automaticamente
+- [ ] Implementar sincronização com calendário externo (Google Calendar?)
+
+### Fase 5: Reimplementação de Análises IA
+- [ ] Reescrever analysis.ts para nova estrutura de tarefas
+- [ ] Reescrever llmContext.ts para nova estrutura
+- [ ] Descomentar endpoints de insights
+- [ ] Testar análises com nova estrutura
+
+### Fase 6: Testes e Validação
+- [ ] Criar testes unitários para novas funções de tarefas
+- [ ] Testar criação, edição e exclusão de tarefas
+- [ ] Testar mudança de status via drag & drop
+- [ ] Testar destaque de tarefas atrasadas
+- [ ] Testar integração com calendário
+- [ ] Validar que tarefas "done" desaparecem após 7 dias
+
+### Especificação da Nova Estrutura de Tarefas
+**Estrutura Obrigatória:**
+- Colunas: Tarefa | Data | Hora (ou "No time") | Status | Tipo | Notas
+- Status padrão: "A fazer" (automático ao criar)
+- Mudança de status: drag & drop estilo Kanban (A fazer → Em andamento → Feito)
+- Tipo: Pessoal/Profissional juntos, apenas destacados visualmente
+- Ordenação: sempre do mais próximo ao mais distante (data + hora)
+
+**Regras de Comportamento:**
+- Tarefas "A fazer" atrasadas ficam VERMELHAS
+- Tarefas "Feito" desaparecem após 7 dias (não arquivar)
+- Tarefas COM hora são automaticamente adicionadas ao calendário
+- Campo hora opcional: pode ter hora específica OU "No time"
+
+**Restrições:**
+- NÃO mexer em funcionalidades já implementadas (Kanban, Usuários, Perfil)
+- NÃO usar sistema antigo de tarefas recorrentes
+- Análises IA serão implementadas DEPOIS da nova estrutura funcionar

@@ -5,9 +5,10 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
-import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyInsights } from "./analysis";
+// TEMPORARIAMENTE COMENTADO - Será reimplementado após nova estrutura de tarefas
+// import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyInsights } from "./analysis";
 import { emitToBoardRoom, KanbanEvents } from "./_core/socket";
-import { collectLLMContextData, formatContextForLLM } from "./llmContext";
+// import { collectLLMContextData, formatContextForLLM } from "./llmContext";
 import { invokeLLM } from "./_core/llm";
 import jwt from "jsonwebtoken";
 
@@ -128,58 +129,49 @@ export const appRouter = router({
      }),
   }),
 
+  // ==================== TASKS (Nova Estrutura Simplificada) ====================
+  // Tarefas agora são únicas (não recorrentes) com data, hora opcional, status e notas
   tasks: router({
     list: protectedProcedure.input(z.object({ scope: z.enum(["personal", "professional"]).optional() }).optional()).query(async ({ ctx, input }) => {
       return db.getTasksByUser(ctx.user.id, input?.scope);
      }),
     create: protectedProcedure.input(z.object({
       title: z.string().min(1),
-      description: z.string().optional(),
-      categoryId: z.number().optional(),
-      frequency: z.enum(["daily", "weekly", "monthly", "as_needed"]).default("daily"),
+      date: z.string().transform(s => new Date(s)),
+      time: z.string().optional(), // "HH:MM" ou null para "No time"
+      hasTime: z.boolean().default(false),
       scope: z.enum(["personal", "professional"]).default("personal"),
-      assignedTo: z.number().optional(),
-      targetCompletionRate: z.number().min(0).max(100).default(100)
+      notes: z.string().optional()
     })).mutation(async ({ ctx, input }) => {
-      return db.createTask({ ...input, userId: ctx.user.id });
+      return db.createTask({ 
+        ...input, 
+        userId: ctx.user.id,
+        status: "todo" // Status padrão ao criar
+      });
      }),
     update: protectedProcedure.input(z.object({
       id: z.number(),
       title: z.string().min(1).optional(),
-      description: z.string().optional(),
-      categoryId: z.number().optional(),
-      frequency: z.enum(["daily", "weekly", "monthly", "as_needed"]).optional(),
+      date: z.string().transform(s => new Date(s)).optional(),
+      time: z.string().optional(),
+      hasTime: z.boolean().optional(),
       scope: z.enum(["personal", "professional"]).optional(),
-      assignedTo: z.number().optional(),
-      targetCompletionRate: z.number().min(0).max(100).optional()
+      notes: z.string().optional()
     })).mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
       await db.updateTask(id, ctx.user.id, data);
       return { success: true };
      }),
+    updateStatus: protectedProcedure.input(z.object({
+      id: z.number(),
+      status: z.enum(["todo", "in_progress", "done"])
+    })).mutation(async ({ ctx, input }) => {
+      await db.updateTask(input.id, ctx.user.id, { status: input.status });
+      return { success: true };
+     }),
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
       await db.deleteTask(input.id, ctx.user.id);
       return { success: true };
-     }),
-    getCompletions: protectedProcedure.input(z.object({
-      startDate: z.string(),
-      endDate: z.string()
-    })).query(async ({ ctx, input }) => {
-      return db.getTaskCompletionsByUser(ctx.user.id, new Date(input.startDate), new Date(input.endDate));
-     }),
-    setCompletion: protectedProcedure.input(z.object({
-      taskId: z.number(),
-      date: z.string(),
-      status: z.enum(["done", "not_done", "in_progress"]),
-      notes: z.string().optional()
-    })).mutation(async ({ ctx, input }) => {
-      return db.upsertTaskCompletion({
-        taskId: input.taskId,
-        userId: ctx.user.id,
-        date: new Date(input.date),
-        status: input.status,
-        notes: input.notes
-      });
      }),
   }),
 
@@ -653,29 +645,33 @@ export const appRouter = router({
   }),
 
   // ==================== INSIGHTS (Análises GPT) ====================
+  // TEMPORARIAMENTE COMENTADO - Será reimplementado após nova estrutura de tarefas
   insights: router({
     getExpenseAnalysis: protectedProcedure.query(async ({ ctx }) => {
-      return generateExpenseAnalysis(ctx.user.id);
+      // return generateExpenseAnalysis(ctx.user.id);
+      return { message: "Análise temporariamente indisponível - em reimplementação" };
     }),
     getProductivityAnalysis: protectedProcedure.query(async ({ ctx }) => {
-      return generateProductivityAnalysis(ctx.user.id);
+      // return generateProductivityAnalysis(ctx.user.id);
+      return { message: "Análise temporariamente indisponível - em reimplementação" };
     }),
     getWeeklyInsights: protectedProcedure.query(async ({ ctx }) => {
-      return generateWeeklyInsights(ctx.user.id);
+      // return generateWeeklyInsights(ctx.user.id);
+      return { message: "Análise temporariamente indisponível - em reimplementação" };
     }),
     generateSuggestions: protectedProcedure.input(z.object({ period: z.enum(["today", "week", "month"]) })).mutation(async ({ ctx, input }) => {
-      const contextData = await collectLLMContextData(ctx.user.id, input.period);
-      const formattedContext = formatContextForLLM(contextData);
-      const response = await invokeLLM({
-        messages: [
-          { role: "system", content: "Voce eh assistente de produtividade" },
-          { role: "user", content: formattedContext }
-        ]
-      });
+      // TEMPORARIAMENTE COMENTADO - Será reimplementado após nova estrutura de tarefas
+      // const contextData = await collectLLMContextData(ctx.user.id, input.period);
+      // const formattedContext = formatContextForLLM(contextData);
+      // const response = await invokeLLM({
+      //   messages: [
+      //     { role: "system", content: "Voce eh assistente de produtividade" },
+      //     { role: "user", content: formattedContext }
+      //   ]
+      // });
       return {
         period: input.period,
-        contextData,
-        suggestions: response.choices[0]?.message?.content || "Nao foi possivel gerar",
+        message: "Sugestões temporariamente indisponíveis - em reimplementação",
         generatedAt: new Date()
       };
     }),

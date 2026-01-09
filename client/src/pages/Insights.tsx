@@ -108,11 +108,23 @@ export default function Insights() {
         {isLoading ? (
           <LoadingSkeleton />
         ) : activeTab === "weekly" && weeklyInsights ? (
-          <WeeklyInsightsView data={weeklyInsights} />
+          (weeklyInsights as any).message ? (
+            <Card><CardContent className="p-6"><p className="text-center text-muted-foreground">{(weeklyInsights as any).message}</p></CardContent></Card>
+          ) : (
+            <WeeklyInsightsView data={weeklyInsights as any} />
+          )
         ) : activeTab === "expenses" && expenseAnalysis ? (
-          <ExpenseAnalysisView data={expenseAnalysis} />
+          (expenseAnalysis as any).message ? (
+            <Card><CardContent className="p-6"><p className="text-center text-muted-foreground">{(expenseAnalysis as any).message}</p></CardContent></Card>
+          ) : (
+            <ExpenseAnalysisView data={expenseAnalysis as any} />
+          )
         ) : activeTab === "productivity" && productivityAnalysis ? (
-          <ProductivityAnalysisView data={productivityAnalysis} />
+          (productivityAnalysis as any).message ? (
+            <Card><CardContent className="p-6"><p className="text-center text-muted-foreground">{(productivityAnalysis as any).message}</p></CardContent></Card>
+          ) : (
+            <ProductivityAnalysisView data={productivityAnalysis as any} />
+          )
         ) : activeTab === "history" ? (
           <AnalysisHistoryView />
         ) : (
@@ -473,13 +485,13 @@ function AnalysisHistoryView() {
     saveAnalysis.mutate({
       weekStartDate: weekStart.toISOString(),
       weekEndDate: weekEnd.toISOString(),
-      overallScore: weeklyInsights.overallScore,
-      taskCompletionRate: weeklyInsights.productivity.taskCompletionRate,
-      habitCompletionRate: weeklyInsights.productivity.habitCompletionRate,
-      totalExpenses: weeklyInsights.expenses.totalSpent,
-      recommendations: [...weeklyInsights.expenses.recommendations, ...weeklyInsights.productivity.recommendations],
-      alerts: weeklyInsights.expenses.alerts,
-      motivationalMessage: weeklyInsights.motivationalMessage
+      overallScore: (weeklyInsights as any).overallScore || 0,
+      taskCompletionRate: (weeklyInsights as any).productivity?.taskCompletionRate || 0,
+      habitCompletionRate: (weeklyInsights as any).productivity?.habitCompletionRate || 0,
+      totalExpenses: (weeklyInsights as any).expenses?.totalSpent || 0,
+      recommendations: [...((weeklyInsights as any).expenses?.recommendations || []), ...((weeklyInsights as any).productivity?.recommendations || [])],
+      alerts: (weeklyInsights as any).expenses?.alerts || [],
+      motivationalMessage: (weeklyInsights as any).motivationalMessage || ""
     }, {
       onSuccess: () => {
         alert("Análise salva no histórico!");
