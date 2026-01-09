@@ -754,3 +754,12 @@
 - NÃO mexer em funcionalidades já implementadas (Kanban, Usuários, Perfil)
 - NÃO usar sistema antigo de tarefas recorrentes
 - Análises IA serão implementadas DEPOIS da nova estrutura funcionar
+
+
+## Correções Urgentes da Página de Tarefas
+
+- [x] Corrigir menu lateral sumindo na página de Tarefas (adicionar DashboardLayout)
+- [x] Adicionar menu de 3 pontos (⋮) para editar/excluir tarefas
+- [x] Melhorar drag & drop: adicionar feedback visual durante arrasto
+- [x] Otimizar drag & drop para funcionar na primeira tentativa
+- [x] Testar todas as correções

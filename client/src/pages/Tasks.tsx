@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Edit2, Clock, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Edit2, Clock, AlertCircle, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import DashboardLayout from "@/components/DashboardLayout";
 
 type TaskStatus = "todo" | "in_progress" | "done";
 
@@ -188,7 +190,8 @@ export default function Tasks() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <DashboardLayout>
+      <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Monitor de Tarefas</h1>
@@ -330,43 +333,64 @@ export default function Tasks() {
               </CardHeader>
               <CardContent>
                 <Droppable droppableId={status}>
-                  {(provided) => (
+                  {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      className="space-y-3 min-h-[200px]"
+                      className={`space-y-3 min-h-[200px] rounded-lg p-2 transition-colors ${
+                        snapshot.isDraggingOver
+                          ? "bg-blue-50 border-2 border-dashed border-blue-400"
+                          : "border-2 border-transparent"
+                      }`}
                     >
                       {sortTasks(tasksByStatus[status]).map((task: any, index: number) => (
                         <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                          {(provided) => (
+                          {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
                               className={`p-4 rounded-lg border-2 ${
+                                snapshot.isDragging
+                                  ? "shadow-2xl scale-105 rotate-2 opacity-90"
+                                  : ""
+                              } ${
                                 isOverdue(task)
                                   ? "bg-red-50 border-red-300"
                                   : "bg-white border-gray-200"
-                              } hover:shadow-md transition-shadow`}
+                              } hover:shadow-md transition-all duration-200`}
+                              style={{
+                                ...provided.draggableProps.style,
+                                cursor: snapshot.isDragging ? 'grabbing' : 'grab'
+                              }}
                             >
                               <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-semibold">{task.title}</h3>
-                                <div className="flex gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleEdit(task)}
-                                  >
-                                    <Edit2 className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDelete(task.id)}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
+                                <h3 className="font-semibold flex-1">{task.title}</h3>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-8 w-8 p-0"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <MoreVertical className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(task); }}>
+                                      <Edit2 className="w-4 h-4 mr-2" />
+                                      Editar
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }}
+                                      className="text-red-600"
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-2" />
+                                      Excluir
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </div>
 
                               <div className="space-y-1 text-sm text-muted-foreground">
@@ -435,6 +459,7 @@ export default function Tasks() {
           </Button>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
