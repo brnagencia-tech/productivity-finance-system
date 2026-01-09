@@ -797,8 +797,27 @@ export async function getManagedUsersByAdmin(adminUserId: number) {
 export async function getManagedUserByEmail(email: string) {
   const db = await getDb();
   if (!db) return null;
-  const result = await db.select().from(managedUsers).where(eq(managedUsers.email, email)).limit(1);
-  return result.length > 0 ? result[0] : null;
+  try {
+    const result = await db.select().from(managedUsers).where(eq(managedUsers.email, email)).limit(1);
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error('[getManagedUserByEmail] Error:', error);
+    // Fallback: usar SQL raw se Drizzle falhar
+    const connection = await import('mysql2/promise');
+    const conn = await connection.createConnection(ENV.DATABASE_URL);
+    try {
+      const [rows] = await conn.execute(
+        'SELECT * FROM managed_users WHERE email = ? LIMIT 1',
+        [email]
+      );
+      await conn.end();
+      return (rows as any[]).length > 0 ? (rows as any[])[0] : null;
+    } catch (fallbackError) {
+      console.error('[getManagedUserByEmail] Fallback error:', fallbackError);
+      await conn.end();
+      return null;
+    }
+  }
 }
 
 export async function getManagedUserById(id: number) {
