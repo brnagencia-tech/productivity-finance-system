@@ -16,7 +16,8 @@ import {
   budgets, InsertBudget,
   habits, InsertHabit, Habit,
   habitLogs, InsertHabitLog,
-  roles, permissions, rolePermissions, userRoles, auditLog, sessions
+  roles, permissions, rolePermissions, userRoles, auditLog, sessions,
+  passwordResetTokens, InsertPasswordResetToken, PasswordResetToken
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -1460,3 +1461,56 @@ export async function getSharedKanbanBoardsForUser(userId: number) {
     .orderBy(desc(kanbanBoards.createdAt));
 }
 
+
+// ==================== PASSWORD RESET TOKENS ====================
+export async function createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(passwordResetTokens).values({
+    userId,
+    token,
+    expiresAt,
+    used: false
+  });
+}
+
+export async function getPasswordResetToken(token: string): Promise<PasswordResetToken | null> {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const result = await db.select()
+    .from(passwordResetTokens)
+    .where(eq(passwordResetTokens.token, token))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function markPasswordResetTokenAsUsed(tokenId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(passwordResetTokens)
+    .set({ 
+      used: true, 
+      usedAt: new Date() 
+    })
+    .where(eq(passwordResetTokens.id, tokenId));
+}
+
+export async function deleteExpiredPasswordResetTokens(): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(passwordResetTokens)
+    .where(lt(passwordResetTokens.expiresAt, new Date()));
+}
+
+export async function deletePasswordResetTokensByUserId(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.delete(passwordResetTokens)
+    .where(eq(passwordResetTokens.userId, userId));
+}

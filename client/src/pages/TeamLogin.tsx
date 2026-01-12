@@ -128,6 +128,13 @@ export default function TeamLogin() {
                 )}
               </Button>
 
+              {/* Forgot Password Link */}
+              <div className="text-center mt-2">
+                <a href="/forgot-password" className="text-sm text-primary hover:underline">
+                  Esqueci minha senha
+                </a>
+              </div>
+
               {/* Info Text */}
               <p className="text-xs text-muted-foreground text-center mt-4">
                 Se você não tem uma conta, solicite ao administrador para criar uma.

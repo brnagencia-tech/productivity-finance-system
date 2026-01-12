@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "a1b3fb4a-170e-4c0e-b8fd-c90f5333e95d",
-  "prevId": "4a9f0a3c-be59-4f78-ab06-56f9582a7319",
+  "id": "39d64f44-ef18-458c-bc8b-d6723029dc01",
+  "prevId": "a1b3fb4a-170e-4c0e-b8fd-c90f5333e95d",
   "tables": {
     "analysis_history": {
       "name": "analysis_history",
@@ -1350,7 +1350,7 @@
         },
         "type": {
           "name": "type",
-          "type": "enum('expense_due','task_reminder','habit_reminder','analysis_ready','system')",
+          "type": "enum('expense_due','task_reminder','habit_reminder','analysis_ready','system','password_reset')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -1418,6 +1418,81 @@
         }
       },
       "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "password_reset_tokens": {
+      "name": "password_reset_tokens",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "token": {
+          "name": "token",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expiresAt": {
+          "name": "expiresAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "used": {
+          "name": "used",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "usedAt": {
+          "name": "usedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "password_reset_tokens_id": {
+          "name": "password_reset_tokens_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "password_reset_tokens_token_unique": {
+          "name": "password_reset_tokens_token_unique",
+          "columns": [
+            "token"
+          ]
+        }
+      },
       "checkConstraint": {}
     },
     "permissions": {

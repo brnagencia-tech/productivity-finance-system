@@ -893,3 +893,12 @@
 
 ## Documentação do Sistema
 - [x] Gerar documentação completa do sistema (arquitetura, APIs, troubleshooting, deploy)
+
+## Recuperação de Senha por E-mail
+- [x] Criar tabela password_reset_tokens no schema do banco de dados
+- [x] Implementar funções de database helpers para gerenciar tokens
+- [x] Criar endpoint tRPC auth.requestPasswordReset
+- [x] Criar endpoint tRPC auth.resetPassword
+- [x] Implementar envio de e-mail com link de reset
+- [x] Criar página frontend /reset-password
+- [x] Testar fluxo completo de recuperação de senha

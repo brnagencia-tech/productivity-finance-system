@@ -103,6 +103,97 @@ export const appRouter = router({
       
       return { success: true };
     }),
+    requestPasswordReset: publicProcedure.input(z.object({
+      email: z.string().email()
+    })).mutation(async ({ input }) => {
+      // Sanitizar email
+      const email = String(input.email || '').trim().toLowerCase();
+      
+      // Buscar usuário por email
+      const user = await db.getManagedUserByEmail(email);
+      if (!user) {
+        // Por segurança, não revelar se o email existe ou não
+        return { success: true, message: 'If the email exists, a password reset link will be sent.' };
+      }
+      
+      // Gerar token aleatório
+      const crypto = await import('crypto');
+      const token = crypto.randomBytes(32).toString('hex');
+      
+      // Token expira em 1 hora
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1);
+      
+      // Deletar tokens antigos do usuário
+      await db.deletePasswordResetTokensByUserId(user.id);
+      
+      // Criar novo token
+      await db.createPasswordResetToken(user.id, token, expiresAt);
+      
+      // Enviar email com link de reset
+      const resetLink = `${process.env.VITE_APP_URL || 'http://localhost:5173'}/reset-password?token=${token}`;
+      
+      try {
+        // Enviar notificação por email usando o sistema de notificações do Manus
+        await db.createNotification({
+          userId: user.id,
+          type: 'password_reset',
+          title: 'Redefinição de Senha',
+          message: `Clique no link para redefinir sua senha: ${resetLink}\n\nEste link expira em 1 hora.\n\nSe você não solicitou esta redefinição, ignore este email.`,
+          isRead: false
+        });
+        
+        console.log(`[Password Reset] Reset link sent to ${email}: ${resetLink}`);
+      } catch (error) {
+        console.error('[Password Reset] Failed to send notification:', error);
+        // Não falhar a requisição se o envio de notificação falhar
+      }
+      
+      return { success: true, message: 'If the email exists, a password reset link will be sent.' };
+    }),
+    resetPassword: publicProcedure.input(z.object({
+      token: z.string().min(1),
+      newPassword: z.string().min(8)
+    })).mutation(async ({ input }) => {
+      // Buscar token
+      const resetToken = await db.getPasswordResetToken(input.token);
+      
+      if (!resetToken) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid or expired reset token' });
+      }
+      
+      // Verificar se token já foi usado
+      if (resetToken.used) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'This reset token has already been used' });
+      }
+      
+      // Verificar se token expirou
+      if (new Date() > new Date(resetToken.expiresAt)) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'This reset token has expired' });
+      }
+      
+      // Buscar usuário
+      const user = await db.getManagedUserById(resetToken.userId);
+      if (!user) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'User not found' });
+      }
+      
+      // Gerar hash da nova senha
+      const bcrypt = await import('bcryptjs');
+      const newPasswordHash = await bcrypt.hash(input.newPassword, 10);
+      
+      // Atualizar senha
+      await db.updateManagedUser(user.id, user.createdByUserId, {
+        passwordHash: newPasswordHash
+      });
+      
+      // Marcar token como usado
+      await db.markPasswordResetTokenAsUsed(resetToken.id);
+      
+      console.log(`[Password Reset] Password successfully reset for user ${user.email}`);
+      
+      return { success: true, message: 'Password has been reset successfully' };
+    }),
   }),
 
   users: router({

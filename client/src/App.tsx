@@ -25,6 +25,8 @@ import AdvancedUserManagement from "./pages/AdvancedUserManagement";
 import TeamLogin from "./pages/TeamLogin";
 // import LoginSelection from "./pages/LoginSelection"; // Removido
 import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 import UserManagement from "./pages/UserManagement";
 
 function Router() {
@@ -32,6 +34,8 @@ function Router() {
     <Switch>
       {/* Rota /login-selection removida - todos usam /team-login */}
       <Route path={"/team-login"} component={TeamLogin} />
+      <Route path={"/forgot-password"} component={ForgotPassword} />
+      <Route path={"/reset-password"} component={ResetPassword} />
       <Route path={"/login"} component={ManagedLogin} />
       <Route path={"/profile"} component={() => <PrivateRoute><Profile /></PrivateRoute>} />
       <Route path={"//"} component={() => <PrivateRoute><Home /></PrivateRoute>} />

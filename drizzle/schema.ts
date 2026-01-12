@@ -337,7 +337,7 @@ export type InsertAnalysisHistory = typeof analysisHistory.$inferInsert;
 export const notifications = mysqlTable("notifications", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  type: mysqlEnum("type", ["expense_due", "task_reminder", "habit_reminder", "analysis_ready", "system"]).notNull(),
+  type: mysqlEnum("type", ["expense_due", "task_reminder", "habit_reminder", "analysis_ready", "system", "password_reset"]).notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
   relatedId: int("relatedId"),
@@ -464,3 +464,17 @@ export const trackerCheckins = mysqlTable("tracker_checkins", {
 
 export type TrackerCheckin = typeof trackerCheckins.$inferSelect;
 export type InsertTrackerCheckin = typeof trackerCheckins.$inferInsert;
+
+// ==================== PASSWORD RESET TOKENS ====================
+export const passwordResetTokens = mysqlTable("password_reset_tokens", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // ID do managed_user
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  used: boolean("used").default(false).notNull(),
+  usedAt: timestamp("usedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
