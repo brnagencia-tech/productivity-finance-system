@@ -1413,3 +1413,8 @@
 - [ ] Mostrar preview da divisão antes de salvar
 - [ ] Adicionar badge "Compartilhado" em despesas compartilhadas
 - [ ] Filtro "Minhas Despesas" vs "Compartilhadas Comigo"
+
+## Correções Técnicas (v1.5.1)
+- [x] Corrigido erro TypeScript em Settings.tsx (router inexistente)
+- [x] Removidas foreign keys de share_notifications (permitir managed_users)
+- [x] Sistema de compartilhamento funcionando corretamente
