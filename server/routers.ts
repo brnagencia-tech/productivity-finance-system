@@ -12,6 +12,164 @@ import { emitToBoardRoom, KanbanEvents } from "./_core/socket";
 import { invokeLLM } from "./_core/llm";
 import jwt from "jsonwebtoken";
 
+// ==================== CLIENTS ROUTER ====================
+export const clientsRouter = router({
+  // Listar clientes do usuário
+  getClients: protectedProcedure.query(async ({ ctx }) => {
+    return await db.getClientsByUser(ctx.user.id);
+  }),
+
+  // Buscar cliente por ID
+  getClientById: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const client = await db.getClientById(input.id);
+      if (!client || client.userId !== ctx.user.id) {
+        throw new Error("Client not found");
+      }
+      return client;
+    }),
+
+  // Criar cliente
+  createClient: protectedProcedure
+    .input(z.object({
+      name: z.string(),
+      company: z.string().optional(),
+      cpfCnpj: z.string().optional(),
+      telefone: z.string().optional(),
+      cep: z.string().optional(),
+      endereco: z.string().optional(),
+      email: z.string().optional(),
+      emailsAdicionais: z.string().optional(),
+      bancoRecebedor: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const clientId = await db.createClient({
+        ...input,
+        userId: ctx.user.id,
+      });
+      return { id: clientId };
+    }),
+
+  // Atualizar cliente
+  updateClient: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      name: z.string().optional(),
+      company: z.string().optional(),
+      cpfCnpj: z.string().optional(),
+      telefone: z.string().optional(),
+      cep: z.string().optional(),
+      endereco: z.string().optional(),
+      email: z.string().optional(),
+      emailsAdicionais: z.string().optional(),
+      bancoRecebedor: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...data } = input;
+      const client = await db.getClientById(id);
+      if (!client || client.userId !== ctx.user.id) {
+        throw new Error("Client not found");
+      }
+      await db.updateClient(id, data);
+      return { success: true };
+    }),
+
+  // Deletar cliente
+  deleteClient: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const client = await db.getClientById(input.id);
+      if (!client || client.userId !== ctx.user.id) {
+        throw new Error("Client not found");
+      }
+      await db.deleteClient(input.id);
+      return { success: true };
+    }),
+
+  // Listar sites de um cliente
+  getClientSites: protectedProcedure
+    .input(z.object({ clientId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const client = await db.getClientById(input.clientId);
+      if (!client || client.userId !== ctx.user.id) {
+        throw new Error("Client not found");
+      }
+      return await db.getSitesByClient(input.clientId);
+    }),
+
+  // Criar site para cliente
+  createClientSite: protectedProcedure
+    .input(z.object({
+      clientId: z.number(),
+      siteDominio: z.string(),
+      servidor: z.string().optional(),
+      estrutura: z.string().optional(),
+      plano: z.string().optional(),
+      inicioPlano: z.date().optional(),
+      expiracaoDominio: z.date().optional(),
+      gateway: z.string().optional(),
+      versao: z.string().optional(),
+      limiteNumero: z.number().optional(),
+      comissaoPercentual: z.string().optional(),
+      observacao: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const client = await db.getClientById(input.clientId);
+      if (!client || client.userId !== ctx.user.id) {
+        throw new Error("Client not found");
+      }
+      const siteId = await db.createClientSite(input);
+      return { id: siteId };
+    }),
+
+  // Atualizar site
+  updateClientSite: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      siteDominio: z.string().optional(),
+      servidor: z.string().optional(),
+      estrutura: z.string().optional(),
+      plano: z.string().optional(),
+      inicioPlano: z.date().optional(),
+      expiracaoDominio: z.date().optional(),
+      gateway: z.string().optional(),
+      versao: z.string().optional(),
+      limiteNumero: z.number().optional(),
+      comissaoPercentual: z.string().optional(),
+      observacao: z.string().optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...data } = input;
+      const site = await db.getSiteById(id);
+      if (!site) {
+        throw new Error("Site not found");
+      }
+      const client = await db.getClientById(site.clientId);
+      if (!client || client.userId !== ctx.user.id) {
+        throw new Error("Client not found");
+      }
+      await db.updateClientSite(id, data);
+      return { success: true };
+    }),
+
+  // Deletar site
+  deleteClientSite: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const site = await db.getSiteById(input.id);
+      if (!site) {
+        throw new Error("Site not found");
+      }
+      const client = await db.getClientById(site.clientId);
+      if (!client || client.userId !== ctx.user.id) {
+        throw new Error("Client not found");
+      }
+      await db.deleteClientSite(input.id);
+      return { success: true };
+    }),
+});
+
 export const appRouter = router({
   system: systemRouter,
   
@@ -1101,6 +1259,9 @@ export const appRouter = router({
       return db.getAuditLogs(input.userId, input.limit);
     }),
   }),
+  
+  clients: clientsRouter,
 });
 
 export type AppRouter = typeof appRouter;
+

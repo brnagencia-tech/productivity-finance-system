@@ -478,3 +478,46 @@ export const passwordResetTokens = mysqlTable("password_reset_tokens", {
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
+
+// ==================== CLIENTS ====================
+export const clients = mysqlTable("clients", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // ID do usuário que criou o cliente
+  name: varchar("name", { length: 255 }).notNull(),
+  company: varchar("company", { length: 255 }),
+  cpfCnpj: varchar("cpfCnpj", { length: 20 }),
+  telefone: varchar("telefone", { length: 20 }),
+  cep: varchar("cep", { length: 10 }),
+  endereco: text("endereco"),
+  email: varchar("email", { length: 255 }),
+  emailsAdicionais: text("emailsAdicionais"), // Separados por vírgula
+  bancoRecebedor: varchar("bancoRecebedor", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Client = typeof clients.$inferSelect;
+export type InsertClient = typeof clients.$inferInsert;
+
+// ==================== CLIENT SITES ====================
+export const clientSites = mysqlTable("client_sites", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId").notNull(), // ID do cliente
+  siteDominio: varchar("siteDominio", { length: 255 }).notNull(),
+  servidor: varchar("servidor", { length: 255 }),
+  estrutura: varchar("estrutura", { length: 255 }),
+  plano: varchar("plano", { length: 255 }),
+  inicioPlano: timestamp("inicioPlano"),
+  expiracaoDominio: timestamp("expiracaoDominio"),
+  gateway: varchar("gateway", { length: 255 }),
+  versao: varchar("versao", { length: 100 }),
+  limiteNumero: int("limiteNumero"),
+  comissaoPercentual: decimal("comissaoPercentual", { precision: 5, scale: 2 }),
+  observacao: text("observacao"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ClientSite = typeof clientSites.$inferSelect;
+export type InsertClientSite = typeof clientSites.$inferInsert;

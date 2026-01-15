@@ -909,3 +909,40 @@
 - [x] Corrigir lógica de aplicação de filtros nos dados
 - [x] Melhorar feedback visual quando filtros são aplicados
 - [x] Testar todos os filtros do dashboard
+
+## Melhorias no Módulo de Clientes
+- [ ] Adicionar campos ao schema: telefone, cep, endereco, bancoRecebedor, emailsAdicionais
+- [ ] Criar tabela client_sites no banco de dados
+- [ ] Atualizar database helpers para novos campos de clientes
+- [ ] Atualizar endpoints tRPC para suportar novos campos
+- [ ] Atualizar interface de cadastro/edição de clientes
+- [ ] Implementar CRUD completo de sites vinculados a clientes
+- [ ] Testar todas as funcionalidades do módulo de Clientes
+
+## Módulo de Gestão de Clientes
+
+### Fase 1: Backend
+- [x] Criar tabela clients no schema (nome, email, telefone, CEP, endereço, banco recebedor, emails adicionais)
+- [x] Criar tabela client_sites no schema (domínio, servidor, estrutura, plano, datas, comissão, observações)
+- [x] Implementar database helpers para CRUD de clientes
+- [x] Implementar database helpers para CRUD de sites de clientes
+- [x] Criar endpoints tRPC para gerenciar clientes (getClients, getClientById, createClient, updateClient, deleteClient)
+- [x] Criar endpoints tRPC para gerenciar sites (getClientSites, createClientSite, updateClientSite, deleteClientSite)
+
+### Fase 2: Frontend
+- [x] Criar página de listagem de clientes (/clients)
+- [x] Implementar formulário de cadastro/edição de cliente
+- [x] Implementar seção de sites vinculados ao cliente
+- [x] Adicionar validação de campos (email, CEP)
+- [x] Implementar tabela de sites com CRUD
+- [x] Adicionar item "Clientes" no menu lateral
+
+### Fase 3: Testes e Validação
+- [ ] Testar criação de cliente
+- [ ] Testar edição de cliente
+- [ ] Testar exclusão de cliente
+- [ ] Testar adição de sites
+- [ ] Testar edição de sites
+- [ ] Testar exclusão de sites
+- [ ] Validar campos obrigatórios
+- [ ] Testes unitários para endpoints de clientes

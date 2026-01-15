@@ -17,7 +17,9 @@ import {
   habits, InsertHabit, Habit,
   habitLogs, InsertHabitLog,
   roles, permissions, rolePermissions, userRoles, auditLog, sessions,
-  passwordResetTokens, InsertPasswordResetToken, PasswordResetToken
+  passwordResetTokens, InsertPasswordResetToken, PasswordResetToken,
+  clients, InsertClient, Client,
+  clientSites, InsertClientSite, ClientSite
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -1513,4 +1515,74 @@ export async function deletePasswordResetTokensByUserId(userId: number): Promise
   
   await db.delete(passwordResetTokens)
     .where(eq(passwordResetTokens.userId, userId));
+}
+
+
+// ==================== CLIENTS ====================
+export async function getClientsByUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(clients).where(eq(clients.userId, userId));
+}
+
+export async function getClientById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(clients).where(eq(clients.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function createClient(data: InsertClient) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(clients).values(data);
+  return Number(result[0].insertId);
+}
+
+export async function updateClient(id: number, data: Partial<InsertClient>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(clients).set(data).where(eq(clients.id, id));
+}
+
+export async function deleteClient(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Deletar sites vinculados primeiro
+  await db.delete(clientSites).where(eq(clientSites.clientId, id));
+  // Deletar cliente
+  await db.delete(clients).where(eq(clients.id, id));
+}
+
+// ==================== CLIENT SITES ====================
+export async function getSitesByClient(clientId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(clientSites).where(eq(clientSites.clientId, clientId));
+}
+
+export async function getSiteById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(clientSites).where(eq(clientSites.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function createClientSite(data: InsertClientSite) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(clientSites).values(data);
+  return Number(result[0].insertId);
+}
+
+export async function updateClientSite(id: number, data: Partial<InsertClientSite>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(clientSites).set(data).where(eq(clientSites.id, id));
+}
+
+export async function deleteClientSite(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(clientSites).where(eq(clientSites.id, id));
 }

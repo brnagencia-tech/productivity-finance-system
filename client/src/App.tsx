@@ -28,6 +28,7 @@ import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import UserManagement from "./pages/UserManagement";
+import Clients from "./pages/Clients";
 
 function Router() {
   return (
@@ -47,6 +48,7 @@ function Router() {
       <Route path={"/habits"} component={() => <PrivateRoute><Habits /></PrivateRoute>} />
       <Route path={"/categories"} component={() => <PrivateRoute><Categories /></PrivateRoute>} />
       <Route path={"/contacts"} component={() => <PrivateRoute><Contacts /></PrivateRoute>} />
+      <Route path={"/clients"} component={() => <PrivateRoute><Clients /></PrivateRoute>} />
       <Route path={"/insights"} component={() => <PrivateRoute><Insights /></PrivateRoute>} />
       <Route path={"/ai-insights"} component={() => <PrivateRoute><AIInsights /></PrivateRoute>} />
       <Route path={"/admin/users"} component={() => <PrivateRoute><AdminUsers /></PrivateRoute>} />
