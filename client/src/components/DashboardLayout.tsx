@@ -70,7 +70,6 @@ const financeMenuItems = [
 const toolsMenuItems = [
   { icon: Brain, label: "Insights IA", path: "/ai-insights" },
   { icon: Tags, label: "Categorias", path: "/categories" },
-  { icon: Users, label: "Contatos", path: "/contacts" },
   { icon: Building2, label: "Clientes", path: "/clients" },
   { icon: Bell, label: "Notificações", path: "/notifications" },
 ];

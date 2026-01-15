@@ -967,3 +967,29 @@
 - [x] Testar filtros de classificação
 - [x] Testar widget de alertas no dashboard
 - [x] Validar datas de expiração e alertas
+
+## Ajustes Finais no Módulo de Clientes
+
+### Exportação e Importação
+- [x] Adicionar botão "Exportar CSV" na página de Clientes
+- [x] Implementar função de exportação de clientes para CSV
+- [x] Adicionar botão "Importar CSV" na página de Clientes
+- [x] Implementar função de importação de clientes via CSV
+- [x] Validar formato do CSV na importação
+
+### Paginação
+- [x] Implementar paginação na lista de clientes (10 por página)
+- [x] Adicionar controles de navegação (anterior/próxima)
+- [x] Mostrar total de clientes e página atual
+
+### Correções de Interface
+- [x] Remover item "Contatos" do menu lateral (DashboardLayout)
+- [x] Corrigir exibição do menu lateral na página de Clientes (usar DashboardLayout)
+- [x] Verificar que todas as páginas mantêm o menu lateral
+
+### Validação para Produção
+- [x] Testar exportação CSV
+- [x] Testar importação CSV
+- [x] Testar paginação
+- [x] Verificar menu lateral em todas as páginas
+- [x] Garantir compatibilidade com código existente
