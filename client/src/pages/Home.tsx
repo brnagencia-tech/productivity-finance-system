@@ -53,15 +53,20 @@ export default function Home() {
       case 'week':
         const weekStart = new Date(today);
         weekStart.setDate(today.getDate() - 7);
+        const weekEnd = new Date(today);
+        weekEnd.setHours(23, 59, 59, 999);
         return {
           startDate: weekStart,
-          endDate: today,
+          endDate: weekEnd,
           month: today.getMonth() + 1,
           year: today.getFullYear()
         };
       case 'month':
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-        const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        const monthStart = new Date(today);
+        monthStart.setDate(today.getDate() - 30);
+        monthStart.setHours(0, 0, 0, 0);
+        const monthEnd = new Date(today);
+        monthEnd.setHours(23, 59, 59, 999);
         return {
           startDate: monthStart,
           endDate: monthEnd,
@@ -195,17 +200,22 @@ export default function Home() {
           
           {/* Filtros de Período */}
           <div className="flex gap-2 flex-wrap">
-            {['Hoje', '7 dias', '30 dias', 'Ano'].map((label, idx) => (
+            {[
+              { label: 'Hoje', value: 'today' },
+              { label: 'Últimos 7 dias', value: 'week' },
+              { label: 'Últimos 30 dias', value: 'month' },
+              { label: 'Este Ano', value: 'year' }
+            ].map((filter) => (
               <button
-                key={idx}
-                onClick={() => setPeriodFilter(['today', 'week', 'month', 'year'][idx])}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  periodFilter === ['today', 'week', 'month', 'year'][idx]
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                key={filter.value}
+                onClick={() => setPeriodFilter(filter.value)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  periodFilter === filter.value
+                    ? 'bg-primary text-primary-foreground shadow-md scale-105'
+                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:scale-102'
                 }`}
               >
-                {label}
+                {filter.label}
               </button>
             ))}
           </div>

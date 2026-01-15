@@ -902,3 +902,10 @@
 - [x] Implementar envio de e-mail com link de reset
 - [x] Criar página frontend /reset-password
 - [x] Testar fluxo completo de recuperação de senha
+
+
+## Correção de Filtros do Dashboard
+- [x] Melhorar filtros de período (Hoje, 7 dias, 30 dias, Ano)
+- [x] Corrigir lógica de aplicação de filtros nos dados
+- [x] Melhorar feedback visual quando filtros são aplicados
+- [x] Testar todos os filtros do dashboard
