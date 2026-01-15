@@ -1297,13 +1297,13 @@
 - [x] Criar tabela `share_notifications` no banco
 - [x] Criar endpoint tRPC para listar notificações
 - [x] Criar endpoint tRPC para marcar como lida
-- [ ] Implementar notificação ao compartilhar tarefa
-- [ ] Implementar notificação ao compartilhar hábito
-- [ ] Criar componente NotificationBell no header
-- [ ] Adicionar badge com contador de não lidas
-- [ ] Implementar dropdown de notificações
-- [ ] Adicionar som de notificação
-- [ ] Adicionar link direto para item compartilhado
+- [x] Implementar notificação ao compartilhar tarefa
+- [x] Implementar notificação ao compartilhar hábito
+- [x] Criar componente NotificationBell no header
+- [x] Adicionar badge com contador de não lidas
+- [x] Implementar dropdown de notificações
+- [x] Adicionar som de notificação
+- [x] Adicionar link direto para item compartilhado
 - [ ] Testar fluxo completo de notificação
 
 ### 3. Contador de Itens Compartilhados

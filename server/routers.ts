@@ -481,6 +481,15 @@ export const appRouter = router({
         permission: input.permission
       });
       
+      // Criar notificação
+      await dbNotifications.createShareNotification({
+        userId: targetUser.id,
+        fromUserId: ctx.user.id,
+        itemType: "task",
+        itemId: input.taskId,
+        itemTitle: task.title
+      });
+      
       return { success: true, sharedWith: targetUser.username };
      }),
     unshare: protectedProcedure.input(z.object({
@@ -963,6 +972,15 @@ export const appRouter = router({
         sharedWithUserId: targetUser.id,
         sharedByUserId: ctx.user.id,
         permission: input.permission
+      });
+      
+      // Criar notificação
+      await dbNotifications.createShareNotification({
+        userId: targetUser.id,
+        fromUserId: ctx.user.id,
+        itemType: "habit",
+        itemId: input.habitId,
+        itemTitle: habit.name
       });
       
       return { success: true, sharedWith: targetUser.username };

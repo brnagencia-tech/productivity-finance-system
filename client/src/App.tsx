@@ -20,7 +20,7 @@ import AdminUsers from "./pages/AdminUsers";
 import Settings from "./pages/Settings";
 import Revenue from "./pages/Revenue";
 import Revenues from "./pages/Revenues";
-import Notifications from "./pages/Notifications";
+// import Notifications from "./pages/Notifications"; // Removido temporariamente
 import ManagedLogin from "./pages/ManagedLogin";
 import AdvancedUserManagement from "./pages/AdvancedUserManagement";
 import TeamLogin from "./pages/TeamLogin";
@@ -58,7 +58,7 @@ function Router() {
       <Route path={"/settings"} component={() => <PrivateRoute><Settings /></PrivateRoute>} />
       <Route path={"/revenue"} component={() => <PrivateRoute><Revenue /></PrivateRoute>} />
       <Route path={"/faturamento"} component={() => <PrivateRoute><Revenues /></PrivateRoute>} />
-      <Route path={"/notifications"} component={() => <PrivateRoute><Notifications /></PrivateRoute>} />
+      {/* <Route path={"/notifications"} component={() => <PrivateRoute><Notifications /></PrivateRoute>} /> */}
       <Route path={"/admin/advanced"} component={() => <PrivateRoute><AdvancedUserManagement /></PrivateRoute>} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
