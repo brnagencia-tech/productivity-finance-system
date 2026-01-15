@@ -265,6 +265,21 @@ export const habitShares = mysqlTable("habit_shares", {
 export type HabitShare = typeof habitShares.$inferSelect;
 export type InsertHabitShare = typeof habitShares.$inferInsert;
 
+// ==================== SHARE NOTIFICATIONS (Notificações de Compartilhamento) ====================
+export const shareNotifications = mysqlTable("share_notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // Usuário que recebe a notificação
+  fromUserId: int("fromUserId").notNull(), // Usuário que compartilhou
+  itemType: mysqlEnum("itemType", ["task", "habit"]).notNull(), // Tipo do item compartilhado
+  itemId: int("itemId").notNull(), // ID do item compartilhado
+  itemTitle: varchar("itemTitle", { length: 255 }).notNull(), // Título do item para exibição
+  isRead: boolean("isRead").default(false).notNull(), // Se foi lida
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ShareNotification = typeof shareNotifications.$inferSelect;
+export type InsertShareNotification = typeof shareNotifications.$inferInsert;
+
 // ==================== HABIT LOGS ====================
 export const habitLogs = mysqlTable("habit_logs", {
   id: int("id").autoincrement().primaryKey(),

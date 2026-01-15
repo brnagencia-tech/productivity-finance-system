@@ -12,6 +12,7 @@ import { trpc } from "@/lib/trpc";
 import { Plus, Trash2, Edit2, Clock, MoreVertical, MapPin, FileText, Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
+import UserAutocomplete from "@/components/UserAutocomplete";
 
 type TaskStatus = "not_started" | "in_progress" | "in_review" | "blocked" | "done";
 
@@ -658,11 +659,15 @@ export default function Tasks() {
           <div className="space-y-4">
             <div>
               <Label>Digite o @username</Label>
-              <Input
-                placeholder="@usuario"
+              <UserAutocomplete
                 value={shareUsername}
-                onChange={(e) => setShareUsername(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleShare()}
+                onChange={setShareUsername}
+                onSelect={(username) => {
+                  setShareUsername(username);
+                  // Auto-submit após selecionar
+                  setTimeout(() => handleShare(), 100);
+                }}
+                placeholder="@usuario"
               />
             </div>
           </div>

@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import * as dbSharing from "./db-sharing";
+import * as dbNotifications from "./db-notifications";
 // TEMPORARIAMENTE COMENTADO - Será reimplementado após nova estrutura de tarefas
 // import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyInsights } from "./analysis";
 import { emitToBoardRoom, KanbanEvents } from "./_core/socket";
@@ -986,6 +987,36 @@ export const appRouter = router({
      }),
   }),
 
+  // Notificações de compartilhamento
+  notifications: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return await dbNotifications.getNotifications(ctx.user.id);
+    }),
+    
+    getUnreadCount: protectedProcedure.query(async ({ ctx }) => {
+      return await dbNotifications.getUnreadCount(ctx.user.id);
+    }),
+    
+    markAsRead: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        await dbNotifications.markAsRead(input.id, ctx.user.id);
+        return { success: true };
+      }),
+    
+    markAllAsRead: protectedProcedure.mutation(async ({ ctx }) => {
+      await dbNotifications.markAllAsRead(ctx.user.id);
+      return { success: true };
+    }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        await dbNotifications.deleteNotification(input.id, ctx.user.id);
+        return { success: true };
+      }),
+  }),
+
   dashboard: router({
     getStats: protectedProcedure.input(z.object({
       month: z.number().min(1).max(12),
@@ -1246,31 +1277,6 @@ export const appRouter = router({
       year: z.number()
     })).query(async ({ ctx, input }) => {
       return db.getMonthlyProfitLoss(ctx.user.id, input.month, input.year);
-     }),
-  }),
-
-  // ==================== NOTIFICATIONS ====================
-  notifications: router({
-    list: protectedProcedure.input(z.object({ unreadOnly: z.boolean().default(false) }).optional()).query(async ({ ctx, input }) => {
-      return db.getNotificationsByUser(ctx.user.id, input?.unreadOnly);
-     }),
-    markAsRead: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
-      await db.markNotificationAsRead(input.id, ctx.user.id);
-      return { success: true };
-     }),
-    markAllAsRead: protectedProcedure.mutation(async ({ ctx }) => {
-      await db.markAllNotificationsAsRead(ctx.user.id);
-      return { success: true };
-     }),
-    delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
-      await db.deleteNotification(input.id, ctx.user.id);
-      return { success: true };
-     }),
-    generateExpenseReminders: protectedProcedure.mutation(async ({ ctx }) => {
-      return db.generateExpenseNotifications(ctx.user.id);
-     }),
-    getUpcomingExpenses: protectedProcedure.query(async ({ ctx }) => {
-      return db.getUpcomingFixedExpenses(ctx.user.id, 7);
      }),
   }),
 

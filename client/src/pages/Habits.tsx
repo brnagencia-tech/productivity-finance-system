@@ -10,6 +10,7 @@ import { trpc } from "@/lib/trpc";
 import { Plus, Trash2, Edit2, Target, CheckCircle2, Circle, ChevronLeft, ChevronRight, Droplets, Dumbbell, Utensils, Footprints, Heart, Coffee, Moon, Share2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import UserAutocomplete from "@/components/UserAutocomplete";
 
 const iconOptions = [
   { value: "💧", label: "Água", Icon: Droplets },
@@ -608,11 +609,15 @@ export default function Habits() {
           <div className="space-y-4">
             <div>
               <Label>Digite o @username</Label>
-              <Input
-                placeholder="@usuario"
+              <UserAutocomplete
                 value={shareUsername}
-                onChange={(e) => setShareUsername(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleShare()}
+                onChange={setShareUsername}
+                onSelect={(username) => {
+                  setShareUsername(username);
+                  // Auto-submit após selecionar
+                  setTimeout(() => handleShare(), 100);
+                }}
+                placeholder="@usuario"
               />
             </div>
           </div>

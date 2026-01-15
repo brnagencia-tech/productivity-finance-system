@@ -1279,3 +1279,58 @@
 - [ ] Atualizar CHANGELOG.md com mudanças
 - [ ] Fazer push para GitHub via Management UI
 - [ ] Testar deploy em produção sem perder dados
+
+
+## Funcionalidades Avançadas de Compartilhamento - v1.4.0
+
+### 1. Autocomplete de @username
+- [x] Criar componente UserAutocomplete reutilizável
+- [x] Implementar busca de usuários ao digitar @
+- [x] Exibir dropdown com avatar, nome completo e @username
+- [x] Adicionar debounce para otimizar buscas
+- [x] Integrar no dialog de compartilhamento de tarefas
+- [x] Integrar no dialog de compartilhamento de hábitos
+- [x] Adicionar navegação por teclado (setas + Enter)
+- [ ] Testar com múltiplos usuários
+
+### 2. Notificações de Compartilhamento
+- [x] Criar tabela `share_notifications` no banco
+- [x] Criar endpoint tRPC para listar notificações
+- [x] Criar endpoint tRPC para marcar como lida
+- [ ] Implementar notificação ao compartilhar tarefa
+- [ ] Implementar notificação ao compartilhar hábito
+- [ ] Criar componente NotificationBell no header
+- [ ] Adicionar badge com contador de não lidas
+- [ ] Implementar dropdown de notificações
+- [ ] Adicionar som de notificação
+- [ ] Adicionar link direto para item compartilhado
+- [ ] Testar fluxo completo de notificação
+
+### 3. Contador de Itens Compartilhados
+- [ ] Criar endpoint para contar itens compartilhados comigo
+- [ ] Adicionar badge no menu lateral (Tarefas/Hábitos)
+- [ ] Atualizar contador em tempo real ao compartilhar
+- [ ] Adicionar tooltip explicativo
+
+### 4. Filtros Avançados de Compartilhamento
+- [ ] Adicionar filtro "Compartilhados comigo" em Tarefas
+- [ ] Adicionar filtro "Compartilhados comigo" em Hábitos
+- [ ] Adicionar filtro por permissão (viewer/editor)
+- [ ] Adicionar filtro "Meus itens" vs "Compartilhados"
+- [ ] Implementar query tRPC para itens compartilhados
+- [ ] Adicionar indicador visual de filtro ativo
+
+### 5. Badges Visuais
+- [ ] Adicionar ícone de compartilhamento em itens compartilhados
+- [ ] Adicionar tooltip mostrando com quem está compartilhado
+- [ ] Diferenciar visualmente viewer vs editor
+- [ ] Adicionar badge "Novo" em itens recém-compartilhados
+- [ ] Implementar cores distintas para cada tipo
+
+### 6. Testes e Validação
+- [ ] Testar autocomplete com busca vazia
+- [ ] Testar notificações com múltiplos usuários
+- [ ] Testar contador em tempo real
+- [ ] Testar filtros combinados
+- [ ] Validar performance com muitos itens
+- [ ] Testar responsividade mobile

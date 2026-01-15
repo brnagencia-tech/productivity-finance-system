@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS share_notifications (\n  id INT PRIMARY KEY AUTO_INCREMENT,\n  userId INT NOT NULL,\n  fromUserId INT NOT NULL,\n  itemType ENUM('task', 'habit') NOT NULL,\n  itemId INT NOT NULL,\n  itemTitle VARCHAR(255) NOT NULL,\n  isRead BOOLEAN DEFAULT FALSE NOT NULL,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,\n  FOREIGN KEY (fromUserId) REFERENCES users(id) ON DELETE CASCADE\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute CREATE TABLE IF NOT EXISTS share_notifications (\n  id INT PRIMARY KEY AUTO_INCREMENT,\n  userId INT NOT NULL,\n  fromUserId INT NOT NULL,\n  itemType ENUM('task', 'habit') NOT NULL,\n  itemId INT NOT NULL,\n  itemTitle VARCHAR(255) NOT NULL,\n  isRead BOOLEAN DEFAULT FALSE NOT NULL,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE,\n  FOREIGN KEY (fromUserId) REFERENCES users(id) ON DELETE CASCADE\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1504
+}
