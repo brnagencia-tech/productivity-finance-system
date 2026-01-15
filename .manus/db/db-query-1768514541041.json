@@ -1,0 +1,18 @@
+{
+  "query": "SELECT id, username, email, firstName, lastName, role FROM managed_users WHERE email = 'teste@teste.com';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, username, email, firstName, lastName, role FROM managed_users WHERE email = 'teste@teste.com';",
+  "rows": [
+    {
+      "id": "90001",
+      "username": "teste",
+      "email": "teste@teste.com",
+      "firstName": "Usuario",
+      "lastName": "Teste",
+      "role": "master"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tusername\temail\tfirstName\tlastName\trole\n90001\tteste\tteste@teste.com\tUsuario\tTeste\tmaster\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

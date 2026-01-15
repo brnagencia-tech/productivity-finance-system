@@ -1227,23 +1227,6 @@ export const appRouter = router({
      }),
   }),
 
-  // ==================== SYSTEM SETTINGS ====================
-  settings: router({
-    get: protectedProcedure.input(z.object({ key: z.string() })).query(async ({ ctx, input }) => {
-      return db.getSetting(ctx.user.id, input.key);
-     }),
-    getAll: protectedProcedure.query(async ({ ctx }) => {
-      return db.getAllSettings(ctx.user.id);
-     }),
-    set: protectedProcedure.input(z.object({
-      key: z.string(),
-      value: z.string(),
-      isEncrypted: z.boolean().default(false)
-    })).mutation(async ({ ctx, input }) => {
-      return db.upsertSetting(ctx.user.id, input.key, input.value, input.isEncrypted);
-     }),
-  }),
-
   // ==================== SALES/REVENUE ====================
   sales: router({
     list: protectedProcedure.input(z.object({

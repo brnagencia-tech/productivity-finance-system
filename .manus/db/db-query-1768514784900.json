@@ -1,0 +1,26 @@
+{
+  "query": "SELECT * FROM managed_users WHERE username = 'karen' LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT * FROM managed_users WHERE username = 'karen' LIMIT 1;",
+  "rows": [
+    {
+      "id": "60032",
+      "createdByUserId": "60001",
+      "firstName": "Karen",
+      "lastName": "Maia",
+      "email": "karen@agenciabrn.com.br",
+      "phoneBR": "NULL",
+      "phoneUS": "NULL",
+      "passwordHash": "$2b$10$yiIJyCJ7uUeAcawyFQxdAeB.P5R.euPaFC4qJoONE9csF3nnhL5J6",
+      "isActive": "1",
+      "lastLogin": "2026-01-09 02:13:07",
+      "createdAt": "2026-01-08 22:33:03",
+      "updatedAt": "2026-01-09 02:13:06",
+      "username": "karen",
+      "role": "master"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcreatedByUserId\tfirstName\tlastName\temail\tphoneBR\tphoneUS\tpasswordHash\tisActive\tlastLogin\tcreatedAt\tupdatedAt\tusername\trole\n60032\t60001\tKaren\tMaia\tkaren@agenciabrn.com.br\tNULL\tNULL\t$2b$10$yiIJyCJ7uUeAcawyFQxdAeB.P5R.euPaFC4qJoONE9csF3nnhL5J6\t1\t2026-01-09 02:13:07\t2026-01-08 22:33:03\t2026-01-09 02:13:06\tkaren\tmaster\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

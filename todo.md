@@ -1354,13 +1354,28 @@
 ## 🐛 Bugs de Compartilhamento (v1.4.2)
 
 ### Bugs Críticos de Compartilhamento
-- [x] Tarefas: "Erro ao compartilhar: Usuário não encontrado" ao tentar compartilhar
-- [x] Hábitos: "Erro ao compartilhar: Usuário não encontrado" ao tentar compartilhar
+- [x] Tarefas: "Erro ao compartilhar: Usuário não encontrado" (getUserByUsername reescrito com logs)
+- [x] Hábitos: "Erro ao compartilhar: Usuário não encontrado" (getUserByUsername reescrito com logs)
 - [x] Kanban: Marcação @username não funciona (criado endpoint público listForMentions)
-- [ ] Kanban: Sistema de compartilhamento (BoardMembersDialog) precisa teste
+- [ ] Kanban: Sistema de compartilhamento (BoardMembersDialog) precisa teste em produção
 
 ### Investigação Necessária
 - [ ] Verificar função getUserByUsername no backend
 - [ ] Verificar se autocomplete retorna username correto
 - [ ] Verificar tabela de usuários (managedUsers vs users)
 - [ ] Verificar sistema de @username no Kanban (MentionInput)
+
+
+## 🚨 PROBLEMAS CRÍTICOS PERSISTENTES (v1.4.3)
+
+### Compartilhamento NÃO Funciona
+- [ ] Hábitos: "Erro ao compartilhar: Usuário não encontrado" (correção anterior não funcionou)
+- [ ] Tarefas: "Erro ao compartilhar: Usuário não encontrado" (correção anterior não funcionou)
+- [ ] Kanban: Não compartilha quadros (BoardMembersDialog não funciona)
+
+### Investigação Urgente
+- [ ] Verificar se getUserByUsername está sendo chamado corretamente
+- [ ] Verificar estrutura real das tabelas (users vs managedUsers)
+- [ ] Verificar logs do backend para erro completo
+- [ ] Testar endpoints manualmente via tRPC
+- [ ] Verificar se username está sendo passado corretamente do frontend

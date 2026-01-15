@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, username, email, firstName, lastName FROM managed_users WHERE username = 'karen' OR email LIKE '%karen%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, username, email, firstName, lastName FROM managed_users WHERE username = 'karen' OR email LIKE '%karen%';",
+  "rows": [
+    {
+      "id": "60032",
+      "username": "karen",
+      "email": "karen@agenciabrn.com.br",
+      "firstName": "Karen",
+      "lastName": "Maia"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tusername\temail\tfirstName\tlastName\n60032\tkaren\tkaren@agenciabrn.com.br\tKaren\tMaia\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}

@@ -5,11 +5,34 @@ import { eq, and } from "drizzle-orm";
 // ==================== USER HELPERS ====================
 export async function getUserByUsername(username: string) {
   const db = await getDb();
-  if (!db) return null;
+  if (!db) {
+    console.log('[getUserByUsername] Database not available');
+    return null;
+  }
   
-  // Buscar em managedUsers (usuários gerenciados pelo sistema)
-  const [user] = await db.select().from(managedUsers).where(eq(managedUsers.username, username)).limit(1);
-  return user || null;
+  console.log('[getUserByUsername] Searching for username:', username);
+  
+  try {
+    // Buscar em managedUsers usando Drizzle ORM
+    const result = await db
+      .select()
+      .from(managedUsers)
+      .where(eq(managedUsers.username, username))
+      .limit(1);
+    
+    console.log('[getUserByUsername] Query result length:', result?.length || 0);
+    
+    if (result && result.length > 0) {
+      console.log('[getUserByUsername] User found - ID:', result[0].id, 'Username:', result[0].username);
+      return result[0];
+    }
+    
+    console.log('[getUserByUsername] User NOT FOUND');
+    return null;
+  } catch (error) {
+    console.error('[getUserByUsername] Error:', error);
+    return null;
+  }
 }
 
 // ==================== TASK HELPERS ====================
