@@ -19,7 +19,8 @@ import {
   roles, permissions, rolePermissions, userRoles, auditLog, sessions,
   passwordResetTokens, InsertPasswordResetToken, PasswordResetToken,
   clients, InsertClient, Client,
-  clientSites, InsertClientSite, ClientSite
+  clientSites, InsertClientSite, ClientSite,
+  revenues, InsertRevenue, Revenue
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -1632,4 +1633,84 @@ export async function getExpiringItemsByUser(userId: number, daysAhead: number =
     );
   
   return expiringSites;
+}
+
+// ==================== REVENUES (Faturamento) ====================
+export async function getRevenuesByUser(userId: number, filters?: {
+  startDate?: string;
+  endDate?: string;
+  revenueType?: 'pessoal' | 'empresa';
+  currency?: 'BRL' | 'USD';
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(revenues.userId, userId)];
+  
+  if (filters?.startDate) {
+    conditions.push(gte(revenues.date, new Date(filters.startDate)));
+  }
+  if (filters?.endDate) {
+    conditions.push(lte(revenues.date, new Date(filters.endDate)));
+  }
+  if (filters?.revenueType) {
+    conditions.push(eq(revenues.revenueType, filters.revenueType));
+  }
+  if (filters?.currency) {
+    conditions.push(eq(revenues.currency, filters.currency));
+  }
+  
+  return await db.select().from(revenues).where(and(...conditions)).orderBy(desc(revenues.date));
+}
+
+export async function getRevenueById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  return await db.select().from(revenues).where(eq(revenues.id, id)).limit(1).then(rows => rows[0] || null);
+}
+
+export async function createRevenue(data: InsertRevenue) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(revenues).values(data);
+  return result[0].insertId;
+}
+
+export async function updateRevenue(id: number, data: Partial<InsertRevenue>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(revenues).set(data).where(eq(revenues.id, id));
+}
+
+export async function deleteRevenue(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(revenues).where(eq(revenues.id, id));
+}
+
+export async function getRevenueTotalsByTypeAndCurrency(userId: number, filters?: {
+  startDate?: string;
+  endDate?: string;
+}) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const conditions = [eq(revenues.userId, userId)];
+  
+  if (filters?.startDate) {
+    conditions.push(gte(revenues.date, new Date(filters.startDate)));
+  }
+  if (filters?.endDate) {
+    conditions.push(lte(revenues.date, new Date(filters.endDate)));
+  }
+  
+  return await db
+    .select({
+      revenueType: revenues.revenueType,
+      currency: revenues.currency,
+      total: sql<number>`SUM(${revenues.amount})`
+    })
+    .from(revenues)
+    .where(and(...conditions))
+    .groupBy(revenues.revenueType, revenues.currency);
 }

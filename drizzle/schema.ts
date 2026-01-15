@@ -129,7 +129,9 @@ export const variableExpenses = mysqlTable("variable_expenses", {
   userId: int("userId").notNull(),
   categoryId: int("categoryId"),
   date: timestamp("date").notNull(),
+  time: varchar("time", { length: 8 }), // Hora no formato HH:MM:SS
   company: varchar("company", { length: 255 }),
+  cnpj: varchar("cnpj", { length: 18 }), // CNPJ da empresa fornecedora
   description: varchar("description", { length: 500 }),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   receiptUrl: text("receiptUrl"),
@@ -156,6 +158,8 @@ export const fixedExpenses = mysqlTable("fixed_expenses", {
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   dueDay: int("dueDay").notNull(),
   scope: mysqlEnum("scope", ["personal", "professional"]).default("personal").notNull(),
+  expenseType: mysqlEnum("expenseType", ["pessoal", "empresa"]).default("pessoal").notNull(),
+  currency: mysqlEnum("currency", ["BRL", "USD"]).default("BRL").notNull(),
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -195,6 +199,26 @@ export const budgets = mysqlTable("budgets", {
 
 export type Budget = typeof budgets.$inferSelect;
 export type InsertBudget = typeof budgets.$inferInsert;
+
+// ==================== REVENUES (Faturamento) ====================
+export const revenues = mysqlTable("revenues", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  date: timestamp("date").notNull(),
+  description: varchar("description", { length: 500 }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  revenueType: mysqlEnum("revenueType", ["pessoal", "empresa"]).default("pessoal").notNull(),
+  currency: mysqlEnum("currency", ["BRL", "USD"]).default("BRL").notNull(),
+  category: varchar("category", { length: 100 }), // Ex: "Consultoria", "Venda de Produto", etc.
+  client: varchar("client", { length: 255 }), // Nome do cliente/empresa pagadora
+  notes: text("notes"),
+  receiptUrl: text("receiptUrl"), // Comprovante de recebimento
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Revenue = typeof revenues.$inferSelect;
+export type InsertRevenue = typeof revenues.$inferInsert;
 
 // ==================== HABITS ====================
 export const habits = mysqlTable("habits", {

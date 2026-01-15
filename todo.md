@@ -1012,3 +1012,40 @@
 - [x] Ao clicar no cliente, abrir perfil lateral
 - [x] Manter formulário de criação/edição no modal existente
 - [x] Garantir performance e UX fluida
+
+## Sistema Financeiro com Múltiplas Moedas e Upload de Comprovantes
+
+### Dashboard
+- [x] Remover widget "Alertas de Vencimento" do Dashboard (Home.tsx)
+
+### Schema e Backend
+- [x] Atualizar tabela `variable_expenses` com campos: time, cnpj (já tinha: tipo, categoria, valor, moeda, data, empresa_fornecedora, comprovante_url, user_id)
+- [x] Criar tabela `revenues` (faturamento) com campos: tipo (pessoal/empresa), descrição, valor, moeda (BRL/USD), data, categoria, client, user_id
+- [x] Atualizar tabela `fixed_expenses` adicionando campos: expenseType (pessoal/empresa), currency (BRL/USD)
+- [ ] Adicionar helpers no db.ts para CRUD de expenses, revenues e fixed_expenses
+- [ ] Criar endpoints tRPC para expenses (create, list, update, delete)
+- [ ] Criar endpoints tRPC para revenues (create, list, update, delete)
+- [ ] Criar endpoints tRPC para fixed_expenses (create, list, update, delete)
+- [ ] Implementar endpoint tRPC para upload de comprovante (S3)
+- [ ] Implementar endpoint tRPC para OCR de nota fiscal (apenas para role admin)
+
+### Frontend - Páginas
+- [ ] Criar página /faturamento com tabs (Pessoal/Empresa) e filtro de moeda
+- [ ] Criar página /despesas-variaveis com upload de comprovante
+- [ ] Criar página /despesas-fixas com gestão de recorrências
+- [ ] Atualizar Dashboard com cards separados por moeda (BRL/USD)
+- [ ] Adicionar gráficos de faturamento vs despesas por moeda
+
+### Upload e OCR
+- [ ] Implementar componente de upload de imagem/PDF
+- [ ] Para usuários comuns: upload + formulário manual
+- [ ] Para admins: upload + OCR automático + revisão
+- [ ] Armazenar comprovantes no S3 com referência no banco
+- [ ] Exibir thumbnail do comprovante na lista de despesas
+
+### Regras de Negócio
+- [ ] Usuário comum vê apenas seus próprios registros
+- [ ] Admin/CEO vê todos os registros da empresa
+- [ ] Filtros por período, categoria, moeda e tipo (pessoal/empresa)
+- [ ] Cálculos automáticos de totais por moeda
+- [ ] Conversão de moeda (opcional) com taxa configurável
