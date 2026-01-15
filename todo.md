@@ -1085,3 +1085,33 @@
 - [x] Validação de permissões implementada nos endpoints
 - [x] CHANGELOG.md atualizado com todas as mudanças
 - [x] Tarefas concluídas marcadas no todo.md
+
+## Integração S3, OCR e Atualização de Despesas Variáveis
+
+### Upload S3 Real
+- [x] Criar endpoint tRPC `revenues.uploadReceipt` em server/routers.ts
+- [x] Implementar upload usando `storagePut()` do server/storage.ts
+- [x] Gerar nome de arquivo único com sufixo aleatório
+- [x] Retornar URL pública do S3
+- [x] Atualizar ReceiptUpload.tsx para usar endpoint real
+
+### OCR com invokeLLM
+- [x] Criar endpoint tRPC `revenues.extractReceiptData` para OCR
+- [x] Implementar extração de: CNPJ, empresa, valor, data, hora
+- [x] Usar `response_format` com JSON schema para dados estruturados
+- [x] Adicionar tratamento de erros para OCR
+- [x] Adicionar validação de role admin no endpoint
+- [x] Atualizar ReceiptUpload para chamar OCR real (apenas admin)
+
+### Atualização de Despesas Variáveis
+- [x] Tabs Pessoal/Profissional já existentes (mantidos)
+- [x] Adicionar campos: hora, moeda (BRL/USD), CNPJ no formulário
+- [ ] Adicionar cards de totais por moeda (4 cards)
+- [ ] Atualizar formulário com campo de moeda
+- [ ] Atualizar formulário com campo de tipo (pessoal/empresa)
+- [ ] Atualizar endpoints tRPC para suportar filtros de moeda e tipo
+- [ ] Integrar ReceiptUpload no modal de despesas
+
+### Documentação
+- [ ] Atualizar CHANGELOG.md
+- [ ] Marcar tarefas concluídas no todo.md

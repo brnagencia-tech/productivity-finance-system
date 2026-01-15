@@ -26,11 +26,15 @@ export default function VariableExpenses() {
 
   const [newExpense, setNewExpense] = useState({
     date: new Date().toISOString().split("T")[0],
+    time: new Date().toTimeString().split(" ")[0],
     categoryId: undefined as number | undefined,
     company: "",
+    cnpj: "",
     description: "",
     amount: "",
+    currency: "BRL" as "BRL" | "USD",
     notes: "",
+    receiptUrl: "",
     scope: "personal" as const
   });
 
@@ -56,11 +60,15 @@ export default function VariableExpenses() {
       setIsCreateOpen(false);
       setNewExpense({
         date: new Date().toISOString().split("T")[0],
+        time: new Date().toTimeString().split(" ")[0],
         categoryId: undefined,
         company: "",
+        cnpj: "",
         description: "",
         amount: "",
+        currency: "BRL" as "BRL" | "USD",
         notes: "",
+        receiptUrl: "",
         scope: "personal"
       });
       toast.success("Despesa registrada!");
@@ -139,7 +147,7 @@ export default function VariableExpenses() {
                 <DialogDescription>Adicione uma nova despesa variável</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Data</Label>
                     <Input
@@ -150,16 +158,40 @@ export default function VariableExpenses() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Valor (R$)</Label>
+                    <Label>Hora</Label>
                     <Input
-                      type="number"
-                      step="0.01"
-                      value={newExpense.amount}
-                      onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                      placeholder="0,00"
+                      type="time"
+                      value={newExpense.time}
+                      onChange={(e) => setNewExpense({ ...newExpense, time: e.target.value })}
                       className="bg-secondary border-border"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label>Moeda</Label>
+                    <Select
+                      value={newExpense.currency}
+                      onValueChange={(v: "BRL" | "USD") => setNewExpense({ ...newExpense, currency: v })}
+                    >
+                      <SelectTrigger className="bg-secondary border-border">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BRL">BRL (R$)</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Valor</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={newExpense.amount}
+                    onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
+                    placeholder="0,00"
+                    className="bg-secondary border-border"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -199,14 +231,25 @@ export default function VariableExpenses() {
                     </Select>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Empresa/Estabelecimento</Label>
-                  <Input
-                    value={newExpense.company}
-                    onChange={(e) => setNewExpense({ ...newExpense, company: e.target.value })}
-                    placeholder="Ex: Restaurante, Uber, Amazon..."
-                    className="bg-secondary border-border"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Empresa/Estabelecimento</Label>
+                    <Input
+                      value={newExpense.company}
+                      onChange={(e) => setNewExpense({ ...newExpense, company: e.target.value })}
+                      placeholder="Ex: Restaurante, Uber, Amazon..."
+                      className="bg-secondary border-border"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>CNPJ (opcional)</Label>
+                    <Input
+                      value={newExpense.cnpj}
+                      onChange={(e) => setNewExpense({ ...newExpense, cnpj: e.target.value })}
+                      placeholder="00.000.000/0000-00"
+                      className="bg-secondary border-border"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Descrição</Label>

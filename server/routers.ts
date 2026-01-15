@@ -1387,6 +1387,100 @@ export const appRouter = router({
       .query(async ({ ctx, input }) => {
         return await db.getRevenueTotalsByTypeAndCurrency(ctx.user.id, input);
       }),
+    
+    uploadReceipt: protectedProcedure
+      .input(z.object({
+        fileData: z.string(), // Base64 encoded file
+        fileName: z.string(),
+        contentType: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { storagePut } = await import("./storage");
+        
+        // Gerar nome único com sufixo aleatório
+        const randomSuffix = Math.random().toString(36).substring(2, 15);
+        const fileExtension = input.fileName.split('.').pop();
+        const storageKey = `receipts/${ctx.user.id}/${Date.now()}-${randomSuffix}.${fileExtension}`;
+        
+        // Decodificar base64
+        const buffer = Buffer.from(input.fileData, 'base64');
+        
+        // Upload para S3
+        const { url } = await storagePut(storageKey, buffer, input.contentType);
+        
+        return { url };
+      }),
+    
+    extractReceiptData: protectedProcedure
+      .input(z.object({
+        receiptUrl: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Apenas admins podem usar OCR
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ 
+            code: 'FORBIDDEN', 
+            message: 'OCR automático disponível apenas para administradores' 
+          });
+        }
+        
+        const { invokeLLM } = await import("./_core/llm");
+        
+        try {
+          const response = await invokeLLM({
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: input.receiptUrl,
+                      detail: "high"
+                    }
+                  },
+                  {
+                    type: "text",
+                    text: "Extraia as seguintes informações desta nota fiscal ou cupom fiscal: CNPJ da empresa (formato 00.000.000/0000-00), nome da empresa, valor total (apenas números com 2 casas decimais), data (formato YYYY-MM-DD) e hora (formato HH:MM:SS). Se algum campo não estiver visível, retorne null."
+                  }
+                ]
+              }
+            ],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "receipt_data",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    cnpj: { type: ["string", "null"], description: "CNPJ no formato 00.000.000/0000-00" },
+                    company: { type: ["string", "null"], description: "Nome da empresa" },
+                    amount: { type: ["string", "null"], description: "Valor total com 2 casas decimais" },
+                    date: { type: ["string", "null"], description: "Data no formato YYYY-MM-DD" },
+                    time: { type: ["string", "null"], description: "Hora no formato HH:MM:SS" }
+                  },
+                  required: ["cnpj", "company", "amount", "date", "time"],
+                  additionalProperties: false
+                }
+              }
+            }
+          });
+          
+          const content = response.choices[0]?.message?.content;
+          if (!content) {
+            throw new Error("OCR não retornou dados");
+          }
+          
+          const data = typeof content === 'string' ? JSON.parse(content) : content;
+          return data;
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: `Erro ao processar OCR: ${error instanceof Error ? error.message : 'Erro desconhecido'}`
+          });
+        }
+      }),
   }),
 });
 

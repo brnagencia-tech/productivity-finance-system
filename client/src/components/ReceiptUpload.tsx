@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 
 interface ReceiptUploadProps {
   onUploadComplete: (data: {
@@ -67,35 +68,41 @@ export function ReceiptUpload({
     }
   };
 
+  const uploadReceiptMutation = trpc.revenues.uploadReceipt.useMutation();
+  const extractDataMutation = trpc.revenues.extractReceiptData.useMutation();
+
   const handleUpload = async () => {
     if (!file) return;
 
     setUploading(true);
     try {
-      // 1. Upload para S3
-      const formData = new FormData();
-      formData.append('file', file);
+      // 1. Converter arquivo para base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          // Remover prefixo data:*/*;base64,
+          const base64Data = base64.split(',')[1];
+          resolve(base64Data);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-      // Aqui você implementaria o upload real para S3
-      // Por enquanto, simulando com URL local
-      const receiptUrl = URL.createObjectURL(file);
+      const fileData = await base64Promise;
 
-      // 2. Se for admin, fazer OCR automático
+      // 2. Upload para S3
+      const { url: receiptUrl } = await uploadReceiptMutation.mutateAsync({
+        fileData,
+        fileName: file.name,
+        contentType: file.type,
+      });
+
+      // 3. Se for admin, fazer OCR automático
       if (isAdmin) {
         setProcessing(true);
         try {
-          // Chamar endpoint tRPC para OCR
-          // const ocrResult = await trpc.receipts.extractData.mutate({ receiptUrl });
-          
-          // Simulando resposta de OCR
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          const ocrResult = {
-            company: "Empresa Exemplo LTDA",
-            cnpj: "12.345.678/0001-90",
-            amount: "150.00",
-            date: new Date().toISOString().split('T')[0],
-            time: "14:30:00"
-          };
+          const ocrResult = await extractDataMutation.mutateAsync({ receiptUrl });
 
           onUploadComplete({
             receiptUrl,

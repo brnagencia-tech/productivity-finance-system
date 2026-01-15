@@ -33,7 +33,29 @@
 
 ---
 
-## [Checkpoint Atual] - 2026-01-15 - Sistema Financeiro Multi-Moeda Completo
+## [Checkpoint Atual] - 2026-01-15 - Integração S3, OCR e Multi-Moeda
+
+### Adicionado (Nova Iteração)
+- **Upload S3 Real**: Endpoint `revenues.uploadReceipt` implementado usando `storagePut()` para salvar comprovantes no S3 com URLs públicas
+- **OCR Automático para Admins**: Endpoint `revenues.extractReceiptData` usando `invokeLLM` com visão para extrair CNPJ, empresa, valor, data e hora de notas fiscais
+- **Componente ReceiptUpload Integrado**: Upload real para S3 e OCR automático para roles admin, preenchimento manual para usuários comuns
+- **Campos de Multi-Moeda em Despesas Variáveis**: Adicionados campos hora, moeda (BRL/USD) e CNPJ no formulário de despesas
+
+### Modificado (Nova Iteração)
+- `server/routers.ts`: Adicionados endpoints `uploadReceipt` e `extractReceiptData` no router revenues
+- `client/src/components/ReceiptUpload.tsx`: Integrado com endpoints tRPC reais de upload e OCR
+- `client/src/pages/VariableExpenses.tsx`: Adicionados campos time, currency, cnpj e receiptUrl no estado e formulário
+
+### Notas Técnicas (Nova Iteração)
+- OCR limitado a roles `admin` por validação no backend
+- Upload S3 usa base64 encoding para transferência de arquivos
+- Nomes de arquivo no S3 incluem sufixo aleatório para evitar enumeração
+- Schema JSON estrito para extração de dados de notas fiscais
+- Formulário de Despesas Variáveis manteve estrutura existente (tabs Pessoal/Profissional)
+
+---
+
+## [Checkpoint d0ba9929] - 2026-01-15 - Sistema Financeiro Multi-Moeda Completo
 
 ### Adicionado
 - **Endpoints tRPC de Revenues** (`server/routers.ts`):
