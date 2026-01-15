@@ -42,6 +42,7 @@ export const tasks = mysqlTable("tasks", {
   time: varchar("time", { length: 5 }), // Hora no formato HH:mm (ex: "14:30"), nullable
   hasTime: boolean("hasTime").default(false).notNull(), // Se tem hora definida ou é "No time"
   status: mysqlEnum("status", ["todo", "not_started", "in_progress", "in_review", "blocked", "done"]).default("not_started").notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high"]).default("medium").notNull(), // Prioridade da tarefa
   scope: mysqlEnum("scope", ["personal", "professional"]).default("personal").notNull(),
   location: varchar("location", { length: 255 }), // Localização/onde (ONDE)
   notes: text("notes"), // Campo livre para observações
@@ -51,6 +52,19 @@ export const tasks = mysqlTable("tasks", {
 
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = typeof tasks.$inferInsert;
+
+// ==================== TASK SHARES (Compartilhamento de Tarefas) ====================
+export const taskShares = mysqlTable("task_shares", {
+  id: int("id").autoincrement().primaryKey(),
+  taskId: int("taskId").notNull(), // ID da tarefa compartilhada
+  sharedWithUserId: int("sharedWithUserId").notNull(), // ID do usuário que recebeu o compartilhamento
+  sharedByUserId: int("sharedByUserId").notNull(), // ID do usuário que compartilhou
+  permission: mysqlEnum("permission", ["viewer", "editor"]).default("viewer").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TaskShare = typeof taskShares.$inferSelect;
+export type InsertTaskShare = typeof taskShares.$inferInsert;
 
 // ==================== KANBAN BOARDS ====================
 export const kanbanBoards = mysqlTable("kanban_boards", {
@@ -228,7 +242,7 @@ export const habits = mysqlTable("habits", {
   name: varchar("name", { length: 100 }).notNull(),
   icon: varchar("icon", { length: 50 }),
   color: varchar("color", { length: 20 }),
-  targetValue: decimal("targetValue", { precision: 10, scale: 2 }),
+  targetValue: varchar("targetValue", { length: 100 }), // Aceita texto livre: "uma hora", "2 litros", "8 copos", etc
   unit: varchar("unit", { length: 50 }),
   frequency: mysqlEnum("frequency", ["daily", "weekly"]).default("daily").notNull(),
   isActive: boolean("isActive").default(true).notNull(),
@@ -237,6 +251,19 @@ export const habits = mysqlTable("habits", {
 
 export type Habit = typeof habits.$inferSelect;
 export type InsertHabit = typeof habits.$inferInsert;
+
+// ==================== HABIT SHARES (Compartilhamento de Hábitos) ====================
+export const habitShares = mysqlTable("habit_shares", {
+  id: int("id").autoincrement().primaryKey(),
+  habitId: int("habitId").notNull(), // ID do hábito compartilhado
+  sharedWithUserId: int("sharedWithUserId").notNull(), // ID do usuário que recebeu o compartilhamento
+  sharedByUserId: int("sharedByUserId").notNull(), // ID do usuário que compartilhou
+  permission: mysqlEnum("permission", ["viewer", "editor"]).default("viewer").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type HabitShare = typeof habitShares.$inferSelect;
+export type InsertHabitShare = typeof habitShares.$inferInsert;
 
 // ==================== HABIT LOGS ====================
 export const habitLogs = mysqlTable("habit_logs", {

@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Edit2, Clock, MoreVertical, MapPin, FileText } from "lucide-react";
+import { Plus, Trash2, Edit2, Clock, MoreVertical, MapPin, FileText, Share2, X } from "lucide-react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/DashboardLayout";
 
@@ -44,12 +44,15 @@ export default function Tasks() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [viewNotesTask, setViewNotesTask] = useState<any>(null);
+  const [shareDialogTask, setShareDialogTask] = useState<any>(null);
+  const [shareUsername, setShareUsername] = useState("");
   const [newTask, setNewTask] = useState({
     title: "",
     date: new Date().toISOString().split("T")[0],
     time: "",
     hasTime: false,
     status: "not_started" as TaskStatus,
+    priority: "medium" as "low" | "medium" | "high",
     scope: "personal" as "personal" | "professional",
     location: "",
     notes: ""
@@ -92,12 +95,33 @@ export default function Tasks() {
     }
   });
 
+  const shareMutation = trpc.tasks.share.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Tarefa compartilhada com @${data.sharedWith}!`);
+      setShareUsername("");
+      setShareDialogTask(null);
+    },
+    onError: (error) => {
+      toast.error(`Erro ao compartilhar: ${error.message}`);
+    }
+  });
+
+  const unshareMutation = trpc.tasks.unshare.useMutation({
+    onSuccess: () => {
+      toast.success("Compartilhamento removido!");
+    },
+    onError: (error) => {
+      toast.error(`Erro ao remover compartilhamento: ${error.message}`);
+    }
+  });
+
   const resetForm = () => {
     setEditingTask(null);
     setNewTask({
       title: "",
       date: new Date().toISOString().split("T")[0],
       time: "",
+      priority: "medium",
       hasTime: false,
       status: "not_started",
       scope: "personal",
@@ -140,6 +164,7 @@ export default function Tasks() {
       time: task.time || "",
       hasTime: task.hasTime,
       status: task.status,
+      priority: task.priority || "medium",
       scope: task.scope,
       location: task.location || "",
       notes: task.notes || ""
@@ -151,6 +176,23 @@ export default function Tasks() {
     if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
       deleteMutation.mutate({ id });
     }
+  };
+
+  const handleShare = () => {
+    if (!shareDialogTask || !shareUsername.trim()) {
+      toast.error("Digite um @username válido");
+      return;
+    }
+    shareMutation.mutate({
+      taskId: shareDialogTask.id,
+      username: shareUsername,
+      permission: "editor"
+    });
+  };
+
+  const openShareDialog = (task: any) => {
+    setShareDialogTask(task);
+    setShareUsername("");
   };
 
   const handleStatusChange = (taskId: number, newStatus: TaskStatus) => {
@@ -288,7 +330,7 @@ export default function Tasks() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="status">Status *</Label>
                     <Select value={newTask.status} onValueChange={(value: TaskStatus) => setNewTask({ ...newTask, status: value })}>
@@ -301,6 +343,20 @@ export default function Tasks() {
                             {statusIcons[key as TaskStatus]} {label}
                           </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="priority">Prioridade *</Label>
+                    <Select value={newTask.priority} onValueChange={(value: "low" | "medium" | "high") => setNewTask({ ...newTask, priority: value })}>
+                      <SelectTrigger className="min-h-[44px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">🟢 Baixa</SelectItem>
+                        <SelectItem value="medium">🟡 Média</SelectItem>
+                        <SelectItem value="high">🔴 Alta</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -466,6 +522,10 @@ export default function Tasks() {
                               <Edit2 className="mr-2 h-4 w-4" />
                               Editar
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openShareDialog(task)}>
+                              <Share2 className="mr-2 h-4 w-4" />
+                              Compartilhar
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleDelete(task.id)} className="text-red-600">
                               <Trash2 className="mr-2 h-4 w-4" />
                               Excluir
@@ -496,6 +556,10 @@ export default function Tasks() {
                           <DropdownMenuItem onClick={() => handleEdit(task)}>
                             <Edit2 className="mr-2 h-4 w-4" />
                             Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openShareDialog(task)}>
+                            <Share2 className="mr-2 h-4 w-4" />
+                            Compartilhar
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDelete(task.id)} className="text-red-600">
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -584,6 +648,34 @@ export default function Tasks() {
           </>
         )}
       </div>
+
+      {/* Dialog de Compartilhamento */}
+      <Dialog open={!!shareDialogTask} onOpenChange={(open) => !open && setShareDialogTask(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Compartilhar Tarefa</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Digite o @username</Label>
+              <Input
+                placeholder="@usuario"
+                value={shareUsername}
+                onChange={(e) => setShareUsername(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleShare()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareDialogTask(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleShare} disabled={shareMutation.isPending}>
+              {shareMutation.isPending ? "Compartilhando..." : "Compartilhar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

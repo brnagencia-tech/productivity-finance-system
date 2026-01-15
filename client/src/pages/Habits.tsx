@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Edit2, Target, CheckCircle2, Circle, ChevronLeft, ChevronRight, Droplets, Dumbbell, Utensils, Footprints, Heart, Coffee, Moon } from "lucide-react";
+import { Plus, Trash2, Edit2, Target, CheckCircle2, Circle, ChevronLeft, ChevronRight, Droplets, Dumbbell, Utensils, Footprints, Heart, Coffee, Moon, Share2, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -38,6 +38,8 @@ export default function Habits() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<any>(null);
+  const [shareDialogHabit, setShareDialogHabit] = useState<any>(null);
+  const [shareUsername, setShareUsername] = useState("");
   const [newHabit, setNewHabit] = useState({
     name: "",
     icon: "💧",
@@ -105,6 +107,26 @@ export default function Habits() {
     onError: () => toast.error("Erro ao remover hábito")
   });
 
+  const shareHabit = trpc.habits.share.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Hábito compartilhado com @${data.sharedWith}!`);
+      setShareUsername("");
+      setShareDialogHabit(null);
+    },
+    onError: (error) => {
+      toast.error(`Erro ao compartilhar: ${error.message}`);
+    }
+  });
+
+  const unshareHabit = trpc.habits.unshare.useMutation({
+    onSuccess: () => {
+      toast.success("Compartilhamento removido!");
+    },
+    onError: (error) => {
+      toast.error(`Erro ao remover compartilhamento: ${error.message}`);
+    }
+  });
+
   const setLog = trpc.habits.setLog.useMutation({
     onSuccess: () => {
       utils.habits.getLogs.invalidate();
@@ -139,6 +161,23 @@ export default function Habits() {
       date: date.toISOString(),
       completed: !currentCompleted
     });
+  };
+
+  const handleShare = () => {
+    if (!shareDialogHabit || !shareUsername.trim()) {
+      toast.error("Digite um @username válido");
+      return;
+    }
+    shareHabit.mutate({
+      habitId: shareDialogHabit.id,
+      username: shareUsername,
+      permission: "editor"
+    });
+  };
+
+  const openShareDialog = (habit: any) => {
+    setShareDialogHabit(habit);
+    setShareUsername("");
   };
 
   const formatWeekRange = () => {
@@ -239,7 +278,7 @@ export default function Habits() {
                     <Input
                       value={newHabit.targetValue}
                       onChange={(e) => setNewHabit({ ...newHabit, targetValue: e.target.value })}
-                      placeholder="Ex: 2, 8, 10000..."
+                      placeholder="Ex: uma hora, 2 litros, 8 copos..."
                       className="bg-secondary border-border"
                     />
                   </div>
@@ -424,6 +463,14 @@ export default function Habits() {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8"
+                          onClick={() => openShareDialog(habit)}
+                        >
+                          <Share2 className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
                           onClick={() => {
                             if (confirm("Remover este hábito?")) {
                               deleteHabit.mutate({ id: habit.id });
@@ -551,6 +598,34 @@ export default function Habits() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Dialog de Compartilhamento */}
+      <Dialog open={!!shareDialogHabit} onOpenChange={(open) => !open && setShareDialogHabit(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Compartilhar Hábito</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Digite o @username</Label>
+              <Input
+                placeholder="@usuario"
+                value={shareUsername}
+                onChange={(e) => setShareUsername(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleShare()}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareDialogHabit(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleShare} disabled={shareHabit.isPending}>
+              {shareHabit.isPending ? "Compartilhando..." : "Compartilhar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

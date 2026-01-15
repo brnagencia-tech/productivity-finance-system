@@ -1237,3 +1237,45 @@
 - [ ] Criar commit descritivo com todas as mudanças
 - [ ] Fazer push para repositório Git
 - [ ] Validar que push foi bem-sucedido
+
+
+## Correções Urgentes - Problemas em Produção (https://brncrm.com.br)
+
+### Compartilhamento de Tarefas e Hábitos
+- [ ] Adicionar opção de compartilhar tarefas com outros usuários
+- [ ] Adicionar opção de compartilhar hábitos com outros usuários
+- [ ] Implementar seletor de usuários para compartilhamento
+- [ ] Adicionar ícone/botão de compartilhar na interface de tarefas
+- [ ] Adicionar ícone/botão de compartilhar na interface de hábitos
+
+### Campo Meta em Hábitos
+- [x] Corrigir campo "Meta" para aceitar texto (ex: "uma hora", "2 litros")
+- [x] Remover validação que força apenas números
+- [x] Atualizar schema do banco se necessário (mudar tipo de number para string)
+- [x] Testar entrada de texto livre no campo Meta
+
+### Prioridade em Tarefas
+- [ ] Adicionar campo "priority" no schema de tarefas (se não existir)
+- [ ] Adicionar opção de alterar prioridade após criar tarefa
+- [ ] Implementar dropdown/seletor de prioridade (Baixa/Média/Alta)
+- [ ] Exibir indicador visual de prioridade nas tarefas
+
+### Responsividade Mobile
+- [ ] Auditar todas as páginas em viewport mobile (375px, 414px)
+- [ ] Corrigir Dashboard para mobile (cards, gráficos, filtros)
+- [ ] Corrigir Tarefas para mobile (lista, formulários, ações)
+- [ ] Corrigir Hábitos para mobile (lista, formulários, logs)
+- [ ] Corrigir Kanban para mobile (colunas, drag-and-drop)
+- [ ] Corrigir Faturamento para mobile (tabs, formulários)
+- [ ] Corrigir Despesas para mobile (tabelas, filtros)
+- [ ] Corrigir Clientes para mobile (lista, perfil lateral)
+- [ ] Corrigir Planilha Anual para mobile (tabela, gráficos)
+- [ ] Testar navegação mobile (menu lateral, headers)
+- [ ] Adicionar breakpoints responsivos onde necessário
+
+### Sincronização Git (Após Correções)
+- [ ] Verificar que nenhum dado fictício está no código
+- [ ] Criar checkpoint com todas as correções
+- [ ] Atualizar CHANGELOG.md com mudanças
+- [ ] Fazer push para GitHub via Management UI
+- [ ] Testar deploy em produção sem perder dados

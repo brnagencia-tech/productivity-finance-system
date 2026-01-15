@@ -5,6 +5,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
+import * as dbSharing from "./db-sharing";
 // TEMPORARIAMENTE COMENTADO - Será reimplementado após nova estrutura de tarefas
 // import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyInsights } from "./analysis";
 import { emitToBoardRoom, KanbanEvents } from "./_core/socket";
@@ -456,6 +457,49 @@ export const appRouter = router({
       await db.deleteTask(input.id, ctx.user.id);
       return { success: true };
      }),
+    share: protectedProcedure.input(z.object({
+      taskId: z.number(),
+      username: z.string().min(1), // @username do usuário
+      permission: z.enum(["viewer", "editor"]).default("viewer")
+    })).mutation(async ({ ctx, input }) => {
+      // Buscar usuário pelo username
+      const targetUser = await dbSharing.getUserByUsername(input.username.replace('@', ''));
+      if (!targetUser) throw new TRPCError({ code: 'NOT_FOUND', message: 'Usuário não encontrado' });
+      
+      // Verificar se a tarefa pertence ao usuário atual
+      const task = await dbSharing.getTaskById(input.taskId);
+      if (!task || task.userId !== ctx.user.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Você não pode compartilhar esta tarefa' });
+      }
+      
+      // Criar compartilhamento
+      await dbSharing.createTaskShare({
+        taskId: input.taskId,
+        sharedWithUserId: targetUser.id,
+        sharedByUserId: ctx.user.id,
+        permission: input.permission
+      });
+      
+      return { success: true, sharedWith: targetUser.username };
+     }),
+    unshare: protectedProcedure.input(z.object({
+      taskId: z.number(),
+      userId: z.number()
+    })).mutation(async ({ ctx, input }) => {
+      // Verificar permissão
+      const task = await dbSharing.getTaskById(input.taskId);
+      if (!task || task.userId !== ctx.user.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão' });
+      }
+      
+      await dbSharing.deleteTaskShare(input.taskId, input.userId);
+      return { success: true };
+     }),
+    getShares: protectedProcedure.input(z.object({
+      taskId: z.number()
+    })).query(async ({ ctx, input }) => {
+      return dbSharing.getTaskShares(input.taskId);
+     }),
   }),
 
   kanban: router({
@@ -896,6 +940,49 @@ export const appRouter = router({
         completed: input.completed,
         notes: input.notes
       });
+     }),
+    share: protectedProcedure.input(z.object({
+      habitId: z.number(),
+      username: z.string().min(1), // @username do usuário
+      permission: z.enum(["viewer", "editor"]).default("viewer")
+    })).mutation(async ({ ctx, input }) => {
+      // Buscar usuário pelo username
+      const targetUser = await dbSharing.getUserByUsername(input.username.replace('@', ''));
+      if (!targetUser) throw new TRPCError({ code: 'NOT_FOUND', message: 'Usuário não encontrado' });
+      
+      // Verificar se o hábito pertence ao usuário atual
+      const habit = await dbSharing.getHabitById(input.habitId);
+      if (!habit || habit.userId !== ctx.user.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Você não pode compartilhar este hábito' });
+      }
+      
+      // Criar compartilhamento
+      await dbSharing.createHabitShare({
+        habitId: input.habitId,
+        sharedWithUserId: targetUser.id,
+        sharedByUserId: ctx.user.id,
+        permission: input.permission
+      });
+      
+      return { success: true, sharedWith: targetUser.username };
+     }),
+    unshare: protectedProcedure.input(z.object({
+      habitId: z.number(),
+      userId: z.number()
+    })).mutation(async ({ ctx, input }) => {
+      // Verificar permissão
+      const habit = await dbSharing.getHabitById(input.habitId);
+      if (!habit || habit.userId !== ctx.user.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão' });
+      }
+      
+      await dbSharing.deleteHabitShare(input.habitId, input.userId);
+      return { success: true };
+     }),
+    getShares: protectedProcedure.input(z.object({
+      habitId: z.number()
+    })).query(async ({ ctx, input }) => {
+      return dbSharing.getHabitShares(input.habitId);
      }),
   }),
 

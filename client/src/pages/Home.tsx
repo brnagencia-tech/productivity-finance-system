@@ -205,9 +205,9 @@ export default function Home() {
         {/* Header com Filtros */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Visão geral das suas tarefas, finanças e hábitos
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight gradient-ai">Dashboard</h1>
+            <p className="text-muted-foreground text-lg">
+              Visão geral em tempo real das suas tarefas, finanças e hábitos
             </p>
           </div>
           
@@ -222,10 +222,10 @@ export default function Home() {
               <button
                 key={filter.value}
                 onClick={() => setPeriodFilter(filter.value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  periodFilter === filter.value
-                    ? 'bg-primary text-primary-foreground shadow-md scale-105'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:scale-102'
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  periodFilter === filter.value 
+                    ? 'bg-primary text-primary-foreground shadow-lg glow-primary scale-105' 
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:scale-105'
                 }`}
               >
                 {filter.label}
@@ -236,7 +236,7 @@ export default function Home() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Tarefas Hoje</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -251,7 +251,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Gastos do Mês</CardTitle>
               <Wallet className="h-4 w-4 text-chart-2" />
@@ -267,7 +267,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Hábitos Hoje</CardTitle>
               <Target className="h-4 w-4 text-chart-3" />
@@ -282,7 +282,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Tendência</CardTitle>
               {(barData[currentMonth - 1]?.total || 0) > (barData[currentMonth - 2]?.total || 0) ? (
@@ -312,7 +312,7 @@ export default function Home() {
 
         {/* Faturamento Cards */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Receita</CardTitle>
@@ -335,7 +335,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Despesas</CardTitle>
@@ -358,7 +358,7 @@ export default function Home() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Lucro Líquido</CardTitle>
@@ -391,7 +391,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold text-foreground mb-4">Faturamento e Despesas por Moeda</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {/* Faturamento BRL */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Faturamento (R$)</CardTitle>
                 <DollarSign className="h-4 w-4 text-green-500" />
@@ -416,7 +416,7 @@ export default function Home() {
             </Card>
 
             {/* Faturamento USD */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Faturamento ($)</CardTitle>
                 <DollarSign className="h-4 w-4 text-green-500" />
@@ -441,7 +441,7 @@ export default function Home() {
             </Card>
 
             {/* Despesas BRL */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Despesas (R$)</CardTitle>
                 <Wallet className="h-4 w-4 text-red-500" />
@@ -466,7 +466,7 @@ export default function Home() {
             </Card>
 
             {/* Despesas USD */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">Despesas ($)</CardTitle>
                 <Wallet className="h-4 w-4 text-red-500" />
@@ -497,7 +497,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold text-foreground mb-4">Gastos Detalhados</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Gastos Pessoais BRL */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">💰 Pessoal (BRL)</CardTitle>
                 <Wallet className="h-4 w-4 text-blue-500" />
@@ -513,7 +513,7 @@ export default function Home() {
             </Card>
 
             {/* Gastos Pessoais USD */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">💵 Pessoal (USD)</CardTitle>
                 <DollarSign className="h-4 w-4 text-green-500" />
@@ -529,7 +529,7 @@ export default function Home() {
             </Card>
 
             {/* Gastos Compartilhados BRL */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">🤝 Compartilhado (BRL)</CardTitle>
                 <Wallet className="h-4 w-4 text-purple-500" />
@@ -545,7 +545,7 @@ export default function Home() {
             </Card>
 
             {/* Gastos Compartilhados USD */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">🤝 Compartilhado (USD)</CardTitle>
                 <DollarSign className="h-4 w-4 text-purple-500" />
@@ -561,7 +561,7 @@ export default function Home() {
             </Card>
 
             {/* Gastos Empresa BRL */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">🏢 Empresa (BRL)</CardTitle>
                 <Wallet className="h-4 w-4 text-orange-500" />
@@ -577,7 +577,7 @@ export default function Home() {
             </Card>
 
             {/* Gastos Empresa USD */}
-            <Card className="bg-card border-border">
+            <Card className="glass-card hover:scale-hover glow-hover">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">🏢 Empresa (USD)</CardTitle>
                 <DollarSign className="h-4 w-4 text-orange-500" />
@@ -597,7 +597,7 @@ export default function Home() {
         {/* Charts Row */}
         <div className="grid gap-4 md:grid-cols-2">
           {/* Monthly Expenses Chart */}
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader>
               <CardTitle className="text-foreground">Gastos Mensais</CardTitle>
               <CardDescription>Evolução dos gastos em {currentYear}</CardDescription>
@@ -638,7 +638,7 @@ export default function Home() {
           </Card>
 
           {/* Expenses by Category */}
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader>
               <CardTitle className="text-foreground">Gastos por Categoria</CardTitle>
               <CardDescription>Distribuição em {monthNames[currentMonth - 1]}</CardDescription>
@@ -688,7 +688,7 @@ export default function Home() {
         </div>
 
         {/* Habits Progress */}
-        <Card className="bg-card border-border">
+        <Card className="glass-card hover:scale-hover glow-hover">
           <CardHeader>
             <CardTitle className="text-foreground">Progresso dos Hábitos</CardTitle>
             <CardDescription>Acompanhamento semanal</CardDescription>
@@ -748,7 +748,7 @@ export default function Home() {
         {/* Novos Cards Informativos */}
         <div className="grid gap-4 md:grid-cols-2">
           {/* Card de Alertas */}
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader>
               <CardTitle className="text-foreground">Alertas</CardTitle>
               <CardDescription>Notificações importantes</CardDescription>
@@ -798,7 +798,7 @@ export default function Home() {
           </Card>
 
           {/* Card de Score do Dia */}
-          <Card className="bg-card border-border">
+          <Card className="glass-card hover:scale-hover glow-hover">
             <CardHeader>
               <CardTitle className="text-foreground">Produtividade</CardTitle>
               <CardDescription>Score do dia</CardDescription>
