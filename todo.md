@@ -1163,3 +1163,33 @@
 - [ ] Corrigir card "Lucro Líquido" (Receita - Despesas)
 - [ ] Verificar se cards multi-moeda estão somando corretamente por BRL/USD
 - [ ] Testar todos os cálculos com dados reais
+
+## Correções Finais e Tooltips Explicativos
+
+### Upload em Despesas Fixas
+- [x] Adicionar import de ReceiptUpload em FixedExpenses.tsx
+- [x] Adicionar handler handleUploadComplete em FixedExpenses
+- [x] Integrar componente ReceiptUpload no formulário de criação
+- [x] Adicionar indicador visual de comprovante anexado
+
+### Contabilização de Despesas Fixas
+- [ ] Revisar lógica de cálculo mensal na Planilha Anual
+- [ ] Despesas fixas devem aparecer todos os meses (independente de pagamento)
+- [ ] Testar com despesas fixas cadastradas
+
+### Correção de Cálculos do Dashboard
+- [ ] Revisar card "Receita" para somar apenas Faturamento (revenues)
+- [ ] Revisar card "Despesas" para somar Fixas + Variáveis corretamente
+- [ ] Revisar card "Lucro Líquido" (Receita - Despesas)
+- [ ] Garantir separação correta por moeda (BRL/USD)
+
+### Tooltips Informativos
+- [ ] Criar componente InfoTooltip com ícone "i"
+- [ ] Implementar hover no desktop (tooltip aparece)
+- [ ] Implementar clique no mobile (dialog/popover com explicação)
+- [ ] Adicionar tooltip em card "Faturamento" explicando cálculo
+- [ ] Adicionar tooltip em card "Despesas" explicando cálculo (Fixas + Variáveis)
+- [ ] Adicionar tooltip em card "Lucro Líquido" explicando fórmula
+- [ ] Adicionar tooltip em "Planilha Anual" explicando contabilização mensal
+- [ ] Adicionar tooltip em "Despesas Fixas" explicando recorrência
+- [ ] Incluir exemplos práticos em cada tooltip

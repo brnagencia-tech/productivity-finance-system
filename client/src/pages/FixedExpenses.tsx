@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
+import { ReceiptUpload } from "@/components/ReceiptUpload";
 import { Plus, Trash2, Edit2, Receipt, Calendar, AlertCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -31,8 +32,18 @@ export default function FixedExpenses() {
     currency: "BRL" as "BRL" | "USD",
     expenseType: "pessoal" as "pessoal" | "empresa",
     dueDay: 1,
-    scope: "personal" as const
+    scope: "personal" as const,
+    receiptUrl: ""
   });
+
+  const handleUploadComplete = (data: any) => {
+    setNewExpense(prev => ({
+      ...prev,
+      receiptUrl: data.receiptUrl,
+      ...(data.company && { description: `${prev.description} - ${data.company}`.trim() }),
+      ...(data.amount && { amount: data.amount }),
+    }));
+  };
 
   const utils = trpc.useUtils();
 
@@ -54,7 +65,8 @@ export default function FixedExpenses() {
         currency: "BRL" as "BRL" | "USD",
         expenseType: "pessoal" as "pessoal" | "empresa",
         dueDay: 1,
-        scope: "personal"
+        scope: "personal",
+        receiptUrl: ""
       });
       toast.success("Despesa fixa criada!");
     },
@@ -274,6 +286,14 @@ export default function FixedExpenses() {
                       <SelectItem value="empresa">Empresa</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Comprovante de Despesa (Nota Fiscal/Cupom)</Label>
+                  <ReceiptUpload onUploadComplete={handleUploadComplete} />
+                  {newExpense.receiptUrl && (
+                    <p className="text-xs text-green-600">Comprovante anexado com sucesso!</p>
+                  )}
                 </div>
               </div>
               <DialogFooter>
