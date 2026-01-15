@@ -1135,3 +1135,31 @@
 - [ ] Implementar endpoints tRPC para buscar totais por moeda (dados reais)
 - [x] Adicionar formatação de moeda automática (R$ vs $)
 - [x] Organizar layout do Dashboard com grid responsivo (4 cards)
+
+## Correções Urgentes do Sistema Financeiro
+
+### Erro ao Atualizar Despesa
+- [ ] Investigar erro "Erro ao atualizar despesa" no toast
+- [ ] Verificar endpoint tRPC de atualização de despesas variáveis
+- [ ] Corrigir validação ou lógica de update no backend
+- [ ] Testar atualização de despesa após correção
+
+### Contabilização de Despesas Fixas
+- [ ] Corrigir lógica da Planilha Anual para contabilizar despesas fixas independente de pagamento
+- [ ] Despesas fixas devem aparecer todos os meses (não só pós-pago)
+- [ ] Revisar endpoint que calcula totais mensais
+- [ ] Testar Planilha Anual com despesas fixas cadastradas
+
+### Upload de Comprovante no Lugar Errado
+- [x] Remover componente ReceiptUpload da página de Faturamento (Revenues.tsx)
+- [x] Faturamento é para vendas/comissões recebidas, não precisa de comprovante de despesa
+- [x] Adicionar upload de comprovante em Despesas Variáveis (VariableExpenses.tsx)
+- [ ] Adicionar upload de comprovante em Despesas Fixas (FixedExpenses.tsx)
+- [x] Integrar ReceiptUpload com OCR no formulário de Despesas Variáveis
+
+### Revisão de Cálculos
+- [ ] Revisar cálculo de "Receita" no Dashboard (deve somar faturamento, não despesas)
+- [ ] Revisar cálculo de "Despesas" no Dashboard (Fixas + Variáveis)
+- [ ] Corrigir card "Lucro Líquido" (Receita - Despesas)
+- [ ] Verificar se cards multi-moeda estão somando corretamente por BRL/USD
+- [ ] Testar todos os cálculos com dados reais

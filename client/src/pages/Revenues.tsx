@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2, DollarSign, TrendingUp, Filter } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useToast } from "@/hooks/use-toast";
-import { ReceiptUpload } from "@/components/ReceiptUpload";
+// ReceiptUpload removido - Faturamento é para vendas/comissões recebidas, não gastos
 
 export default function Revenues() {
   const [activeTab, setActiveTab] = useState<"pessoal" | "empresa">("pessoal");
@@ -30,7 +30,7 @@ export default function Revenues() {
     category: "",
     client: "",
     notes: "",
-    receiptUrl: "",
+    // receiptUrl removido - não aplicável a faturamento
   });
 
   const { toast } = useToast();
@@ -96,7 +96,7 @@ export default function Revenues() {
       category: "",
       client: "",
       notes: "",
-      receiptUrl: "",
+      // receiptUrl removido - não aplicável a faturamento
     });
     setEditingId(null);
   };
@@ -121,7 +121,7 @@ export default function Revenues() {
       category: revenue.category || "",
       client: revenue.client || "",
       notes: revenue.notes || "",
-      receiptUrl: revenue.receiptUrl || "",
+      // receiptUrl removido
     });
     setDialogOpen(true);
   };
@@ -132,15 +132,7 @@ export default function Revenues() {
     }
   };
 
-  const handleUploadComplete = (data: any) => {
-    setFormData(prev => ({
-      ...prev,
-      receiptUrl: data.receiptUrl,
-      ...(data.company && { client: data.company }),
-      ...(data.amount && { amount: data.amount }),
-      ...(data.date && { date: data.date }),
-    }));
-  };
+  // handleUploadComplete removido - não aplicável a faturamento
 
   const formatCurrency = (value: string, curr: string) => {
     const num = parseFloat(value);
@@ -257,10 +249,7 @@ export default function Revenues() {
                   />
                 </div>
 
-                <div>
-                  <Label>Comprovante de Recebimento</Label>
-                  <ReceiptUpload onUploadComplete={handleUploadComplete} />
-                </div>
+                {/* Comprovante removido - Faturamento é para vendas/comissões recebidas */}
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>

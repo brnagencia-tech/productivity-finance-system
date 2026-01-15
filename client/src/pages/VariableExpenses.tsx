@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
+import { ReceiptUpload } from "@/components/ReceiptUpload";
 import { Plus, Trash2, Edit2, Receipt, Calendar, Building2, FileText, Link2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -109,6 +110,18 @@ export default function VariableExpenses() {
     if (!filteredExpenses) return 0;
     return filteredExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
   }, [filteredExpenses]);
+
+  const handleUploadComplete = (data: any) => {
+    setNewExpense(prev => ({
+      ...prev,
+      receiptUrl: data.receiptUrl,
+      ...(data.company && { company: data.company }),
+      ...(data.cnpj && { cnpj: data.cnpj }),
+      ...(data.amount && { amount: data.amount }),
+      ...(data.date && { date: data.date }),
+      ...(data.time && { time: data.time }),
+    }));
+  };
 
   const formatCurrency = (value: number | string) => {
     const num = typeof value === "string" ? parseFloat(value) : value;
@@ -286,6 +299,14 @@ export default function VariableExpenses() {
                     placeholder="Observações adicionais..."
                     className="bg-secondary border-border"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Comprovante de Despesa (Nota Fiscal/Cupom)</Label>
+                  <ReceiptUpload onUploadComplete={handleUploadComplete} />
+                  {newExpense.receiptUrl && (
+                    <p className="text-xs text-green-600">Comprovante anexado com sucesso!</p>
+                  )}
                 </div>
               </div>
               <DialogFooter>
