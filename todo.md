@@ -1125,13 +1125,13 @@
 - [ ] Adicionar filtro de moeda na visualização
 
 ### Filtro de Moeda em Despesas Variáveis
-- [ ] Adicionar dropdown de filtro de moeda (BRL/USD/Todas) na página VariableExpenses
-- [ ] Implementar lógica de filtragem no frontend
-- [ ] Adicionar indicador visual de moeda nos cards de despesas
+- [x] Adicionar dropdown de filtro de moeda (BRL/USD/Todas) na página VariableExpenses
+- [x] Implementar lógica de filtragem no frontend
+- [x] Adicionar indicador visual de moeda (badges R$ ou $) nos cards de despesas
 
 ### Dashboard Multi-Moeda
-- [ ] Criar cards separados para Faturamento BRL e USD
-- [ ] Criar cards separados para Despesas BRL e USD
-- [ ] Implementar endpoints tRPC para buscar totais por moeda
-- [ ] Adicionar formatação de moeda automática (R$ vs $)
-- [ ] Organizar layout do Dashboard com grid responsivo
+- [x] Criar cards separados para Faturamento BRL e USD
+- [x] Criar cards separados para Despesas BRL e USD
+- [ ] Implementar endpoints tRPC para buscar totais por moeda (dados reais)
+- [x] Adicionar formatação de moeda automática (R$ vs $)
+- [x] Organizar layout do Dashboard com grid responsivo (4 cards)

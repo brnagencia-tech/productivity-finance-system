@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 export default function VariableExpenses() {
   const [scope, setScope] = useState<"personal" | "professional">("personal");
+  const [currencyFilter, setCurrencyFilter] = useState<"all" | "BRL" | "USD">("all");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<any>(null);
   const [dateFilter, setDateFilter] = useState(() => {
@@ -98,10 +99,16 @@ export default function VariableExpenses() {
     onError: () => toast.error("Erro ao remover despesa")
   });
 
+  const filteredExpenses = useMemo(() => {
+    if (!expenses) return [];
+    if (currencyFilter === "all") return expenses;
+    return expenses.filter(exp => exp.currency === currencyFilter);
+  }, [expenses, currencyFilter]);
+
   const total = useMemo(() => {
-    if (!expenses) return 0;
-    return expenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
-  }, [expenses]);
+    if (!filteredExpenses) return 0;
+    return filteredExpenses.reduce((sum, exp) => sum + parseFloat(exp.amount), 0);
+  }, [filteredExpenses]);
 
   const formatCurrency = (value: number | string) => {
     const num = typeof value === "string" ? parseFloat(value) : value;
@@ -134,7 +141,18 @@ export default function VariableExpenses() {
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Rastreador de Despesas</h1>
             <p className="text-muted-foreground">Registre e acompanhe seus gastos variáveis</p>
           </div>
-          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+          <div className="flex items-center gap-3">
+            <Select value={currencyFilter} onValueChange={(v: "all" | "BRL" | "USD") => setCurrencyFilter(v)}>
+              <SelectTrigger className="w-[140px] bg-secondary border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas Moedas</SelectItem>
+                <SelectItem value="BRL">BRL (R$)</SelectItem>
+                <SelectItem value="USD">USD ($)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>
               <Button className="bg-primary text-primary-foreground">
                 <Plus className="h-4 w-4 mr-2" />
@@ -282,6 +300,7 @@ export default function VariableExpenses() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -380,8 +399,8 @@ export default function VariableExpenses() {
                           Carregando despesas...
                         </td>
                       </tr>
-                    ) : expenses && expenses.length > 0 ? (
-                      expenses.map((expense) => {
+                    ) : filteredExpenses && filteredExpenses.length > 0 ? (
+                      filteredExpenses.map((expense) => {
                         const category = getCategoryById(expense.categoryId);
                         return (
                           <tr key={expense.id} className="border-b border-border hover:bg-secondary/30 transition-colors">
@@ -409,8 +428,19 @@ export default function VariableExpenses() {
                             <td className="p-4 text-foreground max-w-[200px] truncate">
                               {expense.description || "-"}
                             </td>
-                            <td className="p-4 text-right font-medium text-foreground">
-                              {formatCurrency(expense.amount)}
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <span className="font-medium text-foreground">
+                                  {formatCurrency(expense.amount)}
+                                </span>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                  expense.currency === 'BRL' 
+                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' 
+                                    : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                }`}>
+                                  {expense.currency === 'BRL' ? 'R$' : '$'}
+                                </span>
+                              </div>
                             </td>
                             <td className="p-4 text-muted-foreground text-sm max-w-[150px] truncate">
                               {expense.notes || "-"}

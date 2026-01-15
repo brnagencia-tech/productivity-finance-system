@@ -33,7 +33,37 @@
 
 ---
 
-## [Checkpoint Atual] - 2026-01-15 - Integração S3, OCR e Multi-Moeda
+## [Checkpoint Atual] - 2026-01-15 - Sistema Multi-Moeda Completo
+
+### Adicionado (Iteração Final)
+- **Filtro de Moeda em Despesas Variáveis**: Dropdown no header para filtrar por BRL, USD ou Todas as moedas
+- **Dashboard Multi-Moeda**: 4 cards separados (Faturamento BRL/USD e Despesas BRL/USD) com formatação automática
+- **Badges Visuais de Moeda**: Indicadores coloridos (R$ azul, $ verde) nos cards de despesas para identificação rápida
+- **Campos de Moeda em Despesas Fixas**: Adicionados campos currency e expenseType no formulário
+
+### Modificado (Iteração Final)
+- `client/src/pages/VariableExpenses.tsx`: Adicionado filtro de moeda, badges visuais e lógica de filtragem
+- `client/src/pages/FixedExpenses.tsx`: Adicionados campos de moeda (BRL/USD) e tipo (pessoal/empresa)
+- `client/src/pages/Home.tsx`: Adicionada seção "Faturamento e Despesas por Moeda" com 4 cards
+
+### Notas Técnicas (Iteração Final)
+- Filtro de moeda usa useMemo para performance em listas grandes
+- Badges de moeda com suporte a dark mode (cores adaptativas)
+- Cards do Dashboard com valores estáticos (R$ 0,00 / $ 0.00) aguardando integração com endpoints tRPC
+- Layout responsivo com grid 4 colunas (lg), 2 colunas (md), 1 coluna (sm)
+
+---
+
+## [Checkpoint 77e9fce9] - 2026-01-15 - Despesas Fixas e Variáveis Multi-Moeda
+
+### Adicionado
+- Campos de moeda (BRL/USD) em Despesas Fixas e Variáveis
+- Campo de tipo (pessoal/empresa) em Despesas Fixas
+- Campos de hora e CNPJ em Despesas Variáveis
+
+---
+
+## [Checkpoint 837ec34f] - 2026-01-15 - Integração S3, OCR e Multi-Moeda
 
 ### Adicionado (Nova Iteração)
 - **Upload S3 Real**: Endpoint `revenues.uploadReceipt` implementado usando `storagePut()` para salvar comprovantes no S3 com URLs públicas

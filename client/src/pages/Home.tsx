@@ -349,6 +349,76 @@ export default function Home() {
           </Card>
         </div>
 
+        {/* Faturamento e Despesas por Moeda */}
+        <div>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Faturamento e Despesas por Moeda</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Faturamento BRL */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Faturamento (R$)</CardTitle>
+                <DollarSign className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  R$ 0,00
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Real Brasileiro
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Faturamento USD */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Faturamento ($)</CardTitle>
+                <DollarSign className="h-4 w-4 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-green-600">
+                  $ 0.00
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Dólar Americano
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Despesas BRL */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Despesas (R$)</CardTitle>
+                <Wallet className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  R$ 0,00
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Real Brasileiro
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Despesas USD */}
+            <Card className="bg-card border-border">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Despesas ($)</CardTitle>
+                <Wallet className="h-4 w-4 text-red-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-600">
+                  $ 0.00
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Dólar Americano
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
         {/* Gastos por Tipo e Moeda */}
         <div>
           <h2 className="text-xl font-semibold text-foreground mb-4">Gastos Detalhados</h2>
