@@ -10,6 +10,7 @@ import { Plus, Edit, Trash2, Building2, Search, Filter, Download, Upload, Chevro
 import { useToast } from "@/hooks/use-toast";
 import { ClientSites } from "@/components/ClientSites";
 import DashboardLayout from "@/components/DashboardLayout";
+import { ClientProfile } from "@/components/ClientProfile";
 
 export default function Clients() {
   const { toast } = useToast();
@@ -20,6 +21,7 @@ export default function Clients() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -451,83 +453,62 @@ export default function Clients() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {clients.map((client: any) => (
-            <Card key={client.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-xl">{client.name}</CardTitle>
-                    {client.company && (
-                      <p className="text-sm text-muted-foreground mt-1">{client.company}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleEdit(client)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(client.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ClientSites clientId={client.id} clientName={client.name} />
-                <div className="h-4"></div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                  {client.cpfCnpj && (
-                    <div>
-                      <p className="text-muted-foreground">CPF/CNPJ</p>
-                      <p className="font-medium">{client.cpfCnpj}</p>
-                    </div>
-                  )}
-                  {client.telefone && (
-                    <div>
-                      <p className="text-muted-foreground">Telefone</p>
-                      <p className="font-medium">{client.telefone}</p>
-                    </div>
-                  )}
-                  {client.email && (
-                    <div>
-                      <p className="text-muted-foreground">E-mail</p>
-                      <p className="font-medium">{client.email}</p>
-                    </div>
-                  )}
-                  {client.cep && (
-                    <div>
-                      <p className="text-muted-foreground">CEP</p>
-                      <p className="font-medium">{client.cep}</p>
-                    </div>
-                  )}
-                  {client.endereco && (
-                    <div className="col-span-2">
-                      <p className="text-muted-foreground">Endereço</p>
-                      <p className="font-medium">{client.endereco}</p>
-                    </div>
-                  )}
-                  {client.bancoRecebedor && (
-                    <div className="col-span-2">
-                      <p className="text-muted-foreground">Banco Recebedor</p>
-                      <p className="font-medium">{client.bancoRecebedor}</p>
-                    </div>
-                  )}
-                  {client.emailsAdicionais && (
-                    <div className="col-span-2 md:col-span-3">
-                      <p className="text-muted-foreground">E-mails Adicionais</p>
-                      <p className="font-medium">{client.emailsAdicionais}</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-4 font-medium">Cliente</th>
+                  <th className="text-left p-4 font-medium">Empresa</th>
+                  <th className="text-left p-4 font-medium">Contato</th>
+                  <th className="text-right p-4 font-medium">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clients.map((client: any) => (
+                  <tr 
+                    key={client.id} 
+                    className="border-b hover:bg-accent/50 cursor-pointer transition-colors"
+                    onClick={() => setSelectedClient(client)}
+                  >
+                    <td className="p-4">
+                      <div>
+                        <p className="font-medium">{client.name}</p>
+                        {client.cpfCnpj && (
+                          <p className="text-sm text-muted-foreground">{client.cpfCnpj}</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <p className="text-sm">{client.company || "-"}</p>
+                    </td>
+                    <td className="p-4">
+                      <div className="text-sm">
+                        {client.email && <p>{client.email}</p>}
+                        {client.telefone && <p className="text-muted-foreground">{client.telefone}</p>}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex gap-2 justify-end" onClick={(e) => e.stopPropagation()}>
+                        <Button size="sm" variant="ghost" onClick={() => handleEdit(client)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDelete(client.id)}
+                          disabled={deleteMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
 
       {/* Paginação */}
@@ -561,6 +542,15 @@ export default function Clients() {
           </div>
         </div>
       )}
+
+      {/* Perfil do Cliente */}
+      <ClientProfile
+        client={selectedClient}
+        isOpen={!!selectedClient}
+        onClose={() => setSelectedClient(null)}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
       </div>
     </DashboardLayout>
   );

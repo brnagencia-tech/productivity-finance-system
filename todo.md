@@ -993,3 +993,22 @@
 - [x] Testar paginação
 - [x] Verificar menu lateral em todas as páginas
 - [x] Garantir compatibilidade com código existente
+
+## Refatoração da Página de Clientes (Lista Compacta)
+
+### Componente de Perfil
+- [x] Criar componente ClientProfile (Sheet/Drawer lateral)
+- [x] Exibir todas as informações do cliente no perfil
+- [x] Integrar ClientSites no perfil
+- [x] Adicionar botões de editar e excluir no perfil
+
+### Lista Compacta
+- [x] Refatorar lista para formato de tabela compacta
+- [x] Mostrar apenas nome, empresa e contato na lista
+- [x] Adicionar ações rápidas (editar/excluir) na tabela
+- [x] Manter paginação, busca e filtros funcionando
+
+### Integração
+- [x] Ao clicar no cliente, abrir perfil lateral
+- [x] Manter formulário de criação/edição no modal existente
+- [x] Garantir performance e UX fluida
