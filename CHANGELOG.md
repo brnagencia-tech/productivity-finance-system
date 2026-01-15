@@ -33,7 +33,59 @@
 
 ---
 
-## [Em Progresso] - 2026-01-15 - Sistema Financeiro Multi-Moeda
+## [Checkpoint Atual] - 2026-01-15 - Sistema Financeiro Multi-Moeda Completo
+
+### Adicionado
+- **Endpoints tRPC de Revenues** (`server/routers.ts`):
+  - `revenues.list` - Listar receitas com filtros (tipo, moeda, período)
+  - `revenues.getById` - Buscar receita por ID com validação de permissões
+  - `revenues.create` - Criar nova receita
+  - `revenues.update` - Atualizar receita existente
+  - `revenues.delete` - Excluir receita
+  - `revenues.getTotalsByTypeAndCurrency` - Obter totais agrupados por tipo e moeda
+  - Validação de permissões: usuários veem apenas seus dados, admins veem tudo
+
+- **Componente ReceiptUpload** (`client/src/components/ReceiptUpload.tsx`):
+  - Upload de comprovantes (imagens e PDF) com drag-and-drop
+  - Validação de tamanho (máx 16MB) e formato
+  - Preview de imagens carregadas
+  - OCR automático para roles `admin` (estrutura pronta para integração)
+  - Preenchimento manual para usuários comuns
+
+- **Página de Faturamento** (`client/src/pages/Revenues.tsx`):
+  - Tabs Pessoal/Empresa para segmentação de dados
+  - 4 cards de totais: Pessoal BRL/USD e Empresa BRL/USD
+  - Filtros: período (data início/fim) e moeda (BRL/USD/Todas)
+  - Listagem de receitas em cards com informações detalhadas
+  - Modal de cadastro/edição integrado com ReceiptUpload
+  - Ações de editar e excluir com confirmação
+  - Formatação de moeda automática (BRL/USD)
+
+### Modificado
+- **DashboardLayout** (`client/src/components/DashboardLayout.tsx`):
+  - Item "Faturamento" agora aponta para `/faturamento` (nova página)
+
+- **App.tsx** (`client/src/App.tsx`):
+  - Adicionada rota `/faturamento` com PrivateRoute
+
+### Arquivos Criados
+- `client/src/components/ReceiptUpload.tsx`
+- `client/src/pages/Revenues.tsx`
+
+### Arquivos Modificados
+- `server/routers.ts` - Adicionado router `revenues` completo
+- `client/src/App.tsx` - Adicionada rota `/faturamento`
+- `client/src/components/DashboardLayout.tsx` - Atualizado path do menu Faturamento
+
+### Pendente (Próximas Iterações)
+- Implementar upload real para S3 no ReceiptUpload
+- Integrar OCR real usando `invokeLLM` para admins
+- Atualizar páginas de Despesas Variáveis e Fixas para suportar novos campos (currency, expenseType)
+- Atualizar Dashboard principal com dados multi-moeda
+
+---
+
+## [Em Progresso] - 2026-01-15 - Sistema Financeiro Multi-Moeda (Base)
 ### Adicionado
 - Tabela `revenues` (faturamento) no banco de dados com campos:
   - `revenueType` (pessoal/empresa)

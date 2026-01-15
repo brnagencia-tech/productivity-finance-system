@@ -1270,6 +1270,124 @@ export const appRouter = router({
   }),
   
   clients: clientsRouter,
+  
+  // Faturamento (Revenues)
+  revenues: router({
+    list: protectedProcedure
+      .input(z.object({
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        revenueType: z.enum(['pessoal', 'empresa']).optional(),
+        currency: z.enum(['BRL', 'USD']).optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return await db.getRevenuesByUser(ctx.user.id, input);
+      }),
+    
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const revenue = await db.getRevenueById(input.id);
+        if (!revenue) throw new TRPCError({ code: 'NOT_FOUND', message: 'Receita não encontrada' });
+        
+        // Verificar permissão: usuário só vê suas próprias receitas, admin vê tudo
+        if (revenue.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para acessar esta receita' });
+        }
+        
+        return revenue;
+      }),
+    
+    create: protectedProcedure
+      .input(z.object({
+        date: z.string(),
+        description: z.string().min(1),
+        amount: z.string(),
+        revenueType: z.enum(['pessoal', 'empresa']),
+        currency: z.enum(['BRL', 'USD']),
+        category: z.string().optional(),
+        client: z.string().optional(),
+        notes: z.string().optional(),
+        receiptUrl: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const id = await db.createRevenue({
+          userId: ctx.user.id,
+          date: new Date(input.date),
+          description: input.description,
+          amount: input.amount,
+          revenueType: input.revenueType,
+          currency: input.currency,
+          category: input.category,
+          client: input.client,
+          notes: input.notes,
+          receiptUrl: input.receiptUrl,
+        });
+        return { id };
+      }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        date: z.string().optional(),
+        description: z.string().optional(),
+        amount: z.string().optional(),
+        revenueType: z.enum(['pessoal', 'empresa']).optional(),
+        currency: z.enum(['BRL', 'USD']).optional(),
+        category: z.string().optional(),
+        client: z.string().optional(),
+        notes: z.string().optional(),
+        receiptUrl: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const revenue = await db.getRevenueById(input.id);
+        if (!revenue) throw new TRPCError({ code: 'NOT_FOUND', message: 'Receita não encontrada' });
+        
+        // Verificar permissão
+        if (revenue.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para editar esta receita' });
+        }
+        
+        const { id, ...data } = input;
+        const updateData: any = {};
+        if (data.date) updateData.date = new Date(data.date);
+        if (data.description) updateData.description = data.description;
+        if (data.amount) updateData.amount = data.amount;
+        if (data.revenueType) updateData.revenueType = data.revenueType;
+        if (data.currency) updateData.currency = data.currency;
+        if (data.category !== undefined) updateData.category = data.category;
+        if (data.client !== undefined) updateData.client = data.client;
+        if (data.notes !== undefined) updateData.notes = data.notes;
+        if (data.receiptUrl !== undefined) updateData.receiptUrl = data.receiptUrl;
+        
+        await db.updateRevenue(id, updateData);
+        return { success: true };
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const revenue = await db.getRevenueById(input.id);
+        if (!revenue) throw new TRPCError({ code: 'NOT_FOUND', message: 'Receita não encontrada' });
+        
+        // Verificar permissão
+        if (revenue.userId !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Sem permissão para excluir esta receita' });
+        }
+        
+        await db.deleteRevenue(input.id);
+        return { success: true };
+      }),
+    
+    getTotalsByTypeAndCurrency: protectedProcedure
+      .input(z.object({
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        return await db.getRevenueTotalsByTypeAndCurrency(ctx.user.id, input);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

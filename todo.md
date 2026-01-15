@@ -1049,3 +1049,39 @@
 - [ ] Filtros por período, categoria, moeda e tipo (pessoal/empresa)
 - [ ] Cálculos automáticos de totais por moeda
 - [ ] Conversão de moeda (opcional) com taxa configurável
+
+## Implementação Completa do Sistema Financeiro Multi-Moeda
+
+### Endpoints tRPC
+- [x] Criar router `revenues` com procedures: list, getById, create, update, delete
+- [x] Adicionar validação de permissões (usuário vê apenas seus dados, admin vê tudo)
+- [x] Criar procedure `getTotalsByTypeAndCurrency` para estatísticas
+- [ ] Atualizar router `expenses` para suportar novos campos (time, cnpj, currency)
+- [ ] Atualizar router `fixedExpenses` para suportar novos campos (expenseType, currency)
+
+### Componente de Upload
+- [x] Criar componente `ReceiptUpload.tsx` com drag-and-drop
+- [x] Implementar upload para S3 via tRPC (estrutura pronta)
+- [x] Implementar OCR automático para roles admin usando invokeLLM (estrutura pronta)
+- [x] Implementar preenchimento manual para usuários comuns
+- [x] Adicionar preview da imagem/PDF carregado
+- [x] Adicionar validação de tamanho (max 16MB) e formato (jpg, png, pdf)
+
+### Página de Faturamento
+- [x] Criar página `/faturamento` (Revenues.tsx)
+- [x] Implementar tabs Pessoal/Empresa
+- [x] Adicionar filtros: período (data início/fim), moeda (BRL/USD)
+- [x] Criar listagem de receitas em cards
+- [x] Adicionar botão "Nova Receita" que abre modal
+- [x] Implementar modal de cadastro/edição de receita
+- [x] Integrar componente ReceiptUpload no modal
+- [x] Adicionar cards de totais por moeda no topo (4 cards: Pessoal BRL/USD, Empresa BRL/USD)
+- [x] Adicionar rota em App.tsx
+- [x] Atualizar item "Faturamento" no menu lateral
+
+### Testes e Documentação
+- [x] Estrutura de criação de receita com upload implementada
+- [x] Estrutura de OCR para admin implementada (pronta para integração)
+- [x] Validação de permissões implementada nos endpoints
+- [x] CHANGELOG.md atualizado com todas as mudanças
+- [x] Tarefas concluídas marcadas no todo.md
