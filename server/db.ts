@@ -641,11 +641,12 @@ export async function getMonthlyExpenseTrend(userId: number, year: number) {
     const startOfMonth = new Date(year, month - 1, 1);
     const endOfMonth = new Date(year, month, 0, 23, 59, 59);
     
-    const totalExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+    // Despesas Variáveis
+    const totalVariableExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
       .from(variableExpenses)
       .where(and(eq(variableExpenses.userId, userId), gte(variableExpenses.date, startOfMonth), lte(variableExpenses.date, endOfMonth)));
     
-    const personalExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+    const personalVariableExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
       .from(variableExpenses)
       .where(and(
         eq(variableExpenses.userId, userId), 
@@ -654,7 +655,7 @@ export async function getMonthlyExpenseTrend(userId: number, year: number) {
         lte(variableExpenses.date, endOfMonth)
       ));
     
-    const professionalExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+    const professionalVariableExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
       .from(variableExpenses)
       .where(and(
         eq(variableExpenses.userId, userId), 
@@ -663,11 +664,42 @@ export async function getMonthlyExpenseTrend(userId: number, year: number) {
         lte(variableExpenses.date, endOfMonth)
       ));
     
+    // Despesas Fixas Ativas (aparecem todos os meses independente de pagamento)
+    const totalFixedExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+      .from(fixedExpenses)
+      .where(and(
+        eq(fixedExpenses.userId, userId),
+        eq(fixedExpenses.isActive, true)
+      ));
+    
+    const personalFixedExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+      .from(fixedExpenses)
+      .where(and(
+        eq(fixedExpenses.userId, userId),
+        eq(fixedExpenses.isActive, true),
+        eq(fixedExpenses.scope, "personal")
+      ));
+    
+    const professionalFixedExpenses = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
+      .from(fixedExpenses)
+      .where(and(
+        eq(fixedExpenses.userId, userId),
+        eq(fixedExpenses.isActive, true),
+        eq(fixedExpenses.scope, "professional")
+      ));
+    
+    const totalVariable = parseFloat(totalVariableExpenses[0]?.total || "0");
+    const totalFixed = parseFloat(totalFixedExpenses[0]?.total || "0");
+    const personalVariable = parseFloat(personalVariableExpenses[0]?.total || "0");
+    const personalFixed = parseFloat(personalFixedExpenses[0]?.total || "0");
+    const professionalVariable = parseFloat(professionalVariableExpenses[0]?.total || "0");
+    const professionalFixed = parseFloat(professionalFixedExpenses[0]?.total || "0");
+    
     results.push({ 
       month, 
-      total: parseFloat(totalExpenses[0]?.total || "0"),
-      personal: parseFloat(personalExpenses[0]?.total || "0"),
-      professional: parseFloat(professionalExpenses[0]?.total || "0")
+      total: totalVariable + totalFixed,
+      personal: personalVariable + personalFixed,
+      professional: professionalVariable + professionalFixed
     });
   }
   return results;
@@ -1144,10 +1176,10 @@ export async function getMonthlyProfitLoss(userId: number, month: number, year: 
   const startOfMonth = new Date(year, month - 1, 1);
   const endOfMonth = new Date(year, month, 0, 23, 59, 59);
   
-  // Total revenue
-  const revenueResult = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })
-    .from(sales)
-    .where(and(eq(sales.userId, userId), eq(sales.status, "completed"), gte(sales.date, startOfMonth), lte(sales.date, endOfMonth)));
+  // Total revenue (from revenues table, not sales)
+  const revenueResult = await db.select({ total: sql<string>`COALESCE(SUM(value), 0)` })
+    .from(revenues)
+    .where(and(eq(revenues.userId, userId), gte(revenues.date, startOfMonth), lte(revenues.date, endOfMonth)));
   
   // Variable expenses
   const variableResult = await db.select({ total: sql<string>`COALESCE(SUM(amount), 0)` })

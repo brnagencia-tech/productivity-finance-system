@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
+import InfoTooltip from "@/components/InfoTooltip";
 import { 
   CheckCircle2, 
   Wallet, 
@@ -301,7 +302,15 @@ export default function Home() {
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Receita</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Receita</CardTitle>
+                <InfoTooltip 
+                  title="Como é calculada a Receita?"
+                  description="A receita representa todo o dinheiro que você recebeu no mês, incluindo vendas, comissões e outros faturamentos registrados."
+                  formula="Receita = Soma de todos os Faturamentos do mês"
+                  example="Se você registrou R$ 3.000 em vendas + R$ 800 em comissões = R$ 3.800 de receita total."
+                />
+              </div>
               <DollarSign className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
@@ -316,7 +325,15 @@ export default function Home() {
 
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Despesas</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Despesas</CardTitle>
+                <InfoTooltip 
+                  title="Como são calculadas as Despesas?"
+                  description="As despesas somam TODAS as despesas fixas ativas (que aparecem todo mês) + despesas variáveis registradas no mês atual."
+                  formula="Despesas = Despesas Fixas Ativas + Despesas Variáveis do Mês"
+                  example="Despesas Fixas (aluguel R$ 1.200 + internet R$ 100) + Despesas Variáveis (mercado R$ 500) = R$ 1.800 total."
+                />
+              </div>
               <Wallet className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
@@ -331,7 +348,15 @@ export default function Home() {
 
           <Card className="bg-card border-border">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Lucro Liquido</CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Lucro Líquido</CardTitle>
+                <InfoTooltip 
+                  title="Como é calculado o Lucro Líquido?"
+                  description="O lucro líquido é o resultado final do mês: quanto sobrou (ou faltou) depois de pagar todas as despesas."
+                  formula="Lucro Líquido = Receita - Despesas Totais"
+                  example="Receita R$ 3.800 - Despesas R$ 1.800 = Lucro de R$ 2.000. Se negativo, você teve prejuízo no mês."
+                />
+              </div>
               {(profitLoss?.profit || 0) < 0 ? (
                 <TrendingDown className="h-4 w-4 text-red-500" />
               ) : (

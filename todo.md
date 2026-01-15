@@ -1173,23 +1173,25 @@
 - [x] Adicionar indicador visual de comprovante anexado
 
 ### Contabilização de Despesas Fixas
-- [ ] Revisar lógica de cálculo mensal na Planilha Anual
-- [ ] Despesas fixas devem aparecer todos os meses (independente de pagamento)
+- [x] Revisar lógica de cálculo mensal na Planilha Anual
+- [x] Despesas fixas devem aparecer todos os meses (independente de pagamento)
+- [x] Corrigir função getMonthlyExpenseTrend para somar fixas + variáveis
 - [ ] Testar com despesas fixas cadastradas
 
 ### Correção de Cálculos do Dashboard
-- [ ] Revisar card "Receita" para somar apenas Faturamento (revenues)
-- [ ] Revisar card "Despesas" para somar Fixas + Variáveis corretamente
+- [x] Revisar card "Receita" para somar apenas Faturamento (revenues)
+- [x] Revisar card "Despesas" para somar Fixas + Variáveis corretamente
+- [x] Corrigir função getMonthlyProfitLoss para usar tabela revenues
 - [ ] Revisar card "Lucro Líquido" (Receita - Despesas)
 - [ ] Garantir separação correta por moeda (BRL/USD)
 
 ### Tooltips Informativos
-- [ ] Criar componente InfoTooltip com ícone "i"
-- [ ] Implementar hover no desktop (tooltip aparece)
-- [ ] Implementar clique no mobile (dialog/popover com explicação)
-- [ ] Adicionar tooltip em card "Faturamento" explicando cálculo
-- [ ] Adicionar tooltip em card "Despesas" explicando cálculo (Fixas + Variáveis)
-- [ ] Adicionar tooltip em card "Lucro Líquido" explicando fórmula
+- [x] Criar componente InfoTooltip com ícone "i"
+- [x] Implementar hover no desktop (tooltip aparece)
+- [x] Implementar clique no mobile (dialog/popover com explicação)
+- [x] Adicionar tooltip em card "Receita" explicando cálculo
+- [x] Adicionar tooltip em card "Despesas" explicando cálculo (Fixas + Variáveis)
+- [x] Adicionar tooltip em card "Lucro Líquido" explicando fórmula
 - [ ] Adicionar tooltip em "Planilha Anual" explicando contabilização mensal
 - [ ] Adicionar tooltip em "Despesas Fixas" explicando recorrência
 - [ ] Incluir exemplos práticos em cada tooltip

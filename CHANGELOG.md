@@ -33,7 +33,71 @@
 
 ---
 
-## [Checkpoint Atual] - 2026-01-15 - Sistema Multi-Moeda Completo
+## [Checkpoint Atual] - 2026-01-15 - Correções Finais e Tooltips Explicativos
+
+### Correções de Contabilização
+- **Despesas Fixas na Planilha Anual**: Corrigida função `getMonthlyExpenseTrend` para incluir despesas fixas ativas em todos os meses (não apenas pós-pago)
+- **Cálculo de Receita no Dashboard**: Corrigida função `getMonthlyProfitLoss` para usar tabela `revenues` (faturamento) em vez de `sales`
+- **Cálculo de Despesas**: Confirmado que soma corretamente Despesas Fixas Ativas + Despesas Variáveis do mês
+
+### Upload de Comprovantes Reposicionado
+- **Removido de Faturamento**: Upload de comprovante removido da página `/faturamento` (não aplicável a vendas/comissões recebidas)
+- **Adicionado em Despesas Variáveis**: Componente ReceiptUpload com OCR integrado ao formulário de despesas variáveis
+- **Adicionado em Despesas Fixas**: Componente ReceiptUpload com OCR integrado ao formulário de despesas fixas
+- Comprovantes agora estão apenas onde fazem sentido: registro de gastos com notas fiscais
+
+### Tooltips Explicativos
+- **Componente InfoTooltip**: Criado componente reutilizável com ícone "i" (Info)
+- **Desktop**: Hover mostra tooltip com explicação, fórmula e exemplo
+- **Mobile**: Clique abre dialog com explicação detalhada
+- **Dashboard - Card Receita**: Tooltip explicando cálculo (soma de faturamentos do mês)
+- **Dashboard - Card Despesas**: Tooltip explicando cálculo (Fixas Ativas + Variáveis do mês)
+- **Dashboard - Card Lucro Líquido**: Tooltip explicando fórmula (Receita - Despesas)
+- Todos os tooltips incluem exemplos numéricos práticos
+
+### Arquivos Criados
+- `client/src/components/InfoTooltip.tsx` - Componente de tooltip explicativo
+
+### Arquivos Modificados
+- `server/db.ts`:
+  - Função `getMonthlyExpenseTrend`: Adicionada soma de despesas fixas ativas
+  - Função `getMonthlyProfitLoss`: Corrigida para usar tabela `revenues` em vez de `sales`
+- `client/src/pages/Revenues.tsx`: Removido import e uso de ReceiptUpload
+- `client/src/pages/VariableExpenses.tsx`: Adicionado ReceiptUpload com handler `handleUploadComplete`
+- `client/src/pages/FixedExpenses.tsx`: Adicionado ReceiptUpload com handler `handleUploadComplete`
+- `client/src/pages/Home.tsx`: Adicionados tooltips explicativos nos 3 cards principais (Receita, Despesas, Lucro Líquido)
+
+### Notas Técnicas
+- Despesas fixas ativas são contabilizadas mensalmente independente de pagamento
+- Receita agora vem de `revenues` (faturamento registrado) e não de `sales` (vendas antigas)
+- Tooltips usam `Tooltip` do shadcn/ui para desktop e `Dialog` para mobile
+- InfoTooltip aceita props: `title`, `description`, `formula` (opcional), `example` (opcional)
+
+---
+
+## [Checkpoint 77217c73] - 2026-01-15 - Upload de Comprovante Completo
+
+### Adicionado
+- ReceiptUpload com OCR em Despesas Fixas (`client/src/pages/FixedExpenses.tsx`)
+- Handler `handleUploadComplete` para processar URL do comprovante após upload
+- Campo `receiptUrl` no estado `newExpense` de FixedExpenses
+
+### Arquivos Modificados
+- `client/src/pages/FixedExpenses.tsx`: Adicionado import, handler e componente ReceiptUpload
+
+---
+
+## [Checkpoint ff52c0cf] - 2026-01-15 - Correções Parciais
+
+### Removido
+- Upload de comprovante da página de Faturamento (`client/src/pages/Revenues.tsx`)
+
+### Adicionado
+- ReceiptUpload com OCR em Despesas Variáveis (`client/src/pages/VariableExpenses.tsx`)
+
+---
+
+## [Checkpoint 77e9fce9] - 2026-01-15 - Sistema Multi-Moeda Completo
 
 ### Adicionado (Iteração Final)
 - **Filtro de Moeda em Despesas Variáveis**: Dropdown no header para filtrar por BRL, USD ou Todas as moedas
