@@ -946,3 +946,24 @@
 - [ ] Testar exclusão de sites
 - [ ] Validar campos obrigatórios
 - [ ] Testes unitários para endpoints de clientes
+
+## Melhorias no Módulo de Clientes
+
+### Busca e Filtros
+- [x] Adicionar campo de busca na página de clientes (nome, empresa, CNPJ)
+- [x] Implementar filtro de classificação por data de cadastro
+- [x] Implementar filtro de classificação por nome
+- [ ] Implementar filtro de classificação por status do plano
+- [ ] Implementar filtro de classificação por data de expiração do domínio
+
+### Widget de Alertas no Dashboard
+- [x] Criar componente de widget de alertas de vencimento
+- [x] Implementar endpoint tRPC para buscar domínios/planos expirando em 30 dias
+- [x] Adicionar widget no dashboard principal (Home.tsx)
+- [x] Estilizar widget com cores de alerta (vermelho/amarelo)
+
+### Testes
+- [x] Testar busca por nome, empresa e CNPJ
+- [x] Testar filtros de classificação
+- [x] Testar widget de alertas no dashboard
+- [x] Validar datas de expiração e alertas

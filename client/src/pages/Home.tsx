@@ -15,6 +15,7 @@ import {
   DollarSign
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { ExpirationAlertsWidget } from "@/components/ExpirationAlertsWidget";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -220,6 +221,9 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {/* Widget de Alertas de Vencimento */}
+        <ExpirationAlertsWidget />
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

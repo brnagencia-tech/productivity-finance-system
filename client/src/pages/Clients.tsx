@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Trash2, Building2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Edit, Trash2, Building2, Search, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ClientSites } from "@/components/ClientSites";
 
@@ -14,6 +14,8 @@ export default function Clients() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"createdAt" | "name" | "expirationDate">("createdAt");
   
   // Form state
   const [formData, setFormData] = useState({
@@ -29,7 +31,29 @@ export default function Clients() {
   });
 
   const utils = trpc.useUtils();
-  const { data: clients = [], isLoading } = trpc.clients.getClients.useQuery();
+  const { data: allClients = [], isLoading } = trpc.clients.getClients.useQuery();
+  
+  // Filter and sort clients
+  const clients = allClients
+    .filter((client: any) => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        client.name?.toLowerCase().includes(query) ||
+        client.company?.toLowerCase().includes(query) ||
+        client.cpfCnpj?.toLowerCase().includes(query)
+      );
+    })
+    .sort((a: any, b: any) => {
+      if (sortBy === "name") {
+        return (a.name || "").localeCompare(b.name || "");
+      }
+      if (sortBy === "createdAt") {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+      // For expirationDate, we need to check client sites
+      return 0;
+    });
   
   const createMutation = trpc.clients.createClient.useMutation({
     onSuccess: () => {
@@ -135,11 +159,36 @@ export default function Clients() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Clientes</h1>
           <p className="text-muted-foreground">Gerencie seus clientes e sites vinculados</p>
         </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por nome, empresa ou CNPJ..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <div className="flex gap-2">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="px-4 py-2 border rounded-md bg-background text-sm"
+          >
+            <option value="createdAt">Data de Cadastro</option>
+            <option value="name">Nome</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-end">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleOpenDialog}>

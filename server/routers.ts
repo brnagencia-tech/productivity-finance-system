@@ -173,6 +173,15 @@ export const clientsRouter = router({
 export const appRouter = router({
   system: systemRouter,
   
+  // Alertas de vencimento
+  alerts: router({
+    getExpiringItems: protectedProcedure
+      .input(z.object({ daysAhead: z.number().optional().default(30) }))
+      .query(async ({ input, ctx }) => {
+        return await db.getExpiringItemsByUser(ctx.user.id, input.daysAhead);
+      }),
+  }),
+  
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

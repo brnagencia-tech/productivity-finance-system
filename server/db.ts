@@ -1,4 +1,4 @@
-import { eq, and, or, desc, gte, lte, like, between, gt, lt, asc, sql } from "drizzle-orm";
+import { eq, and, or, desc, gte, lte, like, between, gt, lt, asc, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { 
   InsertUser, users, 
@@ -1585,4 +1585,51 @@ export async function deleteClientSite(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.delete(clientSites).where(eq(clientSites.id, id));
+}
+
+// ==================== EXPIRATION ALERTS ====================
+export async function getExpiringItemsByUser(userId: number, daysAhead: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const now = new Date();
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + daysAhead);
+  
+  // Buscar todos os clientes do usuário
+  const userClients = await db.select().from(clients).where(eq(clients.userId, userId));
+  const clientIds = userClients.map(c => c.id);
+  
+  if (clientIds.length === 0) return [];
+  
+  // Buscar sites com expiração próxima
+  const expiringSites = await db
+    .select({
+      id: clientSites.id,
+      clientId: clientSites.clientId,
+      siteDominio: clientSites.siteDominio,
+      expiracaoDominio: clientSites.expiracaoDominio,
+      inicioPlano: clientSites.inicioPlano,
+      plano: clientSites.plano,
+      clientName: clients.name,
+    })
+    .from(clientSites)
+    .innerJoin(clients, eq(clientSites.clientId, clients.id))
+    .where(
+      and(
+        inArray(clientSites.clientId, clientIds),
+        or(
+          and(
+            gte(clientSites.expiracaoDominio, now),
+            lte(clientSites.expiracaoDominio, futureDate)
+          ),
+          and(
+            gte(clientSites.inicioPlano, now),
+            lte(clientSites.inicioPlano, futureDate)
+          )
+        )
+      )
+    );
+  
+  return expiringSites;
 }
