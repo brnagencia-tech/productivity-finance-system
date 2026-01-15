@@ -171,6 +171,46 @@ certbot --nginx -d seu-dominio.com
 
 ---
 
+## 🆕 Versão 1.2.0 - Mudanças Implementadas (15/01/2026)
+
+### 📊 Integração de Dados Reais no Dashboard
+
+**Problema Resolvido:** Cards de Faturamento e Despesas exibiam valores estáticos (R$ 0,00 / $ 0.00).
+
+**Arquivos Novos:**
+- `server/db-expenses-totals.ts` - Função de cálculo de totais por moeda
+
+**Arquivos Modificados:**
+- `server/routers.ts` - Endpoint `expenses.getTotalsByCurrency` adicionado
+- `client/src/pages/Home.tsx` - Queries tRPC e renderização de dados reais
+
+**Funcionalidades:**
+- Cards de Faturamento BRL/USD agora exibem dados reais do banco
+- Cards de Despesas BRL/USD agora exibem dados reais do banco
+- Loading states com animação durante carregamento
+- Formatação correta de moeda (R$ 1.234,56 / $ 1,234.56)
+- Cálculo automático: Despesas = Variáveis + Fixas (multiplicadas por meses no período)
+
+### 📝 Tooltips Explicativos
+
+**Problema Resolvido:** Usuários não entendiam como os cálculos eram feitos.
+
+**Arquivos Modificados:**
+- `client/src/pages/AnnualExpenses.tsx` - Tooltips em "Total Anual" e "Média Mensal"
+- `client/src/pages/FixedExpenses.tsx` - Tooltip no título explicando recorrência
+
+**Funcionalidades:**
+- Tooltip "Total Anual": Explica soma de despesas variáveis + fixas
+- Tooltip "Média Mensal": Mostra fórmula (Total ÷ Meses) com exemplo prático
+- Tooltip "Despesas Fixas": Explica recorrência automática mensal
+- Responsivo: Hover no desktop, clique no mobile
+
+### ⚠️ Migrations Necessárias
+
+**NENHUMA!** Esta versão não requer migrations. O schema já está sincronizado.
+
+---
+
 ## 🔄 Atualizar Aplicação (Pull de Atualizações)
 
 ### ⚠️ IMPORTANTE: Seus dados do banco NÃO serão perdidos!

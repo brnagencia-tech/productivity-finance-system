@@ -806,6 +806,16 @@ export const appRouter = router({
       
       return stats;
      }),
+    // Totais de despesas por moeda (variáveis + fixas)
+    getTotalsByCurrency: protectedProcedure
+      .input(z.object({
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+      }))
+      .query(async ({ ctx, input }) => {
+        const { getExpensesTotalsByCurrency } = await import("./db-expenses-totals");
+        return await getExpensesTotalsByCurrency(ctx.user.id, input);
+      }),
   }),
 
   budgets: router({

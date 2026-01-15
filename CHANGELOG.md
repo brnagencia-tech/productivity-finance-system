@@ -33,7 +33,40 @@
 
 ---
 
-## [Checkpoint Atual] - 2026-01-15 - Correções Finais e Tooltips Explicativos
+## [Checkpoint Atual] - 2026-01-15 - Versão 1.2.0: Dados Reais e Tooltips Explicativos
+
+### Integração de Dados Reais no Dashboard
+- **Novo Arquivo**: `server/db-expenses-totals.ts` com função `getExpensesTotalsByCurrency`
+- **Novo Endpoint tRPC**: `expenses.getTotalsByCurrency` para calcular totais de despesas por moeda
+- **Dashboard Atualizado**: Cards de Faturamento e Despesas agora exibem dados reais do banco
+- **Loading States**: Animação "pulse" durante carregamento de dados
+- **Formatação de Moeda**: R$ 1.234,56 (BRL) e $ 1,234.56 (USD)
+- **Cálculo Automático**: Despesas = Variáveis + Fixas (multiplicadas por meses no período)
+
+### Tooltips Explicativos Adicionais
+- **Planilha Anual**: Tooltips em "Total Anual" e "Média Mensal" com fórmulas e exemplos
+- **Despesas Fixas**: Tooltip no título explicando recorrência automática mensal
+- **Responsividade**: Hover no desktop, clique abre dialog no mobile
+
+### Arquivos Criados
+- `server/db-expenses-totals.ts` - Função de cálculo de totais por moeda
+
+### Arquivos Modificados
+- `server/routers.ts`: Adicionado endpoint `expenses.getTotalsByCurrency` (linha ~810)
+- `client/src/pages/Home.tsx`: Queries tRPC e renderização de dados reais com loading states
+- `client/src/pages/AnnualExpenses.tsx`: Tooltips em cards de resumo (Total Anual, Média Mensal)
+- `client/src/pages/FixedExpenses.tsx`: Tooltip no header explicando recorrência
+- `DEPLOY.md`: Atualizado com instruções de deploy da versão 1.2.0
+- `todo.md`: Tarefas marcadas como concluídas
+
+### Notas Técnicas
+- **Sem Migrations**: Esta versão não requer migrations, schema já está sincronizado
+- **Código Aditivo**: Nenhum arquivo crítico foi deletado, apenas novos arquivos criados
+- **Preservação de Dados**: Deploy não afeta dados existentes no banco de produção
+
+---
+
+## [Checkpoint 9860c56d] - 2026-01-15 - Correções Finais e Tooltips Explicativos
 
 ### Correções de Contabilização
 - **Despesas Fixas na Planilha Anual**: Corrigida função `getMonthlyExpenseTrend` para incluir despesas fixas ativas em todos os meses (não apenas pós-pago)

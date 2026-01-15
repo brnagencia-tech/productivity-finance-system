@@ -12,6 +12,7 @@ import { ReceiptUpload } from "@/components/ReceiptUpload";
 import { Plus, Trash2, Edit2, Receipt, Calendar, AlertCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import InfoTooltip from "@/components/InfoTooltip";
 
 export default function FixedExpenses() {
   const [scope, setScope] = useState<"personal" | "professional">("personal");
@@ -163,7 +164,14 @@ export default function FixedExpenses() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Controle de Despesas Fixas</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Controle de Despesas Fixas</h1>
+              <InfoTooltip 
+                title="Despesas Fixas" 
+                description="Despesas recorrentes que se repetem todos os meses automaticamente." 
+                example="Aluguel, internet, Netflix, plano de celular, etc. São contabilizadas mensalmente independente de pagamento."
+              />
+            </div>
             <p className="text-muted-foreground">Gerencie suas contas mensais recorrentes</p>
           </div>
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

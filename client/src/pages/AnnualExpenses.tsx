@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import InfoTooltip from "@/components/InfoTooltip";
 import { useMemo, useState } from "react";
 import { 
   ResponsiveContainer, 
@@ -98,13 +99,28 @@ export default function AnnualExpenses() {
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="bg-card border-border">
             <CardContent className="py-4">
-              <p className="text-sm text-muted-foreground">Total Anual</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">Total Anual</p>
+                <InfoTooltip 
+                  title="Total Anual" 
+                  description="Soma de todas as despesas variáveis + despesas fixas de todos os meses do ano." 
+                  example="Despesas fixas são contabilizadas mensalmente independente de pagamento."
+                />
+              </div>
               <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.total)}</p>
             </CardContent>
           </Card>
           <Card className="bg-card border-border">
             <CardContent className="py-4">
-              <p className="text-sm text-muted-foreground">Média Mensal</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">Média Mensal</p>
+                <InfoTooltip 
+                  title="Média Mensal" 
+                  description="Média de gastos por mês considerando apenas meses com gastos registrados." 
+                  formula="Total Anual ÷ Número de meses com gastos"
+                  example="R$ 12.000 em 6 meses = R$ 2.000/mês"
+                />
+              </div>
               <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.average)}</p>
             </CardContent>
           </Card>

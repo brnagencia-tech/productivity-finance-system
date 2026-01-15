@@ -123,6 +123,18 @@ export default function Home() {
     startDate: dateRange.startDate.toISOString(),
     endDate: dateRange.endDate.toISOString()
   });
+  
+  // Totais de faturamento por moeda
+  const { data: revenueTotals, isLoading: revenueTotalsLoading } = trpc.revenues.getTotalsByTypeAndCurrency.useQuery({
+    startDate: dateRange.startDate.toISOString(),
+    endDate: dateRange.endDate.toISOString()
+  });
+  
+  // Totais de despesas por moeda
+  const { data: expensesTotals, isLoading: expensesTotalsLoading } = trpc.expenses.getTotalsByCurrency.useQuery({
+    startDate: dateRange.startDate.toISOString(),
+    endDate: dateRange.endDate.toISOString()
+  });
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -385,9 +397,18 @@ export default function Home() {
                 <DollarSign className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  R$ 0,00
-                </div>
+                {revenueTotalsLoading ? (
+                  <div className="text-2xl font-bold text-muted-foreground animate-pulse">
+                    Carregando...
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-green-600">
+                    R$ {(() => {
+                      const brlRevenue = revenueTotals?.find((r: any) => r.currency === 'BRL');
+                      return brlRevenue ? Number(brlRevenue.total).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00';
+                    })()}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
                   Real Brasileiro
                 </p>
@@ -401,9 +422,18 @@ export default function Home() {
                 <DollarSign className="h-4 w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  $ 0.00
-                </div>
+                {revenueTotalsLoading ? (
+                  <div className="text-2xl font-bold text-muted-foreground animate-pulse">
+                    Loading...
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-green-600">
+                    $ {(() => {
+                      const usdRevenue = revenueTotals?.find((r: any) => r.currency === 'USD');
+                      return usdRevenue ? Number(usdRevenue.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+                    })()}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
                   Dólar Americano
                 </p>
@@ -417,9 +447,18 @@ export default function Home() {
                 <Wallet className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  R$ 0,00
-                </div>
+                {expensesTotalsLoading ? (
+                  <div className="text-2xl font-bold text-muted-foreground animate-pulse">
+                    Carregando...
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-red-600">
+                    R$ {(() => {
+                      const brlExpense = expensesTotals?.find((e: any) => e.currency === 'BRL');
+                      return brlExpense ? Number(brlExpense.total).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00';
+                    })()}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
                   Real Brasileiro
                 </p>
@@ -433,9 +472,18 @@ export default function Home() {
                 <Wallet className="h-4 w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  $ 0.00
-                </div>
+                {expensesTotalsLoading ? (
+                  <div className="text-2xl font-bold text-muted-foreground animate-pulse">
+                    Loading...
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-red-600">
+                    $ {(() => {
+                      const usdExpense = expensesTotals?.find((e: any) => e.currency === 'USD');
+                      return usdExpense ? Number(usdExpense.total).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+                    })()}
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
                   Dólar Americano
                 </p>

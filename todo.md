@@ -1195,3 +1195,45 @@
 - [ ] Adicionar tooltip em "Planilha Anual" explicando contabilização mensal
 - [ ] Adicionar tooltip em "Despesas Fixas" explicando recorrência
 - [ ] Incluir exemplos práticos em cada tooltip
+
+
+## Nova Iteração - Integração de Dados Reais e Deploy Seguro
+
+### Integração de Dados Reais no Dashboard
+- [x] Substituir valores estáticos nos cards de Faturamento BRL/USD por dados reais do banco
+- [x] Substituir valores estáticos nos cards de Despesas BRL/USD por dados reais do banco
+- [x] Implementar queries tRPC agrupadas por moeda (getTotalsByTypeAndCurrency)
+- [x] Adicionar loading states nos cards durante carregamento de dados
+- [ ] Testar cálculos com dados reais em múltiplas moedas
+
+### Tooltips Explicativos Adicionais
+- [x] Adicionar InfoTooltip na Planilha Anual explicando contabilização mensal
+- [x] Adicionar InfoTooltip em Despesas Fixas explicando recorrência automática
+- [x] Adicionar InfoTooltip em cards de Despesas explicando fórmulas de cálculo
+- [x] Garantir responsividade dos tooltips (hover desktop / clique mobile)
+
+### Teste de OCR em Produção
+- [ ] Cadastrar despesa variável real com upload de nota fiscal
+- [ ] Validar extração automática de CNPJ pelo OCR
+- [ ] Validar extração automática de empresa pelo OCR
+- [ ] Validar extração automática de valor pelo OCR
+- [ ] Validar extração automática de data e hora pelo OCR
+- [ ] Documentar casos de sucesso e falhas do OCR
+
+### Documentação de Deploy
+- [x] Criar arquivo DEPLOY.md com guia completo de deploy
+- [x] Documentar mudanças no schema do banco (migrations)
+- [x] Documentar novos endpoints tRPC criados
+- [x] Documentar variáveis de ambiente necessárias
+- [x] Criar guia passo a passo para pull do Git sem perder dados
+- [x] Documentar processo de sincronização Git → Digital Ocean
+- [x] Adicionar checklist de verificação pré-deploy
+- [x] Documentar rollback em caso de problemas
+
+### Sincronização Git
+- [ ] Atualizar CHANGELOG.md com todas as mudanças
+- [ ] Verificar que todo código novo está documentado
+- [ ] Testar localmente antes de commit
+- [ ] Criar commit descritivo com todas as mudanças
+- [ ] Fazer push para repositório Git
+- [ ] Validar que push foi bem-sucedido
