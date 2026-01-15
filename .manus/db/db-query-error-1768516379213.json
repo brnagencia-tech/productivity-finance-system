@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE share_notifications DROP FOREIGN KEY fk_1, DROP FOREIGN KEY fk_2;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute ALTER TABLE share_notifications DROP FOREIGN KEY fk_1, DROP FOREIGN KEY fk_2;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 8200 (HY000) at line 1: Unsupported multi schema change for drop foreign key"
+  ]
+}

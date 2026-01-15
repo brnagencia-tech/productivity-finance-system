@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS pending_expense_shares (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  createdByUserId INT NOT NULL,\n  sharedWithUserId INT NOT NULL,\n  expenseType ENUM('variable', 'fixed') NOT NULL,\n  description VARCHAR(255) NOT NULL,\n  amount DECIMAL(10, 2) NOT NULL,\n  currency ENUM('BRL', 'USD') DEFAULT 'BRL' NOT NULL,\n  category ENUM('personal', 'company') DEFAULT 'personal' NOT NULL,\n  date TIMESTAMP NOT NULL,\n  status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending' NOT NULL,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute CREATE TABLE IF NOT EXISTS pending_expense_shares (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  createdByUserId INT NOT NULL,\n  sharedWithUserId INT NOT NULL,\n  expenseType ENUM('variable', 'fixed') NOT NULL,\n  description VARCHAR(255) NOT NULL,\n  amount DECIMAL(10, 2) NOT NULL,\n  currency ENUM('BRL', 'USD') DEFAULT 'BRL' NOT NULL,\n  category ENUM('personal', 'company') DEFAULT 'personal' NOT NULL,\n  date TIMESTAMP NOT NULL,\n  status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending' NOT NULL,\n  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 180
+}

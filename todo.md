@@ -1379,3 +1379,37 @@
 - [ ] Verificar logs do backend para erro completo
 - [ ] Testar endpoints manualmente via tRPC
 - [ ] Verificar se username está sendo passado corretamente do frontend
+
+
+## 🚨 ERROS CRÍTICOS v1.4.3 (Produção)
+
+### Erros de INSERT em Compartilhamento
+- [x] Tarefas: Erro ao inserir notificação - "Failed query: insert into `share_notifications`" (IDs: 60032, 90001, 240001)
+- [x] Hábitos: Erro ao inserir compartilhamento - "Failed query: insert into `habit_shares`" (IDs: 90002, 60032, 90001)
+- [x] Investigar se IDs estão excedendo limite INT do MySQL
+- [x] Verificar auto_increment das tabelas
+- [x] Corrigir schema se necessário (removidas foreign keys de share_notifications)
+
+## 🆕 NOVA FUNCIONALIDADE: Despesas Compartilhadas
+
+### Requisitos
+- [ ] Permitir marcar usuários (@username) ao criar despesa variável/fixa
+- [ ] Dividir valor automaticamente entre usuários marcados
+- [ ] Adicionar despesa individual para cada usuário marcado
+- [ ] Destacar despesas compartilhadas na planilha (badge ou cor diferente)
+- [ ] Exemplo: Bruno + Karen almoçam R$ 167 → cada um recebe R$ 83,50 na despesa individual
+
+### Backend
+- [x] Criar tabela pending_expense_shares para despesas pendentes de aceitação
+- [x] Criar função createPendingExpenseShare
+- [x] Criar função getPendingExpenseShares (listar pendentes)
+- [x] Criar função acceptExpenseShare (aceitar e criar despesa real)
+- [x] Criar função rejectExpenseShare (recusar)
+- [ ] Criar endpoints tRPC para exposeShares router
+- [ ] Integrar com sistema de notificações
+
+### Frontend
+- [ ] Adicionar UserAutocomplete (multi-select) no formulário de despesas
+- [ ] Mostrar preview da divisão antes de salvar
+- [ ] Adicionar badge "Compartilhado" em despesas compartilhadas
+- [ ] Filtro "Minhas Despesas" vs "Compartilhadas Comigo"

@@ -265,6 +265,25 @@ export const habitShares = mysqlTable("habit_shares", {
 export type HabitShare = typeof habitShares.$inferSelect;
 export type InsertHabitShare = typeof habitShares.$inferInsert;
 
+// ==================== PENDING EXPENSE SHARES (Despesas Compartilhadas Pendentes) ====================
+export const pendingExpenseShares = mysqlTable("pending_expense_shares", {
+  id: int("id").autoincrement().primaryKey(),
+  createdByUserId: int("createdByUserId").notNull(), // Quem criou/lançou a despesa
+  sharedWithUserId: int("sharedWithUserId").notNull(), // Quem vai receber a despesa (dono da dívida)
+  expenseType: mysqlEnum("expenseType", ["variable", "fixed"]).notNull(),
+  description: varchar("description", { length: 255 }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: mysqlEnum("currency", ["BRL", "USD"]).default("BRL").notNull(),
+  category: mysqlEnum("category", ["personal", "company"]).default("personal").notNull(),
+  date: timestamp("date").notNull(),
+  status: mysqlEnum("status", ["pending", "accepted", "rejected"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PendingExpenseShare = typeof pendingExpenseShares.$inferSelect;
+export type InsertPendingExpenseShare = typeof pendingExpenseShares.$inferInsert;
+
 // ==================== SHARE NOTIFICATIONS (Notificações de Compartilhamento) ====================
 export const shareNotifications = mysqlTable("share_notifications", {
   id: int("id").autoincrement().primaryKey(),

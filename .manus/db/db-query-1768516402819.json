@@ -1,0 +1,24 @@
+{
+  "query": "SHOW CREATE TABLE habit_shares;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SHOW CREATE TABLE habit_shares;",
+  "rows": [
+    {
+      "Table": "habit_shares",
+      "Create Table": "CREATE TABLE `habit_shares` ("
+    }
+  ],
+  "messages": [
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,",
+    "  `habitId` int(11) NOT NULL,",
+    "  `sharedWithUserId` int(11) NOT NULL,",
+    "  `sharedByUserId` int(11) NOT NULL,",
+    "  `permission` enum('viewer','editor') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'viewer',",
+    "  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,",
+    "  UNIQUE KEY `unique_habit_user` (`habitId`,`sharedWithUserId`)",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=30001"
+  ],
+  "stdout": "Table\tCreate Table\nhabit_shares\tCREATE TABLE `habit_shares` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `habitId` int(11) NOT NULL,\n  `sharedWithUserId` int(11) NOT NULL,\n  `sharedByUserId` int(11) NOT NULL,\n  `permission` enum('viewer','editor') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'viewer',\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,\n  UNIQUE KEY `unique_habit_user` (`habitId`,`sharedWithUserId`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=30001\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}

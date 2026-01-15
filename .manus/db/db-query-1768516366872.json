@@ -1,0 +1,29 @@
+{
+  "query": "SHOW CREATE TABLE share_notifications;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SHOW CREATE TABLE share_notifications;",
+  "rows": [
+    {
+      "Table": "share_notifications",
+      "Create Table": "CREATE TABLE `share_notifications` ("
+    }
+  ],
+  "messages": [
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,",
+    "  `userId` int(11) NOT NULL,",
+    "  `fromUserId` int(11) NOT NULL,",
+    "  `itemType` enum('task','habit') COLLATE utf8mb4_unicode_ci NOT NULL,",
+    "  `itemId` int(11) NOT NULL,",
+    "  `itemTitle` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,",
+    "  `isRead` tinyint(1) NOT NULL DEFAULT '0',",
+    "  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,",
+    "  KEY `fk_1` (`userId`),",
+    "  KEY `fk_2` (`fromUserId`),",
+    "  CONSTRAINT `fk_1` FOREIGN KEY (`userId`) REFERENCES `jdYJzsjjq9oKQ4uf2Lq74q`.`users` (`id`) ON DELETE CASCADE,",
+    "  CONSTRAINT `fk_2` FOREIGN KEY (`fromUserId`) REFERENCES `jdYJzsjjq9oKQ4uf2Lq74q`.`users` (`id`) ON DELETE CASCADE",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=30001"
+  ],
+  "stdout": "Table\tCreate Table\nshare_notifications\tCREATE TABLE `share_notifications` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `userId` int(11) NOT NULL,\n  `fromUserId` int(11) NOT NULL,\n  `itemType` enum('task','habit') COLLATE utf8mb4_unicode_ci NOT NULL,\n  `itemId` int(11) NOT NULL,\n  `itemTitle` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,\n  `isRead` tinyint(1) NOT NULL DEFAULT '0',\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,\n  KEY `fk_1` (`userId`),\n  KEY `fk_2` (`fromUserId`),\n  CONSTRAINT `fk_1` FOREIGN KEY (`userId`) REFERENCES `jdYJzsjjq9oKQ4uf2Lq74q`.`users` (`id`) ON DELETE CASCADE,\n  CONSTRAINT `fk_2` FOREIGN KEY (`fromUserId`) REFERENCES `jdYJzsjjq9oKQ4uf2Lq74q`.`users` (`id`) ON DELETE CASCADE\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=30001\n",
+  "stderr": "",
+  "execution_time_ms": 92
+}
