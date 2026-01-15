@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { users, tasks, habits, taskShares, habitShares } from "../drizzle/schema";
+import { users, managedUsers, tasks, habits, taskShares, habitShares } from "../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
 // ==================== USER HELPERS ====================
@@ -7,7 +7,8 @@ export async function getUserByUsername(username: string) {
   const db = await getDb();
   if (!db) return null;
   
-  const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  // Buscar em managedUsers (usuários gerenciados pelo sistema)
+  const [user] = await db.select().from(managedUsers).where(eq(managedUsers.username, username)).limit(1);
   return user || null;
 }
 

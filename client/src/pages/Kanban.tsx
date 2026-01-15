@@ -148,7 +148,7 @@ export default function Kanban() {
 
   const { data: users } = trpc.users.list.useQuery();
   const { data: contacts } = trpc.contacts.list.useQuery();
-  const { data: managedUsers } = trpc.managedUsers.list.useQuery();
+  const { data: managedUsers } = trpc.managedUsers.listForMentions.useQuery();
 
   // Prepare users list for mentions (combine users and managed users)
   const mentionableUsers = useMemo(() => {

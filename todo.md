@@ -1349,3 +1349,18 @@
 - [ ] Testes de Segurança
 - [ ] Testes de Performance
 - [ ] Testes Recomendados (múltiplos navegadores)
+
+
+## 🐛 Bugs de Compartilhamento (v1.4.2)
+
+### Bugs Críticos de Compartilhamento
+- [x] Tarefas: "Erro ao compartilhar: Usuário não encontrado" ao tentar compartilhar
+- [x] Hábitos: "Erro ao compartilhar: Usuário não encontrado" ao tentar compartilhar
+- [x] Kanban: Marcação @username não funciona (criado endpoint público listForMentions)
+- [ ] Kanban: Sistema de compartilhamento (BoardMembersDialog) precisa teste
+
+### Investigação Necessária
+- [ ] Verificar função getUserByUsername no backend
+- [ ] Verificar se autocomplete retorna username correto
+- [ ] Verificar tabela de usuários (managedUsers vs users)
+- [ ] Verificar sistema de @username no Kanban (MentionInput)

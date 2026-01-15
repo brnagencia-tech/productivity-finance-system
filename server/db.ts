@@ -893,6 +893,17 @@ export async function searchManagedUsers(query: string, adminUserId: number) {
     .limit(10);
 }
 
+export async function getAllActiveManagedUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: managedUsers.id,
+    username: managedUsers.username,
+    firstName: managedUsers.firstName,
+    lastName: managedUsers.lastName
+  }).from(managedUsers).where(eq(managedUsers.isActive, true));
+}
+
 export async function updateManagedUser(id: number, adminUserId: number, data: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

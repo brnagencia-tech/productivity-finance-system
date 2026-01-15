@@ -1108,12 +1108,16 @@ export const appRouter = router({
 
   // ==================== MANAGED USERS (Admin) ====================
   managedUsers: router({
-    list: protectedProcedure.query(async ({ ctx }) => {
+     list: protectedProcedure.query(async ({ ctx }) => {
       // Permitir CEO e Master acessarem lista de usuários
       if (ctx.user.managedUserRole !== 'ceo' && ctx.user.managedUserRole !== 'master') {
         throw new Error('Unauthorized');
       }
       return db.getManagedUsersByAdmin(ctx.user.id);
+     }),
+    listForMentions: protectedProcedure.query(async ({ ctx }) => {
+      // Endpoint público para menções - qualquer usuário autenticado pode listar
+      return db.getAllActiveManagedUsers();
      }),
     search: protectedProcedure.input(z.object({
       query: z.string().min(1)
