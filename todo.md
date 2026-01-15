@@ -1334,3 +1334,18 @@
 - [ ] Testar filtros combinados
 - [ ] Validar performance com muitos itens
 - [ ] Testar responsividade mobile
+
+
+## 🐛 Bugs Identificados nos Testes (v1.4.1)
+
+### Bugs Críticos
+- [x] Status de tarefa fica em branco ao criar (deveria ser "não iniciado" por padrão)
+- [x] Autocomplete @username não encontra usuários (endpoint ou query com problema)
+- [x] Sino de notificações não aparece na versão web desktop (só aparece no mobile)
+- [ ] Kanban não tem opção de compartilhar cards (sistema próprio já existe, precisa análise)
+
+### Testes Pendentes
+- [ ] Fluxo 2: Notificações Múltiplas
+- [ ] Testes de Segurança
+- [ ] Testes de Performance
+- [ ] Testes Recomendados (múltiplos navegadores)

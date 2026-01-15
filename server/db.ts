@@ -881,7 +881,6 @@ export async function searchManagedUsers(query: string, adminUserId: number) {
   }).from(managedUsers)
     .where(
       and(
-        eq(managedUsers.createdByUserId, adminUserId),
         eq(managedUsers.isActive, true),
         or(
           sql`LOWER(${managedUsers.username}) LIKE ${searchTerm}`,

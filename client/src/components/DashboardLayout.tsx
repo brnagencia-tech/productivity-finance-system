@@ -346,11 +346,13 @@ function DashboardLayoutContent({
                 </SidebarGroupContent>
               </SidebarGroup>
           </SidebarContent>
-
-          <SidebarFooter className="p-3 border-t border-sidebar-border">
+          <SidebarFooter className="p-2 border-t border-sidebar-border">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <NotificationBell />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-sidebar-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <button className="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-sidebar-accent transition-colors text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <Avatar className="h-9 w-9 border border-sidebar-border shrink-0 bg-primary/10">
                     <AvatarFallback className="text-xs font-medium text-primary bg-transparent">
                       {getUserInitial()}

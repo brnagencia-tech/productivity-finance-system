@@ -336,7 +336,7 @@ export default function Tasks() {
                     <Label htmlFor="status">Status *</Label>
                     <Select value={newTask.status} onValueChange={(value: TaskStatus) => setNewTask({ ...newTask, status: value })}>
                       <SelectTrigger className="min-h-[44px]">
-                        <SelectValue />
+                        <SelectValue placeholder="Selecione o status" />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(statusLabels).map(([key, label]) => (
