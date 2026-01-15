@@ -1115,3 +1115,23 @@
 ### Documentação
 - [ ] Atualizar CHANGELOG.md
 - [ ] Marcar tarefas concluídas no todo.md
+
+## Despesas Fixas Multi-Moeda e Dashboard
+### Despesas Fixas
+- [x] Adicionar campos de moeda (BRL/USD) no formulário de Despesas Fixas
+- [x] Adicionar campo de tipo (pessoal/empresa) no formulário
+- [x] Tabs Pessoal/Profissional já existentes (mantidos)
+- [ ] Atualizar listagem para exibir moeda e tipo
+- [ ] Adicionar filtro de moeda na visualização
+
+### Filtro de Moeda em Despesas Variáveis
+- [ ] Adicionar dropdown de filtro de moeda (BRL/USD/Todas) na página VariableExpenses
+- [ ] Implementar lógica de filtragem no frontend
+- [ ] Adicionar indicador visual de moeda nos cards de despesas
+
+### Dashboard Multi-Moeda
+- [ ] Criar cards separados para Faturamento BRL e USD
+- [ ] Criar cards separados para Despesas BRL e USD
+- [ ] Implementar endpoints tRPC para buscar totais por moeda
+- [ ] Adicionar formatação de moeda automática (R$ vs $)
+- [ ] Organizar layout do Dashboard com grid responsivo

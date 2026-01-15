@@ -28,6 +28,8 @@ export default function FixedExpenses() {
     description: "",
     categoryId: undefined as number | undefined,
     amount: "",
+    currency: "BRL" as "BRL" | "USD",
+    expenseType: "pessoal" as "pessoal" | "empresa",
     dueDay: 1,
     scope: "personal" as const
   });
@@ -49,6 +51,8 @@ export default function FixedExpenses() {
         description: "",
         categoryId: undefined,
         amount: "",
+        currency: "BRL" as "BRL" | "USD",
+        expenseType: "pessoal" as "pessoal" | "empresa",
         dueDay: 1,
         scope: "personal"
       });
@@ -172,9 +176,9 @@ export default function FixedExpenses() {
                     className="bg-secondary border-border"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>Valor (R$)</Label>
+                    <Label>Valor</Label>
                     <Input
                       type="number"
                       step="0.01"
@@ -183,6 +187,21 @@ export default function FixedExpenses() {
                       placeholder="0,00"
                       className="bg-secondary border-border"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Moeda</Label>
+                    <Select
+                      value={newExpense.currency}
+                      onValueChange={(v: "BRL" | "USD") => setNewExpense({ ...newExpense, currency: v })}
+                    >
+                      <SelectTrigger className="bg-secondary border-border">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BRL">BRL (R$)</SelectItem>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>Dia de Vencimento</Label>
@@ -226,7 +245,7 @@ export default function FixedExpenses() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Tipo</Label>
+                    <Label>Contexto</Label>
                     <Select
                       value={newExpense.scope}
                       onValueChange={(v: any) => setNewExpense({ ...newExpense, scope: v })}
@@ -240,6 +259,21 @@ export default function FixedExpenses() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Tipo</Label>
+                  <Select
+                    value={newExpense.expenseType}
+                    onValueChange={(v: "pessoal" | "empresa") => setNewExpense({ ...newExpense, expenseType: v })}
+                  >
+                    <SelectTrigger className="bg-secondary border-border">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pessoal">Pessoal</SelectItem>
+                      <SelectItem value="empresa">Empresa</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <DialogFooter>
