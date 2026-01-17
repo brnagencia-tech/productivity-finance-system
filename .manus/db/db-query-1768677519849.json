@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS ticket_status_history (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  ticketId INT NOT NULL,\n  oldStatus ENUM('aberto', 'em_andamento', 'enviado_dev', 'resolvido') NULL,\n  newStatus ENUM('aberto', 'em_andamento', 'enviado_dev', 'resolvido') NOT NULL,\n  changedBy INT NOT NULL,\n  changedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  INDEX idx_ticket (ticketId),\n  INDEX idx_changed_at (changedAt)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute CREATE TABLE IF NOT EXISTS ticket_status_history (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  ticketId INT NOT NULL,\n  oldStatus ENUM('aberto', 'em_andamento', 'enviado_dev', 'resolvido') NULL,\n  newStatus ENUM('aberto', 'em_andamento', 'enviado_dev', 'resolvido') NOT NULL,\n  changedBy INT NOT NULL,\n  changedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n  INDEX idx_ticket (ticketId),\n  INDEX idx_changed_at (changedAt)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 256
+}

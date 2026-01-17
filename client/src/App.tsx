@@ -31,6 +31,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import UserManagement from "./pages/UserManagement";
 import Clients from "./pages/Clients";
 import Suporte from "./pages/Suporte";
+import TicketDetail from "./pages/TicketDetail";
 
 function Router() {
   return (
@@ -52,6 +53,7 @@ function Router() {
       <Route path={"/contacts"} component={() => <PrivateRoute><Contacts /></PrivateRoute>} />
       <Route path={"/clients"} component={() => <PrivateRoute><Clients /></PrivateRoute>} />
       <Route path={"/suporte"} component={() => <PrivateRoute><Suporte /></PrivateRoute>} />
+      <Route path={"/suporte/:id"} component={() => <PrivateRoute><TicketDetail /></PrivateRoute>} />
       <Route path={"/insights"} component={() => <PrivateRoute><Insights /></PrivateRoute>} />
       <Route path={"/ai-insights"} component={() => <PrivateRoute><AIInsights /></PrivateRoute>} />
       <Route path={"/admin/users"} component={() => <PrivateRoute><AdminUsers /></PrivateRoute>} />

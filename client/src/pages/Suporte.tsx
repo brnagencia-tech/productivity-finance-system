@@ -59,7 +59,7 @@ const channelLabels: Record<TicketChannel, string> = {
 };
 
 // Componente de Ticket Arrastável
-function DraggableTicket({ ticket, onClick }: { ticket: any; onClick: () => void }) {
+const TicketCard = ({ ticket }: { ticket: any }) => {
   const {
     attributes,
     listeners,
@@ -91,7 +91,7 @@ function DraggableTicket({ ticket, onClick }: { ticket: any; onClick: () => void
             <GripVertical className="h-4 w-4" />
           </div>
           
-          <div className="flex-1" onClick={onClick}>
+          <div className="flex-1" onClick={() => window.location.href = `/suporte/${ticket.id}`}>
             <div className="flex items-start justify-between gap-2">
               <div className="font-medium text-sm line-clamp-2">{ticket.title}</div>
               {ticket.escalatedToDev && (
@@ -143,6 +143,7 @@ export default function Suporte() {
   const { data: tickets, refetch } = trpc.tickets.list.useQuery();
   const { data: metrics } = trpc.tickets.getMetrics.useQuery();
   const { data: clients } = trpc.clients.getClients.useQuery();
+  const { data: clientSites } = trpc.clients.listAllSites.useQuery();
   const { data: managedUsers } = trpc.managedUsers.listForMentions.useQuery();
 
   // Mutations
@@ -157,14 +158,16 @@ export default function Suporte() {
       toast.error(`Erro ao criar chamado: ${error.message}`);
     }
   });
-
   const updateStatusMutation = trpc.tickets.updateStatus.useMutation({
     onSuccess: () => {
-      toast.success("Status atualizado!");
       refetch();
+      // Tocar som de notificação
+      const audio = new Audio('/notification.mp3');
+      audio.play().catch(() => {});
+      toast.success("Status do ticket atualizado com sucesso!");
     },
     onError: (error) => {
-      toast.error(`Erro ao atualizar: ${error.message}`);
+      toast.error(`Erro ao atualizar status: ${error.message}`);
     }
   });
 
@@ -365,10 +368,9 @@ export default function Suporte() {
                     
                     <div className="space-y-2">
                       {ticketsByStatus[status].map(ticket => (
-                        <DraggableTicket
+                        <TicketCard
                           key={ticket.id}
                           ticket={ticket}
-                          onClick={() => setSelectedTicket(ticket)}
                         />
                       ))}
                     </div>
@@ -412,7 +414,11 @@ export default function Suporte() {
                       <SelectValue placeholder="-- Escolha um site --" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* TODO: Listar sites */}
+                      {clientSites?.map(site => (
+                        <SelectItem key={site.id} value={site.id.toString()}>
+                          {site.siteDominio} {site.clientName ? `(${site.clientName})` : ''}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">

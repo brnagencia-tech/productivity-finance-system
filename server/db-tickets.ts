@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { supportTickets, supportTicketMessages, InsertSupportTicket, InsertSupportTicketMessage } from "../drizzle/schema";
+import { supportTickets, supportTicketMessages, ticketStatusHistory, InsertSupportTicket, InsertSupportTicketMessage, InsertTicketStatusHistory } from "../drizzle/schema";
 import { eq, and, desc, sql, count } from "drizzle-orm";
 
 // ==================== TICKET CRUD ====================
@@ -51,9 +51,13 @@ export async function updateTicket(ticketId: number, data: Partial<InsertSupport
   return true;
 }
 
-export async function updateTicketStatus(ticketId: number, status: string) {
+export async function updateTicketStatus(ticketId: number, status: string, changedBy: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
+  
+  // Buscar status antigo
+  const ticket = await getTicketById(ticketId);
+  const oldStatus = ticket?.status || null;
   
   const updateData: any = { status };
   
@@ -63,6 +67,16 @@ export async function updateTicketStatus(ticketId: number, status: string) {
   }
   
   await db.update(supportTickets).set(updateData).where(eq(supportTickets.id, ticketId));
+  
+  // Salvar histórico
+  await saveStatusHistory({
+    ticketId,
+    oldStatus: oldStatus as any,
+    newStatus: status as any,
+    changedBy,
+    changedAt: new Date()
+  });
+  
   return true;
 }
 
@@ -162,4 +176,22 @@ export async function getTicketMetrics() {
     tempoMedio,
     escaladosDev
   };
+}
+
+// ==================== STATUS HISTORY ====================
+export async function saveStatusHistory(data: InsertTicketStatusHistory) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(ticketStatusHistory).values(data);
+  return true;
+}
+
+export async function getTicketStatusHistory(ticketId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(ticketStatusHistory)
+    .where(eq(ticketStatusHistory.ticketId, ticketId))
+    .orderBy(desc(ticketStatusHistory.changedAt));
 }

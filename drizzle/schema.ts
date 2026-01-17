@@ -643,3 +643,16 @@ export const supportTicketMessages = mysqlTable("support_ticket_messages", {
 
 export type SupportTicketMessage = typeof supportTicketMessages.$inferSelect;
 export type InsertSupportTicketMessage = typeof supportTicketMessages.$inferInsert;
+
+// ==================== TICKET STATUS HISTORY ====================
+export const ticketStatusHistory = mysqlTable("ticket_status_history", {
+  id: int("id").autoincrement().primaryKey(),
+  ticketId: int("ticketId").notNull(),
+  oldStatus: mysqlEnum("oldStatus", ["aberto", "em_andamento", "enviado_dev", "resolvido"]),
+  newStatus: mysqlEnum("newStatus", ["aberto", "em_andamento", "enviado_dev", "resolvido"]).notNull(),
+  changedBy: int("changedBy").notNull(),
+  changedAt: timestamp("changedAt").defaultNow().notNull(),
+});
+
+export type TicketStatusHistory = typeof ticketStatusHistory.$inferSelect;
+export type InsertTicketStatusHistory = typeof ticketStatusHistory.$inferInsert;

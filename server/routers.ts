@@ -90,6 +90,12 @@ export const clientsRouter = router({
       return { success: true };
     }),
 
+  // Listar todos os sites do usuário (para dropdowns)
+  listAllSites: protectedProcedure
+    .query(async ({ ctx }) => {
+      return await db.getAllClientSites(ctx.user.id);
+    }),
+
   // Listar sites de um cliente
   getClientSites: protectedProcedure
     .input(z.object({ clientId: z.number() }))
@@ -1656,8 +1662,8 @@ export const appRouter = router({
         id: z.number(),
         status: z.enum(["aberto", "em_andamento", "enviado_dev", "resolvido", "fechado"])
       }))
-      .mutation(async ({ input }) => {
-        await dbTickets.updateTicketStatus(input.id, input.status);
+      .mutation(async ({ ctx, input }) => {
+        await dbTickets.updateTicketStatus(input.id, input.status, ctx.user.id);
         return { success: true };
       }),
 
@@ -1692,6 +1698,12 @@ export const appRouter = router({
       .input(z.object({ ticketId: z.number() }))
       .query(async ({ input }) => {
         return await dbTickets.getTicketMessages(input.ticketId);
+      }),
+
+    getStatusHistory: protectedProcedure
+      .input(z.object({ ticketId: z.number() }))
+      .query(async ({ input }) => {
+        return await dbTickets.getTicketStatusHistory(input.ticketId);
       }),
 
     // Endpoint para criar ticket via WhatsApp (usado pelo n8n)

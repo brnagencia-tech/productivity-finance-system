@@ -1452,3 +1452,18 @@
 
 ## Bugs Suporte (Urgente)
 - [x] Erro ao clicar "Novo": Select.Item com value vazio não é permitido
+
+## Melhorias Suporte - v2.2.0
+### Backend
+- [x] Criar query clientSites.list (listar sites de clientes)
+- [x] Criar tabela ticket_status_history (id, ticketId, oldStatus, newStatus, changedBy, changedAt)
+- [x] Criar função saveStatusHistory no db-tickets.ts
+- [x] Modificar updateStatus para salvar histórico automaticamente
+- [x] Criar endpoint tickets.getStatusHistory
+
+### Frontend
+- [x] Integrar dropdown "Site Afetado" com clientSites.list
+- [x] Implementar notificação toast ao mover ticket (com som)
+- [x] Criar componente TicketDetailPage com histórico
+- [x] Adicionar rota /suporte/:id para detalhes do ticket
+- [x] Mostrar timeline de alterações de status

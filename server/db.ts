@@ -1637,6 +1637,23 @@ export async function deleteClientSite(id: number) {
   await db.delete(clientSites).where(eq(clientSites.id, id));
 }
 
+export async function getAllClientSites(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  // Join clientSites com clients para retornar apenas sites de clientes do usuário
+  return await db
+    .select({
+      id: clientSites.id,
+      clientId: clientSites.clientId,
+      siteDominio: clientSites.siteDominio,
+      clientName: clients.name,
+    })
+    .from(clientSites)
+    .leftJoin(clients, eq(clientSites.clientId, clients.id))
+    .where(eq(clients.userId, userId));
+}
+
 // ==================== EXPIRATION ALERTS ====================
 export async function getExpiringItemsByUser(userId: number, daysAhead: number = 30) {
   const db = await getDb();
