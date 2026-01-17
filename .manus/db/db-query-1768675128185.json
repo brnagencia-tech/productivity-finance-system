@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `support_ticket_messages` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `ticketId` int NOT NULL,\n  `userId` int,\n  `isFromClient` boolean NOT NULL DEFAULT false,\n  `message` text NOT NULL,\n  `attachments` text,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `support_ticket_messages_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute CREATE TABLE IF NOT EXISTS `support_ticket_messages` (\n  `id` int AUTO_INCREMENT NOT NULL,\n  `ticketId` int NOT NULL,\n  `userId` int,\n  `isFromClient` boolean NOT NULL DEFAULT false,\n  `message` text NOT NULL,\n  `attachments` text,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  CONSTRAINT `support_ticket_messages_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 199
+}

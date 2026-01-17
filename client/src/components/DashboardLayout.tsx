@@ -43,7 +43,8 @@ import {
   DollarSign,
   UserCog,
   User,
-  Building2
+  Building2,
+  Headset
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -72,6 +73,7 @@ const toolsMenuItems = [
   { icon: Brain, label: "Insights IA", path: "/ai-insights" },
   { icon: Tags, label: "Categorias", path: "/categories" },
   { icon: Building2, label: "Clientes", path: "/clients" },
+  { icon: Headset, label: "Suporte", path: "/suporte" },
   { icon: Bell, label: "Notificações", path: "/notifications" },
 ];
 

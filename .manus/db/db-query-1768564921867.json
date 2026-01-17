@@ -1,0 +1,38 @@
+{
+  "query": "SELECT id, username, firstName, lastName, isActive FROM managed_users LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 33MFGxMifQW3kvU.695ec95cf178 --database jdYJzsjjq9oKQ4uf2Lq74q --execute SELECT id, username, firstName, lastName, isActive FROM managed_users LIMIT 10;",
+  "rows": [
+    {
+      "id": "60001",
+      "username": "bruno",
+      "firstName": "Bruno",
+      "lastName": "Medeiros",
+      "isActive": "1"
+    },
+    {
+      "id": "60032",
+      "username": "karen",
+      "firstName": "Karen",
+      "lastName": "Maia",
+      "isActive": "1"
+    },
+    {
+      "id": "60064",
+      "username": "ruan",
+      "firstName": "ruan",
+      "lastName": "programador",
+      "isActive": "1"
+    },
+    {
+      "id": "90001",
+      "username": "teste",
+      "firstName": "Usuario",
+      "lastName": "Teste",
+      "isActive": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tusername\tfirstName\tlastName\tisActive\n60001\tbruno\tBruno\tMedeiros\t1\n60032\tkaren\tKaren\tMaia\t1\n60064\truan\truan\tprogramador\t1\n90001\tteste\tUsuario\tTeste\t1\n",
+  "stderr": "",
+  "execution_time_ms": 753
+}

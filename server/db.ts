@@ -1588,10 +1588,17 @@ export async function updateClient(id: number, data: Partial<InsertClient>) {
   await db.update(clients).set(data).where(eq(clients.id, id));
 }
 
+export async function getClientByPhone(phone: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(clients).where(eq(clients.telefone, phone)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
 export async function deleteClient(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  // Deletar sites vinculados primeiro
+  // Deletar sites do cliente primeiro
   await db.delete(clientSites).where(eq(clientSites.clientId, id));
   // Deletar cliente
   await db.delete(clients).where(eq(clients.id, id));

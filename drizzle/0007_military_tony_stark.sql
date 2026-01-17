@@ -1,1 +1,0 @@
-ALTER TABLE `managed_users` ADD `role` enum('ceo','master','colaborador') DEFAULT 'colaborador' NOT NULL;

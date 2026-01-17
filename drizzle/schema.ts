@@ -606,3 +606,40 @@ export const clientSites = mysqlTable("client_sites", {
 
 export type ClientSite = typeof clientSites.$inferSelect;
 export type InsertClientSite = typeof clientSites.$inferInsert;
+
+
+// ==================== SUPPORT TICKETS ====================
+export const supportTickets = mysqlTable("support_tickets", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId"), // ID do cliente (pode ser null se vier de legado/sem vínculo)
+  siteId: int("siteId"), // ID do site vinculado (pode ser null)
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  status: mysqlEnum("status", ["aberto", "em_andamento", "enviado_dev", "resolvido", "fechado"]).default("aberto").notNull(),
+  type: mysqlEnum("type", ["erro_bug", "duvida", "solicitacao", "melhoria"]).default("duvida").notNull(),
+  channel: mysqlEnum("channel", ["whatsapp", "email", "telefone", "sistema"]).default("sistema").notNull(),
+  assignedTo: int("assignedTo"), // ID do managedUser responsável (pode ser null)
+  dueDate: timestamp("dueDate"), // Prazo de resolução (opcional)
+  escalatedToDev: boolean("escalatedToDev").default(false).notNull(), // Checkbox "Escalar para DEV?"
+  firstResponseAt: timestamp("firstResponseAt"), // Timestamp da primeira resposta
+  resolvedAt: timestamp("resolvedAt"), // Timestamp de quando foi resolvido
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertSupportTicket = typeof supportTickets.$inferInsert;
+
+// ==================== SUPPORT TICKET MESSAGES ====================
+export const supportTicketMessages = mysqlTable("support_ticket_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  ticketId: int("ticketId").notNull(), // ID do ticket
+  userId: int("userId"), // ID do managedUser que enviou (null se for cliente)
+  isFromClient: boolean("isFromClient").default(false).notNull(), // true se mensagem veio do cliente
+  message: text("message").notNull(),
+  attachments: text("attachments"), // JSON array de URLs de anexos
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SupportTicketMessage = typeof supportTicketMessages.$inferSelect;
+export type InsertSupportTicketMessage = typeof supportTicketMessages.$inferInsert;

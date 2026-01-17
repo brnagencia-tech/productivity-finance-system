@@ -1418,3 +1418,29 @@
 - [x] Corrigido erro TypeScript em Settings.tsx (router inexistente)
 - [x] Removidas foreign keys de share_notifications (permitir managed_users)
 - [x] Sistema de compartilhamento funcionando corretamente
+
+## Bugs Reportados (Urgente)
+- [ ] Erro "Usuário não encontrado" ao compartilhar tarefas
+- [ ] Erro "Usuário não encontrado" ao compartilhar hábitos
+
+## Sistema de Tickets de Suporte (v2.0.0)
+### Backend
+- [x] Criar tabela support_tickets (id, clientId, siteId, title, description, status, type, channel, assignedTo, dueDate, escalatedToDev, createdAt, updatedAt)
+- [x] Criar funções de banco (create, list, getById, update, updateStatus, getMetrics)
+- [x] Criar endpoints tRPC (tickets.create, tickets.list, tickets.getById, tickets.update, tickets.updateStatus, tickets.getMetrics)
+- [ ] Criar webhook endpoint /api/webhooks/evolution (receber mensagens WhatsApp)
+- [x] Criar endpoint tickets.createFromWhatsApp (integração n8n)
+
+### Frontend
+- [x] Criar página /suporte com layout Kanban (4 colunas: Aberto, Em Andamento, Enviado DEV, Resolvido)
+- [x] Criar formulário de Novo Chamado (Site, Título, Descrição, Tipo, Canal, Responsável, Prazo)
+- [x] Criar cards de métricas (Total, Resolvidos, Tempo Médio 1ª Resp, DEV)
+- [x] Criar filtros (Cliente, Data, Tipo)
+- [x] Criar modal de detalhes do ticket
+- [x] Adicionar rota /suporte no menu lateral
+
+### Integrações
+- [ ] Documentar configuração Evolution API (webhook URL, API key)
+- [ ] Criar workflow n8n (JSON pronto para importar)
+- [ ] Documentar deploy no Coolify (variáveis de ambiente)
+- [ ] Criar guia de testes da integração completa

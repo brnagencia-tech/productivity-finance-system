@@ -7,6 +7,7 @@ import { z } from "zod";
 import * as db from "./db";
 import * as dbSharing from "./db-sharing";
 import * as dbNotifications from "./db-notifications";
+import * as dbTickets from "./db-tickets";
 // TEMPORARIAMENTE COMENTADO - Será reimplementado após nova estrutura de tarefas
 // import { generateExpenseAnalysis, generateProductivityAnalysis, generateWeeklyInsights } from "./analysis";
 import { emitToBoardRoom, KanbanEvents } from "./_core/socket";
@@ -1589,6 +1590,132 @@ export const appRouter = router({
           });
         }
       }),
+  }),
+
+  // ==================== SUPPORT TICKETS ====================
+  tickets: router({
+    create: protectedProcedure
+      .input(z.object({
+        clientId: z.number().optional(),
+        siteId: z.number().optional(),
+        title: z.string().min(1),
+        description: z.string().min(1),
+        type: z.enum(["erro_bug", "duvida", "solicitacao", "melhoria"]).default("duvida"),
+        channel: z.enum(["whatsapp", "email", "telefone", "sistema"]).default("sistema"),
+        assignedTo: z.number().optional(),
+        dueDate: z.string().optional(),
+        escalatedToDev: z.boolean().default(false)
+      }))
+      .mutation(async ({ input }) => {
+        const ticketId = await dbTickets.createTicket({
+          ...input,
+          dueDate: input.dueDate ? new Date(input.dueDate) : undefined
+        });
+        return { id: ticketId };
+      }),
+
+    list: protectedProcedure
+      .input(z.object({
+        status: z.string().optional(),
+        clientId: z.number().optional(),
+        assignedTo: z.number().optional(),
+        type: z.string().optional()
+      }).optional())
+      .query(async ({ input }) => {
+        return await dbTickets.listTickets(input || {});
+      }),
+
+    getById: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await dbTickets.getTicketById(input.id);
+      }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        type: z.enum(["erro_bug", "duvida", "solicitacao", "melhoria"]).optional(),
+        channel: z.enum(["whatsapp", "email", "telefone", "sistema"]).optional(),
+        assignedTo: z.number().optional(),
+        dueDate: z.string().optional(),
+        escalatedToDev: z.boolean().optional()
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await dbTickets.updateTicket(id, {
+          ...data,
+          dueDate: data.dueDate ? new Date(data.dueDate) : undefined
+        });
+        return { success: true };
+      }),
+
+    updateStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(["aberto", "em_andamento", "enviado_dev", "resolvido", "fechado"])
+      }))
+      .mutation(async ({ input }) => {
+        await dbTickets.updateTicketStatus(input.id, input.status);
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await dbTickets.deleteTicket(input.id);
+        return { success: true };
+      }),
+
+    getMetrics: protectedProcedure
+      .query(async () => {
+        return await dbTickets.getTicketMetrics();
+      }),
+
+    addMessage: protectedProcedure
+      .input(z.object({
+        ticketId: z.number(),
+        message: z.string().min(1),
+        isFromClient: z.boolean().default(false),
+        attachments: z.string().optional()
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const messageId = await dbTickets.addTicketMessage({
+          ...input,
+          userId: ctx.user.id
+        });
+        return { id: messageId };
+      }),
+
+    getMessages: protectedProcedure
+      .input(z.object({ ticketId: z.number() }))
+      .query(async ({ input }) => {
+        return await dbTickets.getTicketMessages(input.ticketId);
+      }),
+
+    // Endpoint para criar ticket via WhatsApp (usado pelo n8n)
+    createFromWhatsApp: protectedProcedure
+      .input(z.object({
+        phone: z.string(),
+        message: z.string(),
+        clientName: z.string().optional()
+      }))
+      .mutation(async ({ input }) => {
+        // Buscar cliente pelo telefone
+        const client = await db.getClientByPhone(input.phone);
+        
+        const ticketId = await dbTickets.createTicket({
+          clientId: client?.id,
+          title: input.clientName ? `Mensagem de ${input.clientName}` : "Novo chamado via WhatsApp",
+          description: input.message,
+          type: "duvida",
+          channel: "whatsapp",
+          status: "aberto"
+        });
+        
+        return { id: ticketId, clientId: client?.id };
+      })
   }),
 });
 
