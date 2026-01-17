@@ -9,7 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Calendar, User, AlertCircle, CheckCircle2, Code, Archive } from "lucide-react";
+import { Plus, Calendar, User, AlertCircle, CheckCircle2, Code, Archive, GripVertical } from "lucide-react";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type TicketStatus = "aberto" | "em_andamento" | "enviado_dev" | "resolvido" | "fechado";
 type TicketType = "erro_bug" | "duvida" | "solicitacao" | "melhoria";
@@ -45,10 +58,74 @@ const channelLabels: Record<TicketChannel, string> = {
   sistema: "Sistema"
 };
 
+// Componente de Ticket Arrastável
+function DraggableTicket({ ticket, onClick }: { ticket: any; onClick: () => void }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: ticket.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={`cursor-pointer hover:shadow-md transition-shadow ${isDragging ? "shadow-2xl ring-2 ring-primary" : ""}`}
+    >
+      <CardContent className="p-4 space-y-2">
+        <div className="flex items-start gap-2">
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing mt-1 text-muted-foreground hover:text-foreground"
+          >
+            <GripVertical className="h-4 w-4" />
+          </div>
+          
+          <div className="flex-1" onClick={onClick}>
+            <div className="flex items-start justify-between gap-2">
+              <div className="font-medium text-sm line-clamp-2">{ticket.title}</div>
+              {ticket.escalatedToDev && (
+                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">DEV</span>
+              )}
+            </div>
+            
+            <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+              {ticket.description}
+            </p>
+            
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+              <span className="bg-muted px-2 py-1 rounded">
+                {channelLabels[ticket.channel as TicketChannel]}
+              </span>
+              {ticket.dueDate && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {new Date(ticket.dueDate).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Suporte() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [filterType, setFilterType] = useState<string>("todos");
+  const [activeId, setActiveId] = useState<number | null>(null);
   
   const [newTicket, setNewTicket] = useState({
     title: "",
@@ -102,6 +179,15 @@ export default function Suporte() {
     }
   });
 
+  // Drag & Drop Sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
   const resetForm = () => {
     setNewTicket({
       title: "",
@@ -122,10 +208,6 @@ export default function Suporte() {
       return;
     }
     createMutation.mutate(newTicket);
-  };
-
-  const handleStatusChange = (ticketId: number, newStatus: TicketStatus) => {
-    updateStatusMutation.mutate({ id: ticketId, status: newStatus });
   };
 
   const handleUpdate = () => {
@@ -156,6 +238,30 @@ export default function Suporte() {
       ticketsByStatus[ticket.status].push(ticket);
     }
   });
+
+  // Drag & Drop Handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over) return;
+
+    const ticketId = active.id as number;
+    const newStatus = over.id as TicketStatus;
+
+    // Encontrar ticket atual
+    const ticket = filteredTickets.find(t => t.id === ticketId);
+    if (!ticket || ticket.status === newStatus) return;
+
+    // Atualizar status
+    updateStatusMutation.mutate({ id: ticketId, status: newStatus });
+  };
+
+  const activeTicket = activeId ? filteredTickets.find(t => t.id === activeId) : null;
 
   return (
     <DashboardLayout>
@@ -231,58 +337,61 @@ export default function Suporte() {
           </div>
         </div>
 
-        {/* Kanban Board */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {(["aberto", "em_andamento", "enviado_dev", "resolvido"] as TicketStatus[]).map(status => {
-            const Icon = statusIcons[status];
-            return (
-              <div key={status} className="space-y-3">
-                <div className="flex items-center gap-2 font-semibold text-sm">
-                  <Icon className="h-4 w-4" />
-                  {statusLabels[status]}
-                  <span className="ml-auto bg-muted px-2 py-1 rounded text-xs">
-                    {ticketsByStatus[status].length}
-                  </span>
-                </div>
-                
-                <div className="space-y-2">
-                  {ticketsByStatus[status].map(ticket => (
-                    <Card 
-                      key={ticket.id} 
-                      className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => setSelectedTicket(ticket)}
-                    >
-                      <CardContent className="p-4 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="font-medium text-sm line-clamp-2">{ticket.title}</div>
-                          {ticket.escalatedToDev && (
-                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">DEV</span>
-                          )}
-                        </div>
-                        
-                        <p className="text-xs text-muted-foreground line-clamp-2">
-                          {ticket.description}
-                        </p>
-                        
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span className="bg-muted px-2 py-1 rounded">
-                            {channelLabels[ticket.channel as TicketChannel]}
-                          </span>
-                          {ticket.dueDate && (
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3" />
-                              {new Date(ticket.dueDate).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {/* Kanban Board com Drag & Drop */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {(["aberto", "em_andamento", "enviado_dev", "resolvido"] as TicketStatus[]).map(status => {
+              const Icon = statusIcons[status];
+              const ticketIds = ticketsByStatus[status].map(t => t.id);
+              
+              return (
+                <SortableContext key={status} items={ticketIds} strategy={verticalListSortingStrategy}>
+                  <div
+                    className="space-y-3 min-h-[200px] p-3 rounded-lg bg-muted/20 border-2 border-dashed border-transparent hover:border-primary/30 transition-colors"
+                    id={status}
+                  >
+                    <div className="flex items-center gap-2 font-semibold text-sm">
+                      <Icon className="h-4 w-4" />
+                      {statusLabels[status]}
+                      <span className="ml-auto bg-muted px-2 py-1 rounded text-xs">
+                        {ticketsByStatus[status].length}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {ticketsByStatus[status].map(ticket => (
+                        <DraggableTicket
+                          key={ticket.id}
+                          ticket={ticket}
+                          onClick={() => setSelectedTicket(ticket)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </SortableContext>
+              );
+            })}
+          </div>
+
+          {/* Drag Overlay */}
+          <DragOverlay>
+            {activeTicket ? (
+              <Card className="cursor-grabbing shadow-2xl ring-2 ring-primary rotate-3">
+                <CardContent className="p-4 space-y-2">
+                  <div className="font-medium text-sm">{activeTicket.title}</div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {activeTicket.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
 
         {/* Dialog Novo Chamado */}
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -478,7 +587,10 @@ export default function Suporte() {
                     <Label>Status (Mover)</Label>
                     <Select 
                       value={selectedTicket.status} 
-                      onValueChange={(v) => handleStatusChange(selectedTicket.id, v as TicketStatus)}
+                      onValueChange={(v) => {
+                        setSelectedTicket({...selectedTicket, status: v});
+                        updateStatusMutation.mutate({ id: selectedTicket.id, status: v as TicketStatus });
+                      }}
                     >
                       <SelectTrigger>
                         <SelectValue />

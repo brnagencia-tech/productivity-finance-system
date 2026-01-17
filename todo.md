@@ -1444,3 +1444,8 @@
 - [ ] Criar workflow n8n (JSON pronto para importar)
 - [ ] Documentar deploy no Coolify (variáveis de ambiente)
 - [ ] Criar guia de testes da integração completa
+
+## Melhorias UX - Suporte (v2.1.0)
+- [x] Implementar drag & drop para arrastar tickets entre colunas do Kanban
+- [x] Adicionar feedback visual durante o arrasto (opacity, shadow)
+- [x] Atualizar status automaticamente ao soltar ticket em nova coluna
