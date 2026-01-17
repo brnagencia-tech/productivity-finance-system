@@ -412,7 +412,6 @@ export default function Suporte() {
                       <SelectValue placeholder="-- Escolha um site --" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sem vínculo</SelectItem>
                       {/* TODO: Listar sites */}
                     </SelectContent>
                   </Select>
@@ -496,7 +495,6 @@ export default function Suporte() {
                       <SelectValue placeholder="-- Sem responsável --" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Sem responsável</SelectItem>
                       {managedUsers?.map(user => (
                         <SelectItem key={user.id} value={user.id.toString()}>
                           {user.firstName} {user.lastName}

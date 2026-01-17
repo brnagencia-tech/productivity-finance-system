@@ -1449,3 +1449,6 @@
 - [x] Implementar drag & drop para arrastar tickets entre colunas do Kanban
 - [x] Adicionar feedback visual durante o arrasto (opacity, shadow)
 - [x] Atualizar status automaticamente ao soltar ticket em nova coluna
+
+## Bugs Suporte (Urgente)
+- [x] Erro ao clicar "Novo": Select.Item com value vazio não é permitido
